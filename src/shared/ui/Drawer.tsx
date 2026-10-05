@@ -1,6 +1,6 @@
 import { useCallback, useId, useRef, type ReactNode } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useBodyScrollLock, useEscapeKey, useFocusTrap } from '@/shared/lib';
+import { cn, EXIT_MS, useBodyScrollLock, useEscapeKey, useExitTransition, useFocusTrap } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { IconButton } from './IconButton';
 import { Portal } from './Portal';
@@ -22,15 +22,16 @@ export function Drawer({ open, onClose, title, subtitle, footer, children }: Dra
   const subtitleId = useId();
   const close = useCallback(() => onClose(), [onClose]);
 
+  const { mounted, exiting } = useExitTransition(open, EXIT_MS.drawer);
   useEscapeKey(open, close);
-  useFocusTrap(panelRef, open);
-  useBodyScrollLock(open);
+  useFocusTrap(panelRef, open && mounted);
+  useBodyScrollLock(mounted);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-20 bg-veil">
+      <div className={cn('fixed inset-0 z-20 bg-veil', exiting ? 'animate-veil-out' : 'animate-veil-in')}>
         <button
           type="button"
           tabIndex={-1}
@@ -44,7 +45,10 @@ export function Drawer({ open, onClose, title, subtitle, footer, children }: Dra
           aria-modal="true"
           aria-labelledby={titleId}
           aria-describedby={subtitle ? subtitleId : undefined}
-          className="absolute inset-y-0 right-0 flex w-drawer max-w-full flex-col border-l border-border bg-surface max-sm:w-full max-sm:border-l-0"
+          className={cn(
+            'absolute inset-y-0 right-0 flex w-drawer max-w-full flex-col border-l border-border bg-surface max-sm:w-full max-sm:border-l-0',
+            exiting ? 'animate-drawer-out' : 'animate-drawer-in',
+          )}
         >
           <div className="flex items-start gap-3 border-b border-border px-5 py-4">
             <div className="min-w-0 flex-1">

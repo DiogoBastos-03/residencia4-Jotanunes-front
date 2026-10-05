@@ -1,0 +1,36 @@
+/** Fila de análise (/fila). */
+export const filaPage = {
+  title: 'Fila de análise',
+  subtitle: 'Documentos e remessas esperando decisão',
+  searchLabel: 'Buscar na fila',
+  searchPlaceholder: 'Buscar por fornecedor, obra ou documento',
+  filtrosLabel: 'Filtrar por tipo de envio',
+  filtros: {
+    todos: 'Todos',
+    documentos: 'Documentos',
+    funcionarios: 'Funcionários',
+    urgentes: 'Urgentes',
+  },
+  obraLabel: 'Filtrar por obra',
+  todasObras: 'Todas as obras',
+  obraOpcao: (obra: string, n: number) => `${obra} (${n})`,
+  caption: 'Itens esperando análise',
+  colunas: {
+    fornecedor: 'Fornecedor',
+    item: 'Item',
+    obra: 'Obra',
+    lista: 'Lista de exigências',
+    enviadoEm: 'Enviado em',
+    espera: 'Espera',
+    prioridade: 'Prioridade',
+  },
+  renovacao: 'nova versão',
+  acao: 'Analisar',
+  vaziaTitle: 'Nada para analisar agora',
+  vaziaDescription:
+    'Assim que um fornecedor enviar um documento ou uma remessa de funcionários, o envio aparece aqui. Enquanto isso, acompanhe os vencimentos na visão geral.',
+  vaziaAction: 'Ir para a visão geral',
+  semResultadoTitle: 'Nenhum item com estes filtros',
+  semResultadoDescription: 'Troque o filtro, escolha outra obra ou apague a busca para ver a fila inteira.',
+  limparFiltros: 'Limpar filtros',
+} as const;

@@ -31,7 +31,7 @@ export function PageHeader({ title, level = 'page', back, badges, subtitle, acti
       {crumb && (
         <Link
           to={back.to}
-          className="focus-ring -mx-1 inline-flex items-center gap-1.5 rounded-control px-1 text-support font-medium text-ink-3 hover:text-ink-2 max-md:min-h-tap"
+          className="focus-ring interactive-color -mx-1 inline-flex items-center gap-1.5 rounded-control px-1 text-support font-medium text-ink-3 hover:text-ink-2 max-md:min-h-tap"
         >
           <Icon icon={ArrowLeftIcon} size={16} />
           {back.label}
@@ -49,7 +49,7 @@ export function PageHeader({ title, level = 'page', back, badges, subtitle, acti
               to={back.to}
               aria-label={back.label}
               title={back.label}
-              className="focus-ring inline-flex size-8 flex-none items-center justify-center rounded-control border border-border-strong bg-surface text-ink-2 hover:bg-surface-2 max-md:size-tap"
+              className="focus-ring interactive-icon inline-flex size-8 flex-none items-center justify-center rounded-control border border-border-strong bg-surface text-ink-2 max-md:size-tap"
             >
               <Icon icon={ArrowLeftIcon} size={20} />
             </Link>

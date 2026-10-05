@@ -20,6 +20,7 @@ export const ui = {
     title: 'Não foi possível carregar estas informações',
     description: 'A conexão com o servidor falhou. Os dados não foram alterados.',
     retry: 'Tentar de novo',
+    compact: 'Não foi possível carregar.',
   },
   field: {
     optional: '(opcional)',

@@ -33,7 +33,7 @@ export function formatPhone(value: string): string {
   return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
 }
 
-export type DatePattern = 'date' | 'dateTime' | 'monthYear' | 'day' | 'monthShort' | 'long';
+export type DatePattern = 'date' | 'dateTime' | 'monthYear' | 'day' | 'monthShort' | 'long' | 'time';
 
 const PATTERNS: Record<DatePattern, string> = {
   date: 'dd/MM/yyyy',
@@ -42,6 +42,7 @@ const PATTERNS: Record<DatePattern, string> = {
   day: 'dd',
   monthShort: 'MMM',
   long: "EEEE, d 'de' MMMM 'de' yyyy",
+  time: 'HH:mm',
 };
 
 /** Formata uma data ISO (yyyy-MM-dd ou yyyy-MM-ddTHH:mm) no padrão brasileiro. */

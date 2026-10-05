@@ -1,0 +1,26 @@
+# Onde mexer
+
+**Texto de interface** — `src/shared/strings/`
+- `dominio.ts`: vocabulário do produto ("lista de exigências", "remessa", motivos de reprovação…). Trocar um termo aqui troca em todas as telas.
+- `eventos.ts`: as frases do histórico das fichas ("vinculou a lista de exigências…").
+- `pages/*.ts`: textos de cada página. `layout.ts`: menu e sidebar. `ui.ts`: componentes base. `status.ts`: rótulos dos badges e tags.
+
+**Dados de exemplo** — `src/mocks/`
+- Um arquivo por domínio: `obras.ts`, `fornecedores.ts`, `exigencias.ts`, `documentos.ts`, `funcionarios.ts`, `historico.ts`.
+- `exemplos.ts`: o conteúdo que preenche os formulários e drawers ao abrir.
+- `tempo.ts`: o "hoje" do sistema (16/09/2026). Esperas e vencimentos são calculados a partir dele.
+- Contagens (fila, "5 de 9", aptos, pendências, vencimentos) não são digitadas: saem dos dados, por `src/entities/lib/`.
+
+**Cor, raio, sombra, tipografia, espaçamento fixo** — `src/app/styles/theme.css`, bloco `@theme`.
+- Vermelho da marca (`primary`) só na logo, no item ativo do menu, no contador da fila e na tag "Funcionários".
+- Ação é grafite (`action-*`). Perigo (`destructive`) só no botão que confirma ação destrutiva.
+
+**Hover e transição** — `src/app/styles/theme.css`
+- Durações, curvas e escalas: tokens `--duration-*`, `--ease-ui`, `--scale-*` no `@theme`.
+- Comportamentos: utilitárias `interactive-lift` (cartão), `interactive-press` (botão), `interactive-icon`, `interactive-row` (linha), `interactive-file`, `interactive-color`.
+- Entrada e saída de drawer, modal, toast e aba: `--animate-*` e os `@keyframes` no mesmo bloco.
+- Movimento reduzido: `src/app/styles/reset.css` e os blocos `prefers-reduced-motion` de cada utilitária.
+
+**Logo** — `src/app/brand/`. Um arquivo com "simbolo" ou "symbol" no nome é a versão só do símbolo; qualquer outro é a versão com o nome. Lido por `src/shared/ui/Logo.tsx`.
+
+**Estados para revisão** — `/_estados` (lista em `src/pages/estados/catalogo.ts`; textos em `src/shared/strings/pages/estados.ts`).

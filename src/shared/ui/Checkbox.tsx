@@ -17,10 +17,10 @@ export function CheckboxBox({ locked = false, className, disabled, checked, ...r
         disabled={disabled || locked}
         checked={locked ? true : checked}
         className={cn(
-          'peer focus-ring absolute inset-0 m-0 appearance-none rounded-badge border transition-colors',
+          'peer focus-ring interactive-color absolute inset-0 m-0 appearance-none rounded-badge border',
           locked
             ? 'border-border-strong bg-border-strong'
-            : 'border-border-strong bg-surface checked:border-primary checked:bg-primary hover:not-disabled:not-checked:border-ink-4 disabled:opacity-45',
+            : 'border-border-strong bg-surface checked:border-action checked:bg-action hover:not-disabled:not-checked:border-ink-4 disabled:opacity-45',
         )}
         {...rest}
       />

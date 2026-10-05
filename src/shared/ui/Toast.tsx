@@ -27,7 +27,7 @@ export function Toast({ message, tone = 'success', onDismiss }: ToastProps) {
           aria-label={strings.ui.toast.dismiss}
           onClick={onDismiss}
           className={cn(
-            'focus-ring inline-flex size-6 flex-none items-center justify-center rounded-control text-ink-3 hover:bg-surface-2 hover:text-ink-2 max-md:size-tap',
+            'focus-ring interactive-icon inline-flex size-6 flex-none items-center justify-center rounded-control text-ink-3 max-md:size-tap',
           )}
         >
           <Icon icon={XMarkIcon} size={16} />

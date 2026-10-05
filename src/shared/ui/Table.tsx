@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
+import { useNavigate } from 'react-router';
 import { cn } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { Button } from './Button';
@@ -27,6 +28,8 @@ export type TableAction<T> = {
   to?: (row: T) => string;
   /** Botão com borda em vez de terciário (ação que pede atenção). */
   emphasis?: (row: T) => boolean;
+  /** Ação indisponível nesta linha (a linha deixa de ser clicável). */
+  disabled?: (row: T) => boolean;
 };
 
 type TableProps<T> = {
@@ -50,10 +53,20 @@ function ActionButton<T>({ action, row, mobile }: { action: TableAction<T>; row:
   const label = action.label(row);
   const described = action.describe ? `${label} — ${action.describe(row)}` : undefined;
   const emphasis = action.emphasis?.(row) ?? false;
+  const disabled = action.disabled?.(row) ?? false;
   const variant = mobile || emphasis ? 'secondary' : 'tertiary';
+  // No desktop, o botão da linha começa apagado e escurece com o destaque da linha.
+  const affordance = !mobile && !emphasis ? 'row-affordance' : undefined;
   if (action.to) {
     return (
-      <ButtonLink to={action.to(row)} variant={variant} size="sm" fullWidth={mobile} aria-label={described}>
+      <ButtonLink
+        to={action.to(row)}
+        variant={variant}
+        size="sm"
+        fullWidth={mobile}
+        aria-label={described}
+        className={affordance}
+      >
         {label}
       </ButtonLink>
     );
@@ -64,11 +77,25 @@ function ActionButton<T>({ action, row, mobile }: { action: TableAction<T>; row:
       size="sm"
       fullWidth={mobile}
       aria-label={described}
+      className={affordance}
+      disabled={disabled}
       onClick={() => action.onClick?.(row)}
     >
       {label}
     </Button>
   );
+}
+
+/** Clique em qualquer ponto da linha dispara a ação — menos quando o clique já foi num controle. */
+function useRowClick<T>(action: TableAction<T> | undefined) {
+  const navigate = useNavigate();
+  if (!action) return undefined;
+  return (event: MouseEvent<HTMLElement>, row: T) => {
+    if (event.target instanceof Element && event.target.closest('a,button,input,select,textarea,label')) return;
+    if (action.disabled?.(row)) return;
+    if (action.to) navigate(action.to(row));
+    else action.onClick?.(row);
+  };
 }
 
 function visibleCells<T>(columns: readonly TableColumn<T>[], row: T) {
@@ -89,6 +116,7 @@ function visibleCells<T>(columns: readonly TableColumn<T>[], row: T) {
 /** Tabela no desktop; lista de cartões abaixo de 1024px. Sem zebra, sem rolagem lateral. */
 export function Table<T>({ caption, columns, rows, rowKey, action, density = 'default', className }: TableProps<T>) {
   const compact = density === 'compact';
+  const rowClick = useRowClick(action);
   const titleColumn = columns.find((c) => c.mobile === 'title') ?? columns[0];
   const badgeColumn = columns.find((c) => c.mobile === 'badge');
   const fieldColumns = columns.filter(
@@ -124,7 +152,11 @@ export function Table<T>({ caption, columns, rows, rowKey, action, density = 'de
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={rowKey(row)} className="border-b border-border last:border-b-0">
+              <tr
+                key={rowKey(row)}
+                onClick={rowClick ? (event) => rowClick(event, row) : undefined}
+                className={cn('border-b border-border last:border-b-0', rowClick && !action?.disabled?.(row) && 'interactive-row')}
+              >
                 {visibleCells(columns, row).map(({ column, span }) => (
                   <td
                     key={column.key}
@@ -151,7 +183,11 @@ export function Table<T>({ caption, columns, rows, rowKey, action, density = 'de
 
       <ul aria-label={caption} className="flex flex-col gap-2 lg:hidden">
         {rows.map((row) => (
-          <li key={rowKey(row)} className="rounded-control border border-border bg-surface p-4">
+          <li
+            key={rowKey(row)}
+            onClick={rowClick ? (event) => rowClick(event, row) : undefined}
+            className={cn('rounded-control border border-border bg-surface p-4', rowClick && !action?.disabled?.(row) && 'interactive-lift')}
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 text-body font-medium text-ink">{titleColumn?.cell(row)}</div>
               {badgeColumn && <div className="flex-none">{badgeColumn.cell(row)}</div>}

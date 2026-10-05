@@ -9,6 +9,7 @@ type TextProps = {
   as?: 'p' | 'span' | 'div';
   children: ReactNode;
   className?: string;
+  role?: 'alert' | 'status';
 };
 
 const SIZE = { body: 'text-body', support: 'text-support', label: 'text-label' } as const;
@@ -16,6 +17,10 @@ const TONE = { default: 'text-ink', soft: 'text-ink-2', muted: 'text-ink-3', fai
 const WEIGHT = { normal: 'font-normal', medium: 'font-medium', semibold: 'font-semibold' } as const;
 
 /** Texto corrido nos tamanhos do design system. */
-export function Text({ size = 'body', tone = 'default', weight = 'normal', as: Tag = 'p', children, className }: TextProps) {
-  return <Tag className={cn(SIZE[size], TONE[tone], WEIGHT[weight], className)}>{children}</Tag>;
+export function Text({ size = 'body', tone = 'default', weight = 'normal', as: Tag = 'p', children, className, role }: TextProps) {
+  return (
+    <Tag role={role} className={cn(SIZE[size], TONE[tone], WEIGHT[weight], className)}>
+      {children}
+    </Tag>
+  );
 }

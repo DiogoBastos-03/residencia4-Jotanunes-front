@@ -1,6 +1,10 @@
 /* Reset mínimo — complementa o preflight do Tailwind. */
 @layer base {
-  html,
+  /* O html fica em 16px: todo o espaçamento do Tailwind é em rem. */
+  html {
+    background: var(--color-app);
+  }
+
   body {
     background: var(--color-app);
     color: var(--color-ink);

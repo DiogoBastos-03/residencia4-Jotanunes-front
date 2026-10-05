@@ -11,8 +11,8 @@ type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' 
 };
 
 const VARIANT = {
-  secondary: 'border border-border-strong bg-surface text-ink-2 hover:not-disabled:bg-surface-2 hover:not-disabled:text-ink',
-  ghost: 'border border-transparent bg-transparent text-ink-3 hover:not-disabled:bg-surface-2 hover:not-disabled:text-ink-2',
+  secondary: 'border border-border-strong bg-surface text-ink-2',
+  ghost: 'border border-transparent bg-transparent text-ink-3',
 } as const;
 
 const SIZE = {
@@ -35,7 +35,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        'focus-ring inline-flex flex-none items-center justify-center rounded-control transition-colors disabled:cursor-not-allowed disabled:opacity-45',
+        'focus-ring interactive-icon inline-flex flex-none items-center justify-center rounded-control disabled:cursor-not-allowed disabled:opacity-45',
         VARIANT[variant],
         SIZE[size],
         className,

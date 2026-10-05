@@ -1,7 +1,13 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/shared/lib';
 
-export type KeyValueItem = { key: string; label: ReactNode; value: ReactNode };
+export type KeyValueItem = {
+  key: string;
+  label: ReactNode;
+  value: ReactNode;
+  /** No layout stacked, ocupa a linha inteira. */
+  full?: boolean;
+};
 
 type KeyValueListProps = {
   items: readonly KeyValueItem[];
@@ -15,7 +21,7 @@ export function KeyValueList({ items, layout = 'columns', className }: KeyValueL
     return (
       <dl className={cn('grid grid-cols-1 gap-3 sm:grid-cols-2', className)}>
         {items.map((item) => (
-          <div key={item.key} className="min-w-0">
+          <div key={item.key} className={cn('min-w-0', item.full && 'sm:col-span-2')}>
             <dt className="text-label font-medium text-ink-2">{item.label}</dt>
             <dd className="mt-1 text-body break-words">{item.value}</dd>
           </div>

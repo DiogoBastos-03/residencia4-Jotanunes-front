@@ -46,7 +46,6 @@ export function DataSection() {
                 value={m.value}
                 hint={m.hint}
                 tone={METRIC_TONES[i]}
-                highlight={i === 0}
               />
             ))}
           </MetricStrip>

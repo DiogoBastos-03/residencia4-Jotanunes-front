@@ -55,8 +55,8 @@ export function Tabs<V extends string>({ label, items, value, onChange, children
               onClick={() => onChange(item.value)}
               onKeyDown={(event) => handleKey(event, index)}
               className={cn(
-                'focus-ring -mb-px mr-5 h-10 flex-none whitespace-nowrap border-b-2 px-0.5 text-support font-semibold transition-colors last:mr-0 max-md:h-tap',
-                selected ? 'border-primary text-primary-hover' : 'border-transparent text-ink-3 hover:text-ink-2',
+                'focus-ring interactive-color -mb-px mr-5 h-10 flex-none whitespace-nowrap border-b-2 px-0.5 text-support font-semibold last:mr-0 max-md:h-tap',
+                selected ? 'border-action text-ink' : 'border-transparent text-ink-3 hover:text-ink-2',
               )}
             >
               {item.label}
@@ -64,7 +64,13 @@ export function Tabs<V extends string>({ label, items, value, onChange, children
           );
         })}
       </div>
-      <div role="tabpanel" id={`${baseId}-panel`} aria-labelledby={`${baseId}-tab-${value}`}>
+      <div
+        key={value}
+        role="tabpanel"
+        id={`${baseId}-panel`}
+        aria-labelledby={`${baseId}-tab-${value}`}
+        className="animate-tab-in"
+      >
         {children}
       </div>
     </div>

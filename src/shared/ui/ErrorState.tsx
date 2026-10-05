@@ -9,6 +9,8 @@ type ErrorStateProps = {
   description?: string;
   onRetry: () => void;
   framed?: boolean;
+  /** compact: uma linha, para dentro de cartões pequenos (métricas, blocos). */
+  variant?: 'block' | 'compact';
   className?: string;
 };
 
@@ -18,8 +20,20 @@ export function ErrorState({
   description = strings.ui.errorState.description,
   onRetry,
   framed = true,
+  variant = 'block',
   className,
 }: ErrorStateProps) {
+  if (variant === 'compact') {
+    return (
+      <div role="alert" className={cn('flex flex-wrap items-center gap-x-2 gap-y-1 bg-surface p-4 text-support text-ink-3', className)}>
+        <Icon icon={ExclamationTriangleIcon} size={16} className="text-danger" />
+        <span>{strings.ui.errorState.compact}</span>
+        <Button variant="link" size="sm" onClick={onRetry}>
+          {strings.ui.errorState.retry}
+        </Button>
+      </div>
+    );
+  }
   return (
     <div
       role="alert"
