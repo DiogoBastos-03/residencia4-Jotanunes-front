@@ -1,0 +1,154 @@
+/*
+ * Tema do design system — Gestão de Fornecedores.
+ * Todo valor visual usado pelos componentes nasce aqui. Componentes nunca usam
+ * cor, raio, sombra ou tamanho de texto cru.
+ */
+@import 'tailwindcss';
+
+@import '@fontsource/geist-sans/400.css';
+@import '@fontsource/geist-sans/500.css';
+@import '@fontsource/geist-sans/600.css';
+@import '@fontsource/geist-mono/500.css';
+
+@theme {
+  /* — Cores: zera a paleta padrão do Tailwind, só existe a nossa — */
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: #ffffff;
+
+  --color-primary: #d60001;
+  --color-primary-hover: #b80001;
+  --color-primary-soft: #fff1f1;
+
+  --color-app: #f6f6f4;
+  --color-surface: #ffffff;
+  --color-surface-2: #f9f9f7;
+  --color-surface-3: #f3f3f1;
+
+  --color-border: #e4e4e1;
+  --color-border-strong: #d2d2ce;
+
+  --color-ink: #1c1c1a;
+  --color-ink-2: #333330;
+  --color-ink-3: #656560;
+  --color-ink-4: #92928c;
+
+  --color-veil: rgb(28 28 26 / 0.24);
+
+  /* Status — sempre em par texto/fundo */
+  --color-ok: #267a4a;
+  --color-ok-bg: #edf7f1;
+  --color-review: #536273;
+  --color-review-bg: #f0f3f6;
+  --color-pending: #62625e;
+  --color-pending-bg: #f1f1ef;
+  --color-warn: #936200;
+  --color-warn-bg: #fff6db;
+  --color-danger: #b42318;
+  --color-danger-bg: #fff0ef;
+  --color-expired: #9e1c14;
+  --color-expired-bg: #fdedec;
+
+  /* — Tipografia — */
+  --font-*: initial;
+  --font-sans: 'Geist Sans', 'Geist', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+  --text-*: initial;
+  --text-display: 36px;
+  --text-display--line-height: 1.2;
+  --text-display--letter-spacing: -0.03em;
+  --text-page: 28px;
+  --text-page--line-height: 1.2;
+  --text-page--letter-spacing: -0.03em;
+  --text-subpage: 24px;
+  --text-subpage--line-height: 1.2;
+  --text-subpage--letter-spacing: -0.02em;
+  --text-block: 16px;
+  --text-block--line-height: 1.2;
+  --text-body: 14px;
+  --text-body--line-height: 1.45;
+  --text-support: 13px;
+  --text-support--line-height: 1.45;
+  --text-label: 12px;
+  --text-label--line-height: 1.35;
+  --text-tag: 11px;
+  --text-tag--line-height: 1.35;
+
+  --font-weight-*: initial;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* — Raios: nada maior que 6 — */
+  --radius-*: initial;
+  --radius-badge: 3px;
+  --radius-control: 4px;
+  --radius-card: 6px;
+
+  /* — Sombras: só modal e toast; foco é anel — */
+  --shadow-*: initial;
+  --shadow-modal: 0 4px 16px rgb(0 0 0 / 0.08);
+  --shadow-toast: 0 2px 8px rgb(0 0 0 / 0.05);
+  --shadow-focus: 0 0 0 2px rgb(214 0 1 / 0.1);
+
+  /* — Medidas fixas do layout — */
+  --spacing-sidebar: 236px;
+  --spacing-drawer: 480px;
+  --spacing-modal: 440px;
+  --spacing-metric: 118px;
+  --spacing-tap: 44px;
+  --spacing-review-aside: 380px;
+
+  /* — Pontos de quebra: alvo 1440; sidebar fixa só acima de 1024 — */
+  --breakpoint-*: initial;
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-nav: 64.0625rem;
+  --breakpoint-xl: 80rem;
+
+  --animate-skeleton: skeleton 1.4s ease-in-out infinite;
+
+  @keyframes skeleton {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+/* Foco de botões, links e alvos clicáveis: borda vermelha + anel suave */
+@utility focus-ring {
+  &:focus-visible {
+    outline: 1px solid var(--color-primary);
+    outline-offset: 0;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+/* Foco de campos: a própria borda fica vermelha + anel suave */
+@utility focus-field {
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+/* Rolagem horizontal sem barra visível (barras de filtro, abas) */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Números de tabela e de métricas */
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}

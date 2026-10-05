@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  body{margin:0;background:#F6F6F4;font-family:'Geist','Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.45}
+  *{box-sizing:border-box}
+  a{color:#B80001;text-decoration:none}
+  a:hover{color:#D60001}
+  button,input,select,textarea{font-family:'Geist','Inter',system-ui,-apple-system,sans-serif}
+  table{font-variant-numeric:tabular-nums}
+  select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23656560' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m19.5 8.25-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E") !important;background-repeat:no-repeat !important;background-position:right 12px center !important;background-size:16px 16px !important;padding-right:36px !important}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#D60001;box-shadow:0 0 0 2px rgba(214,0,1,0.10)}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#D2D2CE;border:3px solid #fff}
+</style>
+</helmet>
+<div style="width:1440px;height:900px;display:flex;padding:12px;gap:8px;background:#F6F6F4;color:#1C1C1A;overflow:hidden">
+  <aside style="width:236px;flex:none;background:#fff;border:1px solid #E4E4E1;border-radius:6px;padding:8px;display:flex;flex-direction:column">
+    <div style="display:flex;gap:8px;padding:8px 6px 12px">
+      <div style="width:26px;height:26px;flex:none;background:#D60001;border-radius:4px;color:#fff;font-size:11px;font-weight:600;letter-spacing:0.02em;display:flex;align-items:center;justify-content:center">JN</div>
+      <div>
+        <div style="font-size:15px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">JotaNunes</div>
+        <div style="font-size:12px;color:#656560;margin-top:3px">Gestão de Fornecedores</div>
+      </div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:2px">
+      <button onClick="{{ goOverview }}" style="{{ navOverview }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"></path></svg>
+        <span>Visão geral</span>
+      </button>
+      <button onClick="{{ goQueue }}" style="{{ navQueue }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"></path></svg>
+        <span style="flex:1;text-align:left">Fila de análise</span>
+        <span style="background:#FFF1F1;color:#B80001;font-size:12px;font-weight:500;border-radius:3px;padding:2px 6px;font-variant-numeric:tabular-nums">12</span>
+      </button>
+      <button onClick="{{ goObras }}" style="{{ navObras }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z"></path></svg>
+        <span>Obras</span>
+      </button>
+      <button onClick="{{ goSuppliers }}" style="{{ navSuppliers }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"></path></svg>
+        <span>Fornecedores</span>
+      </button>
+      <button onClick="{{ goWorkflows }}" style="{{ navWorkflows }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"></path></svg>
+        <span>Workflows</span>
+      </button>
+      <button onClick="{{ goReports }}" style="{{ navReports }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"></path></svg>
+        <span>Relatórios</span>
+      </button>
+    </nav>
+    <div style="margin-top:auto;border-top:1px solid #E4E4E1;padding:12px 6px 4px">
+      <div style="font-size:12px;font-weight:500;color:#656560">Acesso interno</div>
+      <div style="font-size:12px;color:#92928C;margin-top:3px;line-height:1.35">Uso restrito à equipe de Suprimentos</div>
+    </div>
+  </aside>
+  <main style="flex:1;min-width:0;background:#fff;border:1px solid #E4E4E1;border-radius:6px;padding:20px;overflow:auto;position:relative">
+    <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="font-size:28px;font-weight:600;letter-spacing:-0.03em;line-height:1.2">Visão geral</div>
+        <div style="font-size:13px;color:#656560;margin-top:4px">Quarta-feira, 16 de setembro de 2026 — situação da documentação dos fornecedores.</div>
+        <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);height:120px;border:1px solid #E4E4E1;border-radius:4px;margin-top:12px;overflow:hidden">
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0;border-right:1px solid #E4E4E1">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;flex:none;background:#936200"></div><div style="font-size:12px;font-weight:500;color:#333330;line-height:1.35">Aguardando análise</div></div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto;color:#D60001">12</div>
+            <div style="font-size:12px;color:#656560">3 esperando há mais de 2 dias</div>
+          </div>
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0;border-right:1px solid #E4E4E1">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;flex:none;background:#536273"></div><div style="font-size:12px;font-weight:500;color:#333330;line-height:1.35">Analisados hoje</div></div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto">8</div>
+            <div style="font-size:12px;color:#656560">6 aprovados • 2 reprovados</div>
+          </div>
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0;border-right:1px solid #E4E4E1">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;flex:none;background:#267A4A"></div><div style="font-size:12px;font-weight:500;color:#333330;line-height:1.35">Fornecedores aptos</div></div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto">34</div>
+            <div style="font-size:12px;color:#656560">de 41 cadastrados</div>
+          </div>
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;flex:none;background:#936200"></div><div style="font-size:12px;font-weight:500;color:#333330;line-height:1.35">Vencendo em 30 dias</div></div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto">9</div>
+            <div style="font-size:12px;color:#656560">em 7 fornecedores</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:12px;align-items:stretch">
+          <div style="border:1px solid #E4E4E1;border-radius:4px;height:100%;display:flex;flex-direction:column">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #E4E4E1">
+              <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Fila prioritária</div>
+              <button onClick="{{ goQueue }}" style="background:none;border:none;cursor:pointer;color:#B80001;font-size:13px;font-weight:600;padding:0">Ver fila completa</button>
+            </div>
+            <sc-for list="{{ priority }}" as="row" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #E4E4E1">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;font-weight:500">{{ row.i }}</div>
+                  <div style="font-size:13px;color:#656560;margin-top:2px">{{ row.f }} • {{ row.o }}</div>
+                </div>
+                <div style="font-size:13px;color:#656560;width:100px;text-align:right">espera {{ row.e }}</div>
+                <div style="{{ row.badge }}">{{ row.p }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="border:1px solid #E4E4E1;border-radius:4px;height:100%;display:flex;flex-direction:column">
+            <div style="padding:12px 16px;border-bottom:1px solid #E4E4E1;font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Vencimentos próximos</div>
+            <sc-for list="{{ expiring }}" as="row" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #E4E4E1">
+                <div style="{{ row.box }}">
+                  <div style="font-size:14px;font-weight:600;line-height:15px">{{ row.day }}</div>
+                  <div style="font-size:11px;font-weight:500">{{ row.month }}</div>
+                </div>
+                <div style="min-width:0">
+                  <div style="font-size:14px;font-weight:500">{{ row.doc }}</div>
+                  <div style="font-size:13px;color:#656560;margin-top:2px">{{ row.sup }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="border:1px solid #E4E4E1;border-radius:4px;margin-top:12px">
+          <div style="padding:12px 16px;border-bottom:1px solid #E4E4E1;font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Últimas análises</div>
+          <sc-for list="{{ recent }}" as="row" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #E4E4E1">
+              <div style="font-size:13px;color:#92928C;width:44px">{{ row.h }}</div>
+              <div style="font-size:13px;color:#333330;width:130px">{{ row.who }}</div>
+              <div style="font-size:14px;flex:1;min-width:0">{{ row.doc }}</div>
+              <div style="font-size:13px;color:#656560;width:230px">{{ row.sup }}</div>
+              <div style="{{ row.badge }}">{{ row.s }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isQueue }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:28px;font-weight:600;letter-spacing:-0.03em;line-height:1.2">Fila de análise</div>
+            <div style="font-size:13px;color:#656560;margin-top:4px">Documentos e remessas esperando decisão</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="position:relative;width:320px;flex:none;max-width:100%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92928C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:12px;top:12px;pointer-events:none"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path></svg><input placeholder="Buscar por fornecedor, obra ou documento" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px 0 36px;font-size:14px;color:#1C1C1A"></div>
+            <button onClick="{{ toggleEmpty }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer">{{ emptyToggleLabel }}</button>
+          </div>
+        </div>
+        <div style="display:inline-flex;border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+          <sc-for list="{{ queueFilters }}" as="f" hint-placeholder-count="4">
+            <button onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ queueHasRows }}" hint-placeholder-val="{{ true }}">
+          <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="background:#F9F9F7">
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Fornecedor</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Item</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Obra</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Workflow</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Enviado em</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Espera</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Prioridade</th>
+                  <th style="padding:9px 16px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ queueRows }}" as="row" hint-placeholder-count="9">
+                  <tr style="border-bottom:1px solid #E4E4E1">
+                    <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ row.f }}</td>
+                    <td style="padding:14px 16px;font-size:14px">{{ row.i }}</td>
+                    <td style="padding:14px 16px;font-size:14px;color:#333330">{{ row.o }} <span style="color:#92928C">{{ row.x }}</span></td>
+                    <td style="padding:14px 16px;font-size:13px;color:#656560">{{ row.w }}</td>
+                    <td style="padding:14px 16px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ row.d }}</td>
+                    <td style="padding:14px 16px;font-size:14px;color:#656560;white-space:nowrap">{{ row.e }}</td>
+                    <td style="padding:14px 16px"><span style="{{ row.badge }}">{{ row.p }}</span></td>
+                    <td style="padding:14px 16px;text-align:right"><button onClick="{{ row.open }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer">Analisar</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </sc-if>
+        <sc-if value="{{ queueNoRows }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E4E4E1;border-radius:4px;margin-top:12px;padding:72px 20px;display:flex;flex-direction:column;align-items:center;text-align:center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#92928C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m7.875 14.25 1.214 1.942a2.25 2.25 0 0 0 1.908 1.058h2.006c.776 0 1.497-.4 1.908-1.058l1.214-1.942M2.41 9h4.636a2.25 2.25 0 0 1 1.872 1.002l.164.246a2.25 2.25 0 0 0 1.872 1.002h2.092a2.25 2.25 0 0 0 1.872-1.002l.164-.246A2.25 2.25 0 0 1 16.954 9h4.636M2.41 9a2.25 2.25 0 0 0-.16.832V12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 12V9.832c0-.287-.055-.57-.16-.832M2.41 9a2.25 2.25 0 0 1 .382-.632l3.285-3.832a2.25 2.25 0 0 1 1.708-.786h8.43c.657 0 1.281.287 1.709.786l3.284 3.832c.163.19.291.404.382.632M4.5 20.25h15A2.25 2.25 0 0 0 21.75 18v-2.625c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125V18a2.25 2.25 0 0 0 2.25 2.25Z"></path></svg>
+            <div style="font-size:16px;font-weight:600;margin-top:12px">Nada para analisar agora</div>
+            <div style="font-size:14px;color:#656560;margin-top:6px">Assim que um fornecedor enviar um documento, ele aparece aqui.</div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <button onClick="{{ goQueue }}" style="width:32px;height:32px;border:1px solid #D2D2CE;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#333330">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"></path></svg>
+          </button>
+          <div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.2">PGR – Programa de Gerenciamento de Riscos</div>
+              <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#536273;background:#F0F3F6">Em análise</span>
+            </div>
+            <div style="font-size:13px;color:#656560;margin-top:3px">Construtora Exemplo Ltda.</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:12px;margin-top:12px;align-items:stretch">
+          <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;min-width:0">
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;border-bottom:1px solid #E4E4E1;background:#F9F9F7">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#656560" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"></path></svg>
+              <div style="font-size:13px;font-weight:500">pgr-2026-construtora-exemplo.pdf</div>
+              <div style="font-size:12px;color:#92928C">1,8 MB</div>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+                <div style="display:flex;align-items:center;gap:6px"><button title="Página anterior" style="width:28px;height:28px;border:1px solid #D2D2CE;border-radius:4px;background:#fff;cursor:pointer;color:#333330;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M15.75 19.5 8.25 12l7.5-7.5"></path></svg></button><div style="font-size:12px;color:#656560;font-variant-numeric:tabular-nums">Página 1 de 12</div><button title="Próxima página" style="width:28px;height:28px;border:1px solid #D2D2CE;border-radius:4px;background:#fff;cursor:pointer;color:#333330;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m8.25 4.5 7.5 7.5-7.5 7.5"></path></svg></button></div>
+                <div style="display:flex;border:1px solid #D2D2CE;border-radius:4px;overflow:hidden">
+                  <button style="width:28px;height:28px;border:none;background:#fff;cursor:pointer;color:#333330;display:flex;align-items:center;justify-content:center" title="Diminuir zoom"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM13.5 10.5h-6"></path></svg></button>
+                  <div style="width:46px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#656560;border-left:1px solid #E4E4E1;border-right:1px solid #E4E4E1">100%</div>
+                  <button style="width:28px;height:28px;border:none;background:#fff;cursor:pointer;color:#333330;display:flex;align-items:center;justify-content:center" title="Aumentar zoom"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6"></path></svg></button>
+                </div>
+                <button style="height:32px;padding:0 10px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"></path></svg>Baixar</button>
+              </div>
+            </div>
+            <div style="background:#F3F3F1;padding:20px;display:flex;justify-content:center;flex:1;min-height:560px;overflow:hidden">
+              <div style="width:430px;background:#fff;border:1px solid #E4E4E1;padding:34px 38px">
+                <div style="font-size:11px;font-weight:500;color:#92928C">CONSTRUTORA EXEMPLO LTDA. — 12.345.678/0001-90</div>
+                <div style="font-size:16px;font-weight:600;margin-top:12px;letter-spacing:-0.2px">Programa de Gerenciamento de Riscos</div>
+                <div style="height:1px;background:#E4E4E1;margin:14px 0"></div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <div style="height:7px;background:#F3F3F1;width:100%"></div>
+                  <div style="height:7px;background:#F3F3F1;width:96%"></div>
+                  <div style="height:7px;background:#F3F3F1;width:88%"></div>
+                  <div style="height:7px;background:#F3F3F1;width:92%"></div>
+                  <div style="height:7px;background:#F3F3F1;width:60%"></div>
+                </div>
+                <div style="font-size:12px;font-weight:600;margin-top:20px">1. Inventário de riscos</div>
+                <div style="display:flex;flex-direction:column;gap:7px;margin-top:10px">
+                  <div style="height:7px;background:#F3F3F1;width:100%"></div>
+                  <div style="height:7px;background:#F3F3F1;width:84%"></div>
+                  <div style="height:7px;background:#F3F3F1;width:94%"></div>
+                  <div style="height:7px;background:#F3F3F1;width:46%"></div>
+                </div>
+                <div style="border:1px solid #E4E4E1;margin-top:16px">
+                  <div style="display:flex;background:#F9F9F7;border-bottom:1px solid #E4E4E1">
+                    <div style="flex:2;padding:6px 8px;font-size:10px;color:#92928C">Risco</div>
+                    <div style="flex:1;padding:6px 8px;font-size:10px;color:#92928C">Grau</div>
+                    <div style="flex:1;padding:6px 8px;font-size:10px;color:#92928C">Medida</div>
+                  </div>
+                  <div style="display:flex;border-bottom:1px solid #E4E4E1"><div style="flex:2;padding:7px 8px"><div style="height:6px;background:#F3F3F1"></div></div><div style="flex:1;padding:7px 8px"><div style="height:6px;background:#F3F3F1"></div></div><div style="flex:1;padding:7px 8px"><div style="height:6px;background:#F3F3F1"></div></div></div>
+                  <div style="display:flex"><div style="flex:2;padding:7px 8px"><div style="height:6px;background:#F3F3F1"></div></div><div style="flex:1;padding:7px 8px"><div style="height:6px;background:#F3F3F1"></div></div><div style="flex:1;padding:7px 8px"><div style="height:6px;background:#F3F3F1"></div></div></div>
+                </div>
+                <div style="font-size:10px;color:#92928C;margin-top:20px">Emitido em 16/09/2026 • Responsável técnico: eng. de segurança do trabalho</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="border:1px solid #E4E4E1;border-radius:4px">
+              <div style="padding:12px 16px;border-bottom:1px solid #E4E4E1;font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Dados do envio</div>
+              <div style="padding:16px;display:grid;grid-template-columns:100px 1fr;row-gap:10px;column-gap:10px;align-items:baseline">
+                <div style="font-size:12px;font-weight:500;color:#333330">Fornecedor</div><div style="font-size:14px">Construtora Exemplo Ltda.</div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Workflow</div><div style="font-size:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span>Segurança do trabalho em obra</span><span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#536273;background:#F0F3F6"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"></path></svg>Serviço</span></div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Exigido em</div><div style="font-size:14px">Residencial Mirante do Parque <span style="color:#92928C">+2</span></div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Documento</div><div style="font-size:14px">PGR – Programa de Gerenciamento de Riscos</div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Tipo</div><div><span style="display:inline-block;border-radius:3px;padding:2px 6px;font-size:11px;font-weight:500;color:#62625E;background:#F1F1EF">Obrigatório</span></div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Enviado em</div><div style="font-size:14px">16/09/2026, 08:42</div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Espera</div><div style="font-size:14px">2 dias</div>
+              </div>
+            </div>
+            <div style="border:1px solid #E4E4E1;border-radius:4px">
+              <div style="padding:12px 16px;border-bottom:1px solid #E4E4E1;font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Envios anteriores</div>
+              <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #E4E4E1">
+                <div style="flex:1;min-width:0"><div style="font-size:14px">pgr-2026-v1.pdf</div><div style="font-size:12px;color:#92928C;margin-top:2px">04/09/2026</div></div>
+                <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#B42318;background:#FFF0EF">Reprovado</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:11px 16px">
+                <div style="flex:1;min-width:0"><div style="font-size:14px">pgr-2025.pdf</div><div style="font-size:12px;color:#92928C;margin-top:2px">12/03/2025</div></div>
+                <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#267A4A;background:#EDF7F1">Aprovado</span>
+              </div>
+            </div>
+            <sc-if value="{{ deciding }}" hint-placeholder-val="{{ true }}">
+              <div style="border:1px solid #E4E4E1;border-radius:4px;padding:16px">
+                <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Decisão</div>
+                <div style="font-size:12px;font-weight:500;color:#333330;margin:12px 0 6px">Validade do documento</div>
+                <input onChange="{{ setValidity }}" value="{{ validity }}" placeholder="dd/mm/aaaa" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;color:#1C1C1A">
+                <div style="display:flex;gap:8px;margin-top:12px">
+                  <button onClick="{{ startReject }}" style="height:40px;flex:1;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg>Reprovar</button>
+                  <button onClick="{{ openApprove }}" style="height:40px;flex:1.4;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg>Aprovar documento</button>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ rejecting }}" hint-placeholder-val="{{ false }}">
+              <div style="border:1px solid #E4E4E1;border-radius:4px;padding:16px">
+                <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Reprovar documento</div>
+                <div style="font-size:12px;font-weight:500;color:#333330;margin:12px 0 6px">Motivo da reprovação</div>
+                <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;color:#1C1C1A;background:#fff">
+                  <option>Documento ilegível</option>
+                  <option>Fora da validade</option>
+                  <option>Documento incorreto</option>
+                  <option>Falta assinatura</option>
+                </select>
+                <div style="font-size:12px;font-weight:500;color:#333330;margin:12px 0 6px">Observação para o fornecedor</div>
+                <textarea rows="4" placeholder="Escreva o que precisa ser corrigido no reenvio." style="width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:10px 12px;font-size:14px;color:#1C1C1A;resize:none"></textarea>
+                <div style="font-size:12px;color:#92928C;margin-top:6px">O fornecedor lê este texto no portal e por e-mail.</div>
+                <div style="display:flex;gap:8px;margin-top:12px">
+                  <button onClick="{{ cancelReject }}" style="height:40px;flex:1;background:none;border:none;font-size:13px;font-weight:600;color:#656560;cursor:pointer">Cancelar</button>
+                  <button onClick="{{ openReject }}" style="height:40px;flex:1.6;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg>Confirmar reprovação</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isShipment }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <button onClick="{{ goQueue }}" style="width:32px;height:32px;flex:none;border:1px solid #D2D2CE;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#333330">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"></path></svg>
+          </button>
+          <div>
+            <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.2">Remessa com 8 funcionários</div>
+            <div style="font-size:13px;color:#656560;margin-top:3px">Construtora Exemplo Ltda. • Residencial Mirante do Parque • Funcionários em campo, do workflow Segurança do trabalho em obra • enviada em 11/09/2026</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);height:120px;border:1px solid #E4E4E1;border-radius:4px;margin-top:12px;overflow:hidden">
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0;border-right:1px solid #E4E4E1">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;flex:none;background:#267A4A"></div><div style="font-size:12px;font-weight:500;color:#333330;line-height:1.35">Aprovados</div></div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto">4</div>
+          </div>
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0;border-right:1px solid #E4E4E1">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;flex:none;background:#536273"></div><div style="font-size:12px;font-weight:500;color:#333330;line-height:1.35">Aguardando análise</div></div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto;color:#D60001">3</div>
+          </div>
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;flex:none;background:#B42318"></div><div style="font-size:12px;font-weight:500;color:#333330;line-height:1.35">Reprovados</div></div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto">1</div>
+          </div>
+        </div>
+        <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:#F9F9F7">
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Funcionário</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">CPF</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Documentos</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Situação</th>
+                <th style="padding:9px 16px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ shipmentRows }}" as="row" hint-placeholder-count="8">
+                <tr style="border-bottom:1px solid #E4E4E1">
+                  <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ row.n }}</td>
+                  <td style="padding:14px 16px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ row.c }}</td>
+                  <td style="padding:14px 16px;font-size:14px;color:#656560">{{ row.d }}</td>
+                  <td style="padding:14px 16px"><span style="{{ row.badge }}">{{ row.s }}</span></td>
+                  <td style="padding:10px 16px;text-align:right"><button onClick="{{ row.open }}" style="{{ row.btn }}">{{ row.action }}</button></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:16px;border-top:1px solid #E4E4E1">
+          <div style="font-size:13px;color:#656560">Concluir encerra a remessa. Os funcionários reprovados continuam pendentes para reenvio.</div>
+          <button onClick="{{ finishShipment }}" style="height:40px;padding:0 16px;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg>Concluir remessa</button>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isObras }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:28px;font-weight:600;letter-spacing:-0.03em;line-height:1.2">Obras</div>
+            <div style="font-size:13px;color:#656560;margin-top:4px">A obra liga os workflows aos fornecedores que trabalham nela</div>
+          </div>
+          <div style="font-size:13px;color:#92928C;margin-top:8px;line-height:1.35;display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"></path></svg><span>Obras recebidas da integração. Não são criadas aqui.</span></div>
+        </div>
+        <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:16px">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:#F9F9F7">
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Obra</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Código</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Cidade</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Workflows</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Fornecedores</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Funcionários</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Pendências</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Situação</th>
+                <th style="padding:9px 16px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ obraRows }}" as="r" hint-placeholder-count="5">
+                <tr style="border-bottom:1px solid #E4E4E1">
+                  <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.n }}</td>
+                  <td style="padding:14px 16px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ r.c }}</td>
+                  <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.city }}</td>
+                  <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.wf }}</td>
+                  <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.sup }}</td>
+                  <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.emp }}</td>
+                  <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.pend }}</td>
+                  <td style="padding:14px 16px">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                      <span style="{{ r.badge }}">{{ r.s }}</span>
+                      <sc-if value="{{ r.noWf }}" hint-placeholder-val="{{ false }}">
+                        <span style="{{ r.noWfBadge }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"></path></svg>Sem workflow</span>
+                      </sc-if>
+                    </div>
+                  </td>
+                  <td style="padding:14px 16px;text-align:right"><button onClick="{{ r.open }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Abrir obra</button></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isObra }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <button onClick="{{ goObras }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;font-weight:500;color:#656560;display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"></path></svg>
+          Obras
+        </button>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:8px">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.2">Residencial Mirante do Parque</div>
+              <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#267A4A;background:#EDF7F1">Em execução</span>
+            </div>
+            <div style="font-size:13px;color:#656560;margin-top:4px;line-height:1.35;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">OB-2401</span><span>•</span><span>Recife/PE</span><span>•</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"></path></svg><span>recebida da integração em 08/01/2026</span></div>
+          </div>
+          <button onClick="{{ openObraSup }}" style="height:40px;padding:0 16px;flex:none;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg>Vincular fornecedor</button>
+        </div>
+        <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);height:120px;border:1px solid #E4E4E1;border-radius:4px;margin-top:12px;overflow:hidden">
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0;border-right:1px solid #E4E4E1">
+            <div style="font-size:12px;font-weight:500;color:#333330">Workflows</div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto">3</div>
+          </div>
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0;border-right:1px solid #E4E4E1">
+            <div style="font-size:12px;font-weight:500;color:#333330">Fornecedores</div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto">6</div>
+          </div>
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0;border-right:1px solid #E4E4E1">
+            <div style="font-size:12px;font-weight:500;color:#333330">Funcionários em campo</div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto">132</div>
+          </div>
+          <div style="padding:16px;display:flex;flex-direction:column;min-width:0">
+            <div style="font-size:12px;font-weight:500;color:#333330">Pendências</div>
+            <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;line-height:1.2;font-variant-numeric:tabular-nums;margin-top:auto;color:#D60001">5</div>
+          </div>
+        </div>
+        <div style="display:flex;border-bottom:1px solid #E4E4E1;margin-top:12px">
+          <sc-for list="{{ obraTabs }}" as="t" hint-placeholder-count="5">
+            <button onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ obraTabSup }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:16px">
+              <table style="width:100%;border-collapse:collapse">
+                <thead>
+                  <tr style="background:#F9F9F7">
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Fornecedor</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Tipo</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Serviço contratado</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Período</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Workflows aplicáveis</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Documentos</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Situação</th>
+                    <th style="padding:9px 16px"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ obraSupRows }}" as="r" hint-placeholder-count="6">
+                    <tr style="border-bottom:1px solid #E4E4E1">
+                      <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.n }}</td>
+                      <td style="padding:14px 16px"><span style="{{ r.tb }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ r.ti }}"></path></svg>{{ r.t }}</span></td>
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.svc }}</td>
+                      <td style="padding:14px 16px;white-space:nowrap;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ r.per }}</td>
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.wa }}</td>
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.d }}</td>
+                      <td style="padding:14px 16px"><span style="{{ r.badge }}">{{ r.s }}</span></td>
+                      <td style="padding:14px 16px;text-align:right"><button onClick="{{ r.open }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Abrir ficha</button></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+            <div style="background:#F9F9F7;border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px;font-size:13px;color:#656560;line-height:1.35">Um fornecedor só recebe as exigências dos workflows do mesmo tipo dele. Os demais são ignorados.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ obraTabWf }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+              <div style="font-size:13px;color:#656560">3 workflows nesta obra • 2 de serviço • 1 de material</div>
+              <button onClick="{{ openObraWf }}" style="height:36px;padding:0 16px;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg>Vincular workflow</button>
+            </div>
+            <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+              <table style="width:100%;border-collapse:collapse">
+                <thead>
+                  <tr style="background:#F9F9F7">
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Workflow</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Tipo</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Itens exigidos</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Aplica-se a</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Vinculado em</th>
+                    <th style="padding:9px 16px"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ obraWfRows }}" as="r" hint-placeholder-count="3">
+                    <tr style="border-bottom:1px solid #E4E4E1">
+                      <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.n }}</td>
+                      <td style="padding:14px 16px"><span style="{{ r.tb }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ r.ti }}"></path></svg>{{ r.t }}</span></td>
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.itens }}</td>
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.aplica }}</td>
+                      <td style="padding:14px 16px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ r.d }}</td>
+                      <td style="padding:14px 16px;text-align:right"><button onClick="{{ r.unlink }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer">Desvincular</button></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+            <div style="background:#F9F9F7;border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px;font-size:13px;color:#656560;line-height:1.35">Cada workflow vale para os fornecedores do mesmo tipo. Um workflow de material não cria exigência para um fornecedor de serviço — ele é simplesmente ignorado. Toda obra precisa de pelo menos um workflow, então o último não pode ser desvinculado.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ obraTabEmp }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:13px;color:#656560;margin-top:16px">132 funcionários em campo nesta obra • mostrando a remessa mais recente, da Construtora Exemplo Ltda.</div>
+            <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+              <table style="width:100%;border-collapse:collapse">
+                <thead>
+                  <tr style="background:#F9F9F7">
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Funcionário</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Fornecedor</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Função</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Documentos</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Situação</th>
+                    <th style="padding:9px 16px"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ obraEmpRows }}" as="r" hint-placeholder-count="8">
+                    <tr style="border-bottom:1px solid #E4E4E1">
+                      <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.n }}</td>
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">Construtora Exemplo Ltda.</td>
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.fn }}</td>
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.d }}</td>
+                      <td style="padding:14px 16px"><span style="{{ r.badge }}">{{ r.s }}</span></td>
+                      <td style="padding:14px 16px;text-align:right"><button onClick="{{ r.open }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Ver documentos</button></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ obraTabPend }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:13px;color:#656560;margin-top:16px">Pendência não trava ninguém: o fornecedor pode pular item, pular prazo ou não enviar nada. O que falta fica aqui e entra na cobrança.</div>
+            <sc-for list="{{ pendGroups }}" as="g" hint-placeholder-count="3">
+              <div style="margin-top:12px">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                  <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">{{ g.sup }}</div>
+                  <div style="font-size:13px;color:#656560">{{ g.count }}</div>
+                </div>
+                <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden">
+                  <table style="width:100%;border-collapse:collapse">
+                    <thead>
+                      <tr style="background:#F9F9F7">
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Pendência</th>
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:200px">Tipo</th>
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:260px">Exigido por</th>
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:120px">Situação</th>
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:110px">Em aberto</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="2">
+                        <tr style="border-bottom:1px solid #E4E4E1">
+                          <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.doc }}</td>
+                          <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.tipo }}</td>
+                          <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.por }}</td>
+                          <td style="padding:14px 16px"><span style="{{ r.badge }}">{{ r.s }}</span></td>
+                          <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.ha }}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ obraTabHist }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E4E4E1;border-radius:4px;margin-top:16px">
+            <sc-for list="{{ obraHistory }}" as="h" hint-placeholder-count="7">
+              <div style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid #E4E4E1">
+                <div style="font-size:13px;color:#92928C;width:130px;flex:none">{{ h.when }}</div>
+                <div style="font-size:14px"><span style="font-weight:500">{{ h.who }}</span> {{ h.what }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isSuppliers }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:28px;font-weight:600;letter-spacing:-0.03em;line-height:1.2">Fornecedores</div>
+            <div style="font-size:13px;color:#656560;margin-top:4px">41 empresas cadastradas no portal</div>
+          </div>
+          <div style="position:relative;width:300px;flex:none;max-width:100%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92928C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:12px;top:12px;pointer-events:none"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path></svg><input placeholder="Buscar por nome ou CNPJ" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px 0 36px;font-size:14px;color:#1C1C1A"></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
+          <div style="display:inline-flex;border:1px solid #E4E4E1;border-radius:4px;overflow:hidden">
+            <sc-for list="{{ supFilters }}" as="f" hint-placeholder-count="4">
+              <button onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
+            </sc-for>
+          </div>
+          <select value="{{ supType }}" onChange="{{ setSupType }}" style="height:36px;border:1px solid #D2D2CE;border-radius:4px;padding:0 10px;font-size:13px;background:#fff;color:#333330">
+            <option>Todos os tipos</option>
+            <option>Serviço 26</option>
+            <option>Material 15</option>
+          </select>
+        </div>
+        <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:#F9F9F7">
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Fornecedor</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">CNPJ</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Tipo</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Obras</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Workflows aplicáveis</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Documentos</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Situação</th>
+                <th style="padding:9px 16px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ supplierRows }}" as="row" hint-placeholder-count="10">
+                <tr style="border-bottom:1px solid #E4E4E1">
+                  <td style="padding:13px 16px;font-size:14px;font-weight:500">{{ row.n }}</td>
+                  <td style="padding:13px 16px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ row.c }}</td>
+                  <td style="padding:13px 16px"><span style="{{ row.tb }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ row.ti }}"></path></svg>{{ row.t }}</span></td>
+                  <td style="padding:13px 16px;font-size:14px;color:#656560">{{ row.o }}</td>
+                  <td style="padding:13px 16px;font-size:14px;color:#656560">{{ row.wa }}</td>
+                  <td style="padding:13px 16px;font-size:14px;color:#656560">{{ row.d }}</td>
+                  <td style="padding:13px 16px"><span style="{{ row.badge }}">{{ row.s }}</span></td>
+                  <td style="padding:13px 16px;text-align:right"><button onClick="{{ row.open }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Abrir ficha</button></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:13px;color:#92928C;margin-top:10px">Documentos conta só os obrigatórios da empresa, nos workflows que se aplicam a ela. Fornecedor apto tem todos aprovados e dentro da validade.</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isSupplier }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <button onClick="{{ goSuppliers }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;font-weight:500;color:#656560;display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"></path></svg>
+          Fornecedores
+        </button>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:8px">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.2;margin-right:2px">Construtora Exemplo Ltda.</div>
+              <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#936200;background:#FFF6DB">Com pendência</span>
+              <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#536273;background:#F0F3F6"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"></path></svg>Serviço</span>
+            </div>
+            <div style="font-size:13px;color:#656560;margin-top:4px"><span style="font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">12.345.678/0001-90</span> • fornecedor desde 10/01/2026 • suprimentos@construtoraexemplo.com.br</div>
+          </div>
+          <div style="display:flex;gap:8px;flex:none">
+            <button onClick="{{ openBlock }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"></path></svg>Bloquear fornecedor</button>
+            <button onClick="{{ chargePending }}" style="height:40px;padding:0 16px;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"></path></svg>Cobrar pendências</button>
+          </div>
+        </div>
+        <div style="display:flex;border-bottom:1px solid #E4E4E1;margin-top:12px">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+            <button onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ tabDocs }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="font-size:13px;color:#656560;margin-top:12px">O documento da empresa é enviado uma vez e vale para todas as obras que o exigem.</div>
+            <sc-for list="{{ docGroups }}" as="g" hint-placeholder-count="2">
+              <div style="margin-top:12px">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                  <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">{{ g.name }}</div>
+                  <span style="{{ g.tb }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"></path></svg>Serviço</span>
+                  <div style="font-size:13px;color:#656560;flex:1">{{ g.meta }}</div>
+                  <span style="{{ g.badge }}">{{ g.s }}</span>
+                </div>
+                <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden">
+                  <table style="width:100%;border-collapse:collapse">
+                    <thead>
+                      <tr style="background:#F9F9F7">
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Documento</th>
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:110px">Tipo</th>
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:140px">Status</th>
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:130px">Validade</th>
+                        <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:150px">Último envio</th>
+                        <th style="padding:9px 16px;width:100px"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="4">
+                        <tr style="border-bottom:1px solid #E4E4E1">
+                          <td style="padding:13px 16px;font-size:14px;font-weight:500">{{ r.doc }}</td>
+                          <td style="padding:13px 16px"><span style="{{ r.tag }}">{{ r.tipo }}</span></td>
+                          <td style="padding:13px 16px"><span style="{{ r.badge }}">{{ r.s }}</span></td>
+                          <td style="{{ r.valStyle }}">{{ r.val }}</td>
+                          <td style="{{ r.lastStyle }}">{{ r.last }}</td>
+                          <td style="padding:13px 16px;text-align:right"><button onClick="{{ r.open }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer">{{ r.action }}</button></td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+                <sc-if value="{{ g.func }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:12px;background:#F9F9F7;border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#656560" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"></path></svg>
+                      <div style="font-size:14px;font-weight:500">Funcionários em campo</div>
+                      <span style="display:inline-block;border-radius:3px;padding:2px 6px;font-size:11px;font-weight:500;color:#B80001;background:#FFF1F1">Funcionários</span>
+                      <div style="font-size:13px;color:#656560;flex:1">15 funcionários em 2 obras • 11 em dia • 2 em análise • 2 com pendência</div>
+                      <button onClick="{{ g.openEmployees }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer">Ver funcionários</button>
+                    </div>
+                    <div style="font-size:12px;color:#92928C;margin-top:8px">O item de funcionários é por obra, acompanhado por pessoa, e não entra na conta de fornecedor apto.</div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tabWf }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:13px;color:#656560;margin-top:16px">Estas exigências vêm das obras em que a empresa está. Para mudar, mude os workflows da obra.</div>
+            <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+              <table style="width:100%;border-collapse:collapse">
+                <thead>
+                  <tr style="background:#F9F9F7">
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Workflow</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Tipo</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Obras em que se aplica</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Itens exigidos</th>
+                    <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Situação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ supWfRows }}" as="r" hint-placeholder-count="2">
+                    <tr style="border-bottom:1px solid #E4E4E1">
+                      <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.n }}</td>
+                      <td style="padding:14px 16px"><span style="{{ r.tb }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"></path></svg>Serviço</span></td>
+                      <td style="padding:14px 16px;font-size:14px;color:#333330">{{ r.o }} <span style="color:#92928C">{{ r.x }}</span></td>
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.itens }}</td>
+                      <td style="padding:14px 16px"><span style="{{ r.badge }}">{{ r.s }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+            <div style="background:#F9F9F7;border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px">
+              <div style="font-size:14px;font-weight:600">Ignorados por tipo</div>
+              <div style="font-size:13px;color:#656560;line-height:1.35;margin-top:4px">Habilitação — fornecedor de material (Material), exigido em 2 obras desta empresa. Não se aplica porque a Construtora Exemplo é fornecedora de serviço.</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tabObras }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:16px">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="background:#F9F9F7">
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Obra</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Código</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Serviço contratado</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Período</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Workflows aplicáveis</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Situação da obra</th>
+                  <th style="padding:9px 16px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ supObraRows }}" as="r" hint-placeholder-count="3">
+                  <tr style="border-bottom:1px solid #E4E4E1">
+                    <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.n }}</td>
+                    <td style="padding:14px 16px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ r.c }}</td>
+                    <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.svc }}</td>
+                    <td style="padding:14px 16px;white-space:nowrap;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ r.per }}</td>
+                    <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.wa }}</td>
+                    <td style="padding:14px 16px"><span style="{{ r.badge }}">{{ r.s }}</span></td>
+                    <td style="padding:14px 16px;text-align:right"><button onClick="{{ r.open }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer">Abrir obra</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tabEmp }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:16px">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="background:#F9F9F7">
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Funcionário</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">CPF</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Telefone</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Obra</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Documentos</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Situação</th>
+                  <th style="padding:9px 16px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ employeeRows }}" as="row" hint-placeholder-count="8">
+                  <tr style="border-bottom:1px solid #E4E4E1">
+                    <td style="padding:13px 16px;font-size:14px;font-weight:500">{{ row.n }}</td>
+                    <td style="padding:13px 16px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ row.c }}</td>
+                    <td style="padding:13px 16px;font-size:14px;color:#656560">{{ row.t }}</td>
+                    <td style="padding:13px 16px;font-size:14px;color:#656560">Residencial Mirante do Parque</td>
+                    <td style="padding:13px 16px;font-size:14px;color:#656560">{{ row.d }}</td>
+                    <td style="padding:13px 16px"><span style="{{ row.badge }}">{{ row.s }}</span></td>
+                    <td style="padding:13px 16px;text-align:right"><button onClick="{{ row.open }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Ver documentos</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tabHist }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E4E4E1;border-radius:4px;margin-top:16px">
+            <sc-for list="{{ history }}" as="h" hint-placeholder-count="6">
+              <div style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid #E4E4E1">
+                <div style="font-size:13px;color:#92928C;width:130px;flex:none">{{ h.when }}</div>
+                <div style="font-size:14px"><span style="font-weight:500">{{ h.who }}</span> {{ h.what }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tabCont }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+            <div style="border:1px solid #E4E4E1;border-radius:4px;padding:16px">
+              <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Contato principal</div>
+              <div style="display:grid;grid-template-columns:100px 1fr;row-gap:10px;margin-top:12px">
+                <div style="font-size:12px;font-weight:500;color:#333330">Nome</div><div style="font-size:14px">Débora Castro</div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Cargo</div><div style="font-size:14px">Coordenadora administrativa</div>
+                <div style="font-size:12px;font-weight:500;color:#333330">E-mail</div><div style="font-size:14px">debora.castro@construtoraexemplo.com.br</div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Telefone</div><div style="font-size:14px">(81) 3244-7788</div>
+              </div>
+            </div>
+            <div style="border:1px solid #E4E4E1;border-radius:4px;padding:16px">
+              <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Segurança do trabalho</div>
+              <div style="display:grid;grid-template-columns:100px 1fr;row-gap:10px;margin-top:12px">
+                <div style="font-size:12px;font-weight:500;color:#333330">Nome</div><div style="font-size:14px">Ivan Menezes</div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Cargo</div><div style="font-size:14px">Técnico de segurança</div>
+                <div style="font-size:12px;font-weight:500;color:#333330">E-mail</div><div style="font-size:14px">ivan.menezes@construtoraexemplo.com.br</div>
+                <div style="font-size:12px;font-weight:500;color:#333330">Telefone</div><div style="font-size:14px">(81) 99812-4501</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isWorkflows }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:28px;font-weight:600;letter-spacing:-0.03em;line-height:1.2">Workflows</div>
+            <div style="font-size:13px;color:#656560;margin-top:4px">Definem o que os fornecedores de cada tipo precisam enviar nas obras em que o workflow vale</div>
+          </div>
+          <button onClick="{{ goWfNew }}" style="height:40px;padding:0 16px;flex:none;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg>Novo workflow</button>
+        </div>
+        <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:16px">
+          <sc-for list="{{ wfList }}" as="w" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;align-items:stretch;border-bottom:1px solid #E4E4E1">
+              <div style="padding:16px;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;margin-right:2px">{{ w.n }}</div>
+                  <span style="{{ w.tb }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ w.ti }}"></path></svg>{{ w.t }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#267A4A;background:#EDF7F1">Ativo</span>
+                </div>
+                <div style="font-size:14px;color:#656560;margin-top:6px">{{ w.d }}</div>
+                <div style="font-size:13px;color:#92928C;margin-top:8px">{{ w.comp }}</div>
+              </div>
+              <div style="border-left:1px solid #E4E4E1;padding:16px;display:flex;flex-direction:column;align-items:flex-start;gap:2px">
+                <div style="font-size:14px;font-weight:500">{{ w.obras }}</div>
+                <div style="font-size:13px;color:#656560">{{ w.alc }}</div>
+                <button onClick="{{ w.open }}" style="height:32px;margin-top:auto;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;padding:0">Configurar</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size:13px;color:#92928C;margin-top:10px">Workflow vale em obras. Fornecedor está em obras. A obra é o que liga os dois, e cada workflow só cria exigência para fornecedores do mesmo tipo.</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isWfConfig }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <button onClick="{{ goWorkflows }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;font-weight:500;color:#656560;display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"></path></svg>
+          Workflows
+        </button>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:8px">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.2">Segurança do trabalho em obra</div>
+              <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#536273;background:#F0F3F6"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"></path></svg>Serviço</span>
+            </div>
+            <div style="font-size:13px;color:#656560;margin-top:4px">5 itens exigidos • vale em 3 obras • alcança 12 fornecedores de serviço</div>
+          </div>
+          <div style="display:flex;gap:8px;flex:none">
+            <button onClick="{{ openWfObras }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg>Vincular a obras</button>
+            <button onClick="{{ openNewDocDrawer }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg>Adicionar documento</button>
+            <button onClick="{{ openFuncDrawer }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg>Adicionar item de funcionários</button>
+          </div>
+        </div>
+        <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:#F9F9F7">
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Item exigido</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:180px">Tipo de item</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:130px">Obrigatoriedade</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:140px">Validade</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:160px">Aviso de vencimento</th>
+                <th style="padding:9px 16px;width:80px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ wfItems }}" as="r" hint-placeholder-count="5">
+                <tr style="border-bottom:1px solid #E4E4E1">
+                  <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.item }}</td>
+                  <td style="padding:14px 16px"><span style="{{ r.tipoStyle }}">{{ r.tipoItem }}</span></td>
+                  <td style="padding:14px 16px"><span style="{{ r.obrigTag }}">{{ r.obrig }}</span></td>
+                  <td colSpan="{{ r.span }}" style="padding:14px 16px;font-size:14px;color:#656560">{{ r.val }}</td>
+                  <sc-if value="{{ r.showAviso }}" hint-placeholder-val="{{ true }}">
+                    <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.aviso }}</td>
+                  </sc-if>
+                  <td style="padding:14px 16px;text-align:right"><button onClick="{{ r.open }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer">{{ r.action }}</button></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;margin-top:20px">Obras em que este workflow vale</div>
+        <div style="font-size:13px;color:#656560;margin-top:4px">Nestas obras, os fornecedores de serviço recebem estas exigências. Os de material ignoram este workflow.</div>
+        <div style="border:1px solid #E4E4E1;border-radius:4px;margin-top:10px">
+          <sc-for list="{{ wfObraRows }}" as="o" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #E4E4E1">
+              <div style="font-size:14px;font-weight:500;flex:1">{{ o.n }}</div>
+              <div style="width:80px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ o.c }}</div>
+              <div style="font-size:13px;color:#656560;width:220px">{{ o.city }}</div>
+              <div style="width:110px"><span style="{{ o.badge }}">{{ o.s }}</span></div>
+              <button onClick="{{ o.remove }}" style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path></svg>Remover desta obra</button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isWfNew }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <button onClick="{{ goWorkflows }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;font-weight:500;color:#656560;display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"></path></svg>
+          Workflows
+        </button>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:8px">
+          <div>
+            <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.2">Novo workflow</div>
+            <div style="font-size:13px;color:#656560;margin-top:4px">O workflow é uma lista de itens exigidos. Ele passa a valer nas obras que você escolher, para os fornecedores do mesmo tipo.</div>
+          </div>
+          <div style="display:flex;gap:8px;flex:none">
+            <button onClick="{{ goWorkflows }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer">Cancelar</button>
+            <button onClick="{{ createWf }}" style="height:40px;padding:0 16px;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer">Criar workflow</button>
+          </div>
+        </div>
+
+        <div style="border:1px solid #E4E4E1;border-radius:4px;padding:16px;margin-top:12px">
+          <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">1. Identificação</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;align-items:end">
+            <div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Nome do workflow</div>
+              <input value="{{ wfNewName }}" onChange="{{ setWfName }}" placeholder="Ex.: Segurança do trabalho em obra" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;color:#1C1C1A">
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Situação ao criar</div>
+              <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>Ativo</option><option>Rascunho</option></select>
+            </div>
+          </div>
+          <div style="font-size:12px;font-weight:500;color:#333330;margin:12px 0 6px">Tipo de workflow</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch">
+            <sc-for list="{{ typeCards }}" as="c" hint-placeholder-count="2">
+              <button onClick="{{ c.pick }}" style="{{ c.style }}">
+                <div style="{{ c.box }}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m4.5 12.75 6 6 9-13.5"></path></svg>
+                </div>
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:#1C1C1A">{{ c.t }}</div>
+                  <div style="font-size:13px;color:#656560;margin-top:3px;line-height:1.35">{{ c.desc }}</div>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+          <div style="font-size:13px;color:#92928C;margin-top:8px">O workflow só cria exigência para fornecedores do mesmo tipo. Não pode ser alterado depois de criado.</div>
+          <div style="font-size:12px;font-weight:500;color:#333330;margin:12px 0 6px">Descrição que aparece para o fornecedor</div>
+          <textarea rows="2" placeholder="Explique para que servem estes documentos." style="width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:10px 12px;font-size:14px;color:#1C1C1A;resize:none"></textarea>
+        </div>
+
+        <div style="border:1px solid #E4E4E1;border-radius:4px;padding:16px;margin-top:12px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">2. Itens exigidos</div>
+              <div style="font-size:13px;color:#656560;margin-top:4px">Um item pode ser um documento da empresa ou o cadastro dos funcionários.</div>
+            </div>
+            <div style="display:flex;gap:8px;flex:none">
+              <button onClick="{{ openNewDocDrawer }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg>Adicionar documento</button>
+              <button onClick="{{ openFuncDrawer }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg>Adicionar item de funcionários</button>
+            </div>
+          </div>
+          <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="background:#F9F9F7">
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Item exigido</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:180px">Tipo de item</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:130px">Obrigatoriedade</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:140px">Validade</th>
+                  <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:160px">Aviso de vencimento</th>
+                  <th style="padding:9px 16px;width:90px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ newWfItems }}" as="r" hint-placeholder-count="5">
+                  <tr style="border-bottom:1px solid #E4E4E1">
+                    <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.item }}</td>
+                    <td style="padding:14px 16px"><span style="{{ r.tipoStyle }}">{{ r.tipoItem }}</span></td>
+                    <td style="padding:14px 16px"><span style="{{ r.obrigTag }}">{{ r.obrig }}</span></td>
+                    <td colSpan="{{ r.span }}" style="padding:14px 16px;font-size:14px;color:#656560">{{ r.val }}</td>
+                    <sc-if value="{{ r.showAviso }}" hint-placeholder-val="{{ true }}">
+                      <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.aviso }}</td>
+                    </sc-if>
+                    <td style="padding:14px 16px;text-align:right"><button style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer">{{ r.action }}</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="border:1px solid #E4E4E1;border-radius:4px;padding:16px;margin-top:12px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">3. Obras em que este workflow vale</div>
+              <div style="font-size:13px;color:#656560;margin-top:4px">Um workflow precisa valer em pelo menos uma obra para começar a exigir alguma coisa.</div>
+            </div>
+            <div style="position:relative;width:260px;flex:none;max-width:100%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92928C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:12px;top:12px;pointer-events:none"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path></svg><input placeholder="Buscar obra" style="height:40px;width:100%;flex:none;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px 0 36px;font-size:14px;color:#1C1C1A"></div>
+          </div>
+          <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden;margin-top:12px">
+            <sc-for list="{{ newObras }}" as="o" hint-placeholder-count="5">
+              <div onClick="{{ o.toggle }}" style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #E4E4E1;cursor:pointer">
+                <div style="{{ o.box }}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m4.5 12.75 6 6 9-13.5"></path></svg>
+                </div>
+                <div style="font-size:14px;font-weight:500;flex:1">{{ o.n }}</div>
+                <div style="width:80px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ o.c }}</div>
+                <div style="font-size:13px;color:#656560;width:220px">{{ o.city }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:13px;font-weight:500;color:#333330;margin-top:10px">{{ newObrasResumo }}</div>
+        </div>
+
+        <div style="border:1px solid #E4E4E1;border-radius:4px;padding:16px;margin:12px 0 0">
+          <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">4. Prazo e acompanhamento</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;align-items:end">
+            <div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Prazo sugerido para envio</div>
+              <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>30 dias após a vinculação</option><option>15 dias após a vinculação</option><option>60 dias após a vinculação</option></select>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Lembretes automáticos</div>
+              <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>15, 7 e 2 dias antes do prazo</option><option>7 e 2 dias antes do prazo</option><option>Sem lembretes</option></select>
+            </div>
+          </div>
+          <div style="background:#F9F9F7;border:1px solid #E4E4E1;border-radius:4px;padding:16px;margin-top:12px">
+            <div style="font-size:14px;font-weight:600">O prazo não trava o fornecedor</div>
+            <div style="font-size:13px;color:#656560;line-height:1.35;margin-top:6px">Passado o prazo, os documentos não enviados continuam pendentes e entram nos relatórios de cobrança. O fornecedor pode enviar depois, pular os opcionais ou não enviar nada. O bloqueio é sempre decisão manual da equipe.</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:28px;font-weight:600;letter-spacing:-0.03em;line-height:1.2">Relatórios</div>
+            <div style="font-size:13px;color:#656560;margin-top:4px">Acompanhamento da análise e dos vencimentos</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <select style="height:40px;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>Últimos 30 dias</option><option>Últimos 90 dias</option><option>Este ano</option></select>
+            <button onClick="{{ exportReport }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"></path></svg>Exportar</button>
+          </div>
+        </div>
+        <div style="border:1px solid #E4E4E1;border-radius:4px;margin-top:16px">
+          <div style="padding:12px 16px;border-bottom:1px solid #E4E4E1;font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Tempo médio de análise por workflow</div>
+          <sc-for list="{{ analysisTimes }}" as="r" hint-placeholder-count="4">
+            <div style="padding:14px 16px;border-bottom:1px solid #E4E4E1">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="font-size:14px;font-weight:500">{{ r.n }}</div>
+                  <span style="{{ r.tb }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ r.ti }}"></path></svg>{{ r.t }}</span>
+                </div>
+                <div style="font-size:14px;color:#656560">{{ r.time }}</div>
+              </div>
+              <div style="height:6px;background:#F3F3F1;border-radius:3px;margin-top:10px;overflow:hidden">
+                <div style="{{ r.bar }}"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border:1px solid #E4E4E1;border-radius:4px;margin-top:12px;overflow:hidden">
+          <div style="padding:12px 16px;border-bottom:1px solid #E4E4E1;font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Vencimentos nos próximos 30 dias</div>
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:#F9F9F7">
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:120px">Data</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Documento</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left">Fornecedor</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:140px">Faltam</th>
+                <th style="padding:9px 16px;font-size:12px;font-weight:500;color:#656560;text-align:left;width:160px">Situação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ expiringRows }}" as="r" hint-placeholder-count="6">
+                <tr style="border-bottom:1px solid #E4E4E1">
+                  <td style="padding:14px 16px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ r.date }}</td>
+                  <td style="padding:14px 16px;font-size:14px;font-weight:500">{{ r.doc }}</td>
+                  <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.sup }}</td>
+                  <td style="padding:14px 16px;font-size:14px;color:#656560">{{ r.days }}</td>
+                  <td style="padding:14px 16px"><span style="{{ r.badge }}">{{ r.s }}</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ hasDrawer }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(28,28,26,0.24);z-index:20">
+      <div onClick="{{ closeOverlay }}" style="position:absolute;inset:0"></div>
+      <div style="position:absolute;top:0;right:0;bottom:0;width:480px;background:#fff;border-left:1px solid #E4E4E1;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 20px;border-bottom:1px solid #E4E4E1">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">{{ drawerTitle }}</div>
+            <div style="font-size:13px;color:#656560;margin-top:3px">{{ drawerSubtitle }}</div>
+          </div>
+          <button onClick="{{ closeOverlay }}" style="width:28px;height:28px;flex:none;border:none;background:none;cursor:pointer;color:#656560;display:flex;align-items:center;justify-content:center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M6 18 18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        <div style="flex:1;overflow:auto;padding:16px 20px">
+
+          <sc-if value="{{ drawerEmployee }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;border:1px solid #E4E4E1;border-radius:4px;padding:16px">
+                <div><div style="font-size:12px;font-weight:500;color:#333330">CPF</div><div style="margin-top:4px;font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">234.567.890-11</div></div>
+                <div><div style="font-size:12px;font-weight:500;color:#333330">Telefone</div><div style="font-size:14px;margin-top:4px">(81) 99765-2345</div></div>
+                <div><div style="font-size:12px;font-weight:500;color:#333330">Função</div><div style="font-size:14px;margin-top:4px">Pedreiro</div></div>
+                <div><div style="font-size:12px;font-weight:500;color:#333330">Obra</div><div style="font-size:14px;margin-top:4px">Residencial Mirante do Parque</div></div>
+                <div style="grid-column:span 2"><div style="font-size:12px;font-weight:500;color:#333330">Remessa de origem</div><div style="font-size:14px;margin-top:4px">Remessa com 8 funcionários • 11/09/2026</div></div>
+                <div style="grid-column:span 2"><div style="font-size:12px;font-weight:500;color:#333330">Item de origem</div><div style="font-size:14px;margin-top:4px">Funcionários em campo — Segurança do trabalho em obra</div></div>
+              </div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin:16px 0 8px">Documentos da pessoa</div>
+              <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden">
+                <sc-for list="{{ empDocs }}" as="d" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #E4E4E1">
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                        <div style="font-size:14px;font-weight:500">{{ d.doc }}</div>
+                        <span style="{{ d.tag }}">{{ d.tipo }}</span>
+                      </div>
+                      <div style="font-size:12px;color:#92928C;margin-top:3px;line-height:1.35;display:flex;align-items:center;gap:4px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"></path></svg><span>{{ d.file }}</span></div>
+                    </div>
+                    <span style="{{ d.badge }}">{{ d.s }}</span>
+                    <button style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg>Abrir</button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ drawerObraWf }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="position:relative;width:100%;flex:none;max-width:100%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92928C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:12px;top:12px;pointer-events:none"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path></svg><input placeholder="Buscar workflow" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px 0 36px;font-size:14px;color:#1C1C1A"></div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin:12px 0 8px">Workflows ativos</div>
+              <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden">
+                <sc-for list="{{ obraWfList }}" as="w" hint-placeholder-count="4">
+                  <div onClick="{{ w.toggle }}" style="{{ w.row }}">
+                    <div style="{{ w.box }}">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m4.5 12.75 6 6 9-13.5"></path></svg>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                        <div style="font-size:14px;font-weight:500">{{ w.n }}</div>
+                        <span style="{{ w.tb }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ w.ti }}"></path></svg>{{ w.t }}</span>
+                      </div>
+                      <div style="font-size:13px;color:#656560;margin-top:3px">{{ w.comp }}</div>
+                    </div>
+                    <sc-if value="{{ w.already }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:12px;font-weight:500;color:#92928C;flex:none">Já nesta obra</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px">
+                <div style="font-size:12px;font-weight:500;color:#333330">Resumo</div>
+                <div style="font-size:14px;margin-top:4px;line-height:1.35">{{ obraWfResumo }}</div>
+              </div>
+              <div style="background:#F9F9F7;border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px;font-size:13px;color:#656560;line-height:1.35">As exigências aparecem como pendentes no portal dos fornecedores do mesmo tipo. Quem já enviou o documento em outra obra não precisa enviar de novo.</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ drawerObraSup }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Fornecedor</div>
+              <select value="{{ obraSupPick }}" onChange="{{ setObraSupPick }}" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A">
+                <sc-for list="{{ obraSupOptions }}" as="o" hint-placeholder-count="5">
+                  <option value="{{ o.n }}">{{ o.n }}</option>
+                </sc-for>
+              </select>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+                <div style="font-size:14px;font-weight:500">{{ pickSup.n }}</div>
+                <span style="{{ pickSup.tb }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ pickSup.ti }}"></path></svg>{{ pickSup.t }}</span>
+                <div style="font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ pickSup.c }}</div>
+              </div>
+              <div style="margin-top:12px">
+                <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Serviço contratado</div>
+                <input placeholder="Ex.: Vergalhões e telas" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;color:#1C1C1A">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;align-items:end">
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Início</div>
+                  <input placeholder="mm/aaaa" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;color:#1C1C1A">
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Fim previsto</div>
+                  <input placeholder="mm/aaaa" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;color:#1C1C1A">
+                </div>
+              </div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin:16px 0 8px">Workflows exigidos nesta obra</div>
+              <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden">
+                <sc-for list="{{ obraSupWfs }}" as="w" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #E4E4E1">
+                    <div style="flex:1;min-width:0">
+                      <div style="{{ w.nameStyle }}">{{ w.n }}</div>
+                    </div>
+                    <span style="{{ w.labelStyle }}">{{ w.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-size:12px;color:#92928C;margin-top:6px">Calculado pelo tipo do fornecedor. Não é preciso escolher.</div>
+              <div style="border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px">
+                <div style="font-size:12px;font-weight:500;color:#333330">Resumo</div>
+                <div style="font-size:14px;margin-top:4px;line-height:1.35">{{ obraSupResumo }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ drawerWfObras }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="position:relative;width:100%;flex:none;max-width:100%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92928C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:12px;top:12px;pointer-events:none"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path></svg><input placeholder="Buscar obra por nome ou código" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px 0 36px;font-size:14px;color:#1C1C1A"></div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin:12px 0 8px">Obras</div>
+              <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden">
+                <sc-for list="{{ wfObrasList }}" as="o" hint-placeholder-count="5">
+                  <div onClick="{{ o.toggle }}" style="{{ o.row }}">
+                    <div style="{{ o.box }}">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m4.5 12.75 6 6 9-13.5"></path></svg>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:14px;font-weight:500">{{ o.n }}</div>
+                      <div style="font-size:13px;color:#656560;margin-top:2px;line-height:1.35"><span style="font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560">{{ o.c }}</span> • {{ o.city }}</div>
+                    </div>
+                    <sc-if value="{{ o.already }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:12px;font-weight:500;color:#92928C;flex:none">Já vinculada</div>
+                    </sc-if>
+                    <span style="{{ o.badge }}">{{ o.s }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px">
+                <div style="font-size:12px;font-weight:500;color:#333330">Resumo</div>
+                <div style="font-size:14px;margin-top:4px;line-height:1.35">{{ wfObrasResumo }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ drawerFuncs }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Nome do item</div>
+              <input value="Funcionários em campo" onChange="{{ noop }}" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;color:#1C1C1A">
+              <div style="font-size:12px;color:#92928C;margin-top:6px">É assim que o fornecedor vai ver esse item no portal.</div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin:16px 0 8px">Dados de cada pessoa</div>
+              <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden">
+                <sc-for list="{{ personFields }}" as="f" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #E4E4E1">
+                    <div style="{{ f.box }}">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m4.5 12.75 6 6 9-13.5"></path></svg>
+                    </div>
+                    <div style="font-size:14px;flex:1">{{ f.n }}</div>
+                    <sc-if value="{{ f.locked }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-block;border-radius:3px;padding:2px 6px;font-size:11px;font-weight:500;color:#62625E;background:#F1F1EF">sempre obrigatório</span>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin:16px 0 8px">Documentos que cada funcionário envia</div>
+              <div style="border:1px solid #E4E4E1;border-radius:4px;overflow:hidden">
+                <table style="width:100%;border-collapse:collapse">
+                  <thead>
+                    <tr style="background:#F9F9F7">
+                      <th style="padding:8px 12px;font-size:12px;font-weight:500;color:#656560;text-align:left">Documento</th>
+                      <th style="padding:8px 12px;font-size:12px;font-weight:500;color:#656560;text-align:left">Tipo</th>
+                      <th style="padding:8px 12px;font-size:12px;font-weight:500;color:#656560;text-align:left">Validade</th>
+                      <th style="padding:8px 12px;font-size:12px;font-weight:500;color:#656560;text-align:left">Aviso</th>
+                      <th style="padding:8px 12px"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ personDocs }}" as="d" hint-placeholder-count="4">
+                      <tr style="border-bottom:1px solid #E4E4E1">
+                        <td style="padding:10px 12px;font-size:13px;font-weight:500">{{ d.doc }}</td>
+                        <td style="padding:10px 12px"><span style="{{ d.tag }}">{{ d.tipo }}</span></td>
+                        <td style="padding:10px 12px;font-size:13px;color:#656560">{{ d.val }}</td>
+                        <td style="padding:10px 12px;font-size:13px;color:#656560">{{ d.aviso }}</td>
+                        <td style="padding:10px 12px;text-align:right"><button style="height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path></svg>Remover</button></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+              <button style="height:40px;padding:0 16px;margin-top:10px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg>Adicionar documento da pessoa</button>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin:16px 0 8px">Regras da remessa</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end">
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Funcionários por remessa</div>
+                  <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>Até 10</option><option>Até 20</option><option>Sem limite</option></select>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Envio</div>
+                  <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>Todos de uma vez, sem salvar pela metade</option><option>Um funcionário por vez</option></select>
+                </div>
+              </div>
+              <div style="background:#F9F9F7;border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px;font-size:13px;color:#656560;line-height:1.35">No portal, este item não é um campo de upload. O fornecedor preenche os dados de uma pessoa, anexa os documentos dela, repete para a próxima e envia a remessa inteira de uma vez. O item nunca fica aprovado como um todo: o acompanhamento é por pessoa, em cada obra.</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ drawerNewDoc }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Nome do documento</div>
+              <input placeholder="Ex.: Certidão Negativa Estadual" style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;color:#1C1C1A">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;align-items:end">
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Tipo</div>
+                  <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>Obrigatório</option><option>Opcional</option></select>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Exige validade</div>
+                  <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>Sim, com data</option><option>Não</option></select>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Avisar antes de vencer</div>
+                  <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>30 dias</option><option>15 dias</option><option>7 dias</option></select>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Formatos aceitos</div>
+                  <select style="height:40px;width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:0 12px;font-size:14px;background:#fff;color:#1C1C1A"><option>PDF, JPG ou PNG</option><option>Somente PDF</option></select>
+                </div>
+              </div>
+              <div style="margin-top:12px">
+                <div style="font-size:12px;font-weight:500;color:#333330;margin-bottom:6px">Instruções para o fornecedor (opcional)</div>
+                <textarea rows="3" placeholder="Ex.: envie a certidão emitida nos últimos 60 dias." style="width:100%;border:1px solid #D2D2CE;border-radius:4px;padding:10px 12px;font-size:14px;color:#1C1C1A;resize:none"></textarea>
+              </div>
+              <div style="background:#F9F9F7;border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px">
+                <div style="font-size:14px;font-weight:600">Impacto nos fornecedores</div>
+                <div style="font-size:13px;color:#656560;line-height:1.35;margin-top:6px">12 fornecedores de serviço, nas 3 obras em que este workflow vale, passarão a ter esta pendência no portal. Quem já enviou o mesmo documento por outra obra não precisa enviar de novo.</div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid #E4E4E1">
+          <button onClick="{{ closeOverlay }}" style="height:40px;padding:0 12px;background:none;border:none;font-size:13px;font-weight:600;color:#656560;cursor:pointer">Cancelar</button>
+          <button onClick="{{ drawerAction }}" style="height:40px;padding:0 16px;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer">{{ drawerActionLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(28,28,26,0.24);z-index:30;display:flex;align-items:center;justify-content:center">
+      <div onClick="{{ closeOverlay }}" style="position:absolute;inset:0"></div>
+      <div style="position:relative;width:440px;background:#fff;border:1px solid #E4E4E1;border-radius:6px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <sc-if value="{{ modalApprove }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Aprovar documento</div>
+            <div style="font-size:14px;color:#656560;line-height:1.45;margin-top:8px">O PGR fica válido até 30/09/2027. O sistema avisa a equipe e o fornecedor 30 dias antes do vencimento.</div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+              <button onClick="{{ closeOverlay }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer">Voltar</button>
+              <button onClick="{{ confirmApprove }}" style="height:40px;padding:0 16px;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg>Aprovar documento</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ modalReject }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Confirmar reprovação</div>
+            <div style="font-size:14px;color:#656560;line-height:1.45;margin-top:8px">O fornecedor recebe o motivo e a sua observação por e-mail e pode reenviar o documento corrigido.</div>
+            <div style="background:#FFF0EF;border-radius:4px;padding:12px 16px;margin-top:12px;font-size:14px;color:#B42318">O documento volta para a lista de pendências do fornecedor.</div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+              <button onClick="{{ closeOverlay }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer">Voltar</button>
+              <button onClick="{{ confirmReject }}" style="height:40px;padding:0 16px;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg>Confirmar reprovação</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ modalBlock }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Bloquear fornecedor?</div>
+            <div style="font-size:14px;color:#656560;line-height:1.45;margin-top:8px">A Construtora Exemplo Ltda. deixa de aparecer como apta para novas contratações até regularizar a documentação.</div>
+            <div style="background:#FFF0EF;border-radius:4px;padding:12px 16px;margin-top:12px;font-size:14px;color:#B42318">O fornecedor continua acessando o portal para enviar documentos.</div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+              <button onClick="{{ closeOverlay }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer">Cancelar</button>
+              <button onClick="{{ confirmBlock }}" style="height:40px;padding:0 16px;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"></path></svg>Bloquear</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ modalUnlink }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2">Desvincular workflow?</div>
+            <div style="font-size:14px;color:#656560;line-height:1.45;margin-top:8px">{{ unlinkText }}</div>
+            <div style="background:#F9F9F7;border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;margin-top:12px;font-size:13px;color:#656560;line-height:1.35">Os documentos já enviados continuam no histórico. Toda obra precisa de pelo menos um workflow, então o último não pode ser desvinculado.</div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+              <button onClick="{{ closeOverlay }}" style="height:40px;padding:0 16px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer">Cancelar</button>
+              <button onClick="{{ confirmUnlink }}" style="height:40px;padding:0 16px;background:#D60001;border:none;border-radius:4px;font-size:13px;font-weight:600;color:#fff;cursor:pointer">Desvincular</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:20px;bottom:20px;z-index:40;background:#fff;border:1px solid #E4E4E1;border-radius:4px;padding:12px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;align-items:center;gap:10px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#267A4A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg>
+      <div style="font-size:13px;font-weight:500">{{ toast }}</div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+const NAV_BASE = "height:36px;padding:0 10px;border-radius:4px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:transparent;color:#656560;width:100%;text-align:left";
+const NAV_ON = "height:36px;padding:0 10px;border-radius:4px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:#FFF1F1;color:#B80001;width:100%;text-align:left";
+const PAIRS = {
+  "Aprovado": ["#267A4A", "#EDF7F1"], "Em análise": ["#536273", "#F0F3F6"], "Pendente": ["#62625E", "#F1F1EF"],
+  "Vence em breve": ["#936200", "#FFF6DB"], "Reprovado": ["#B42318", "#FFF0EF"], "Vencido": ["#9E1C14", "#FDEDEC"],
+  "Apto": ["#267A4A", "#EDF7F1"], "Com pendência": ["#936200", "#FFF6DB"], "Bloqueado": ["#B42318", "#FFF0EF"],
+  "Ativo": ["#267A4A", "#EDF7F1"], "Urgente": ["#B42318", "#FFF0EF"], "Normal": ["#62625E", "#F1F1EF"],
+  "Serviço": ["#536273", "#F0F3F6"], "Material": ["#62625E", "#F1F1EF"],
+  "Em execução": ["#267A4A", "#EDF7F1"], "Planejamento": ["#62625E", "#F1F1EF"], "Concluída": ["#536273", "#F0F3F6"], "Sem workflow": ["#936200", "#FFF6DB"]
+};
+function badge(s) { const p = PAIRS[s] || PAIRS["Pendente"]; return "display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;font-size:12px;font-weight:500;line-height:1.35;font-variant-numeric:tabular-nums;color:" + p[0] + ";background:" + p[1]; }
+const ICON_T = { "Serviço": "M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z", "Material": "m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" };
+const MONO = "font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;font-size:13px;letter-spacing:-0.1px;color:#656560";
+function cellStyle(v) { return "padding:13px 16px;" + (/\d{2}\/\d{2}\/\d{4}/.test(v) ? MONO : "font-size:14px;color:#656560"); }
+function tag(t) { return "display:inline-block;white-space:nowrap;border-radius:3px;padding:2px 6px;font-size:11px;font-weight:500;" + (t === "Opcional" ? "color:#92928C;background:#F9F9F7" : "color:#62625E;background:#F1F1EF"); }
+function box(on, locked) { return "width:18px;height:18px;flex:none;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#fff;border:1px solid " + (locked ? "#D2D2CE" : on ? "#D60001" : "#D2D2CE") + ";background:" + (locked ? "#D2D2CE" : on ? "#D60001" : "#fff"); }
+
+const WORKFLOWS = [
+  { id: 1, n: "Habilitação — fornecedor de serviço", t: "Serviço", comp: "5 documentos obrigatórios • 1 opcional", short: "5 documentos • 1 opcional", obras: 7, alc: 23, d: "Habilitação cadastral, fiscal e trabalhista de quem executa serviço na obra." },
+  { id: 2, n: "Habilitação — fornecedor de material", t: "Material", comp: "5 documentos obrigatórios", short: "5 documentos", obras: 6, alc: 15, d: "Habilitação cadastral, fiscal e bancária de quem fornece material." },
+  { id: 3, n: "Segurança do trabalho em obra", t: "Serviço", comp: "4 documentos obrigatórios • 1 item de funcionários", short: "4 documentos • 1 item de funcionários", obras: 3, alc: 12, d: "Programas de segurança, seguro e as pessoas que trabalham no canteiro." },
+  { id: 4, n: "Obras públicas — documentação complementar", t: "Material", comp: "5 documentos obrigatórios", short: "5 documentos", obras: 1, alc: 4, d: "Documentação extra exigida em obras contratadas por órgão público." }
+];
+const OBRAS = [
+  { n: "Residencial Mirante do Parque", c: "OB-2401", city: "Recife/PE", wf: 3, sup: 6, emp: 132, pend: 5, s: "Em execução", serv: 4, mat: 2 },
+  { n: "Edifício Jardins da Torre", c: "OB-2402", city: "Recife/PE", wf: 2, sup: 9, emp: 187, pend: 2, s: "Em execução", serv: 3, mat: 6 },
+  { n: "Condomínio Vila Serena", c: "OB-2403", city: "Jaboatão dos Guararapes/PE", wf: 2, sup: 7, emp: 94, pend: 0, s: "Em execução", serv: 4, mat: 3 },
+  { n: "Reserva das Águas", c: "OB-2404", city: "Olinda/PE", wf: 0, sup: 4, emp: 0, pend: 3, s: "Planejamento", serv: 2, mat: 2 },
+  { n: "Centro Clínico Boa Viagem", c: "OB-2312", city: "Recife/PE", wf: 3, sup: 11, emp: 0, pend: 0, s: "Concluída", serv: 5, mat: 6 }
+];
+const QUEUE = [
+  { f: "Construtora Exemplo Ltda.", i: "PGR – Programa de Gerenciamento de Riscos", o: "Residencial Mirante do Parque", x: "", w: "Segurança do trabalho em obra", d: "16/09/2026", e: "2 dias", p: "Urgente", k: "doc" },
+  { f: "Construtora Exemplo Ltda.", i: "Remessa com 8 funcionários", o: "Residencial Mirante do Parque", x: "", w: "Segurança do trabalho em obra", d: "11/09/2026", e: "5 dias", p: "Urgente", k: "rem" },
+  { f: "Serralheria Ponto Firme ME", i: "Certidão Negativa de Débitos Federais", o: "Condomínio Vila Serena", x: "+1", w: "Habilitação — fornecedor de material", d: "15/09/2026", e: "1 dia", p: "Normal", k: "doc" },
+  { f: "Elétrica Aracaju Ltda.", i: "Apólice de Seguro de Responsabilidade Civil", o: "Edifício Jardins da Torre", x: "", w: "Segurança do trabalho em obra", d: "15/09/2026", e: "1 dia", p: "Normal", k: "doc" },
+  { f: "Engemax Serviços Ltda.", i: "PCMSO – Controle Médico de Saúde Ocupacional", o: "Residencial Mirante do Parque", x: "+1", w: "Segurança do trabalho em obra", d: "15/09/2026", e: "1 dia", p: "Normal", k: "doc" },
+  { f: "Hidro Norte Instalações", i: "Contrato Social consolidado", o: "Residencial Mirante do Parque", x: "", w: "Habilitação — fornecedor de serviço", d: "14/09/2026", e: "2 dias", p: "Urgente", k: "doc" },
+  { f: "Aços do Recife Ltda.", i: "Certidão Negativa Municipal", o: "Reserva das Águas", x: "", w: "Obras públicas — documentação complementar", d: "14/09/2026", e: "2 dias", p: "Normal", k: "doc" },
+  { f: "Transportes Vale Verde", i: "Remessa com 4 funcionários", o: "Condomínio Vila Serena", x: "", w: "Segurança do trabalho em obra", d: "14/09/2026", e: "2 dias", p: "Normal", k: "rem" },
+  { f: "Elétrica Aracaju Ltda.", i: "Certidão de Regularidade do FGTS", o: "Residencial Mirante do Parque", x: "+1", w: "Habilitação — fornecedor de serviço", d: "13/09/2026", e: "3 dias", p: "Normal", k: "doc" }
+];
+const SUPPLIERS = [
+  { n: "Construtora Exemplo Ltda.", c: "12.345.678/0001-90", t: "Serviço", o: "3 obras", wa: "2", d: "5 de 9", s: "Com pendência" },
+  { n: "Elétrica Aracaju Ltda.", c: "23.456.789/0001-01", t: "Serviço", o: "2 obras", wa: "2", d: "8 de 9", s: "Com pendência" },
+  { n: "Engemax Serviços Ltda.", c: "34.567.890/0001-12", t: "Serviço", o: "4 obras", wa: "2", d: "9 de 9", s: "Apto" },
+  { n: "Hidro Norte Instalações Ltda.", c: "45.678.901/0001-23", t: "Serviço", o: "1 obra", wa: "2", d: "8 de 9", s: "Com pendência" },
+  { n: "Serralheria Ponto Firme ME", c: "56.789.012/0001-34", t: "Material", o: "2 obras", wa: "1", d: "5 de 5", s: "Apto" },
+  { n: "Transportes Vale Verde Ltda.", c: "67.890.123/0001-45", t: "Serviço", o: "5 obras", wa: "2", d: "9 de 9", s: "Apto" },
+  { n: "Marcenaria Sol Nascente ME", c: "78.901.234/0001-56", t: "Material", o: "1 obra", wa: "1", d: "5 de 5", s: "Apto" },
+  { n: "Aços do Recife Ltda.", c: "90.123.456/0001-78", t: "Material", o: "3 obras", wa: "2", d: "8 de 10", s: "Com pendência" },
+  { n: "Cimentos Nordeste S.A.", c: "01.234.567/0001-89", t: "Material", o: "4 obras", wa: "1", d: "5 de 5", s: "Apto" },
+  { n: "Pinturas Litoral Ltda.", c: "89.012.345/0001-67", t: "Serviço", o: "2 obras", wa: "2", d: "4 de 9", s: "Bloqueado" }
+];
+const OBRA_SUPS = [
+  ["Construtora Exemplo Ltda.", "Serviço", "Alvenaria e acabamento", "01/2026 – 12/2027", "2 de 3", "5 de 9", "Com pendência"],
+  ["Elétrica Aracaju Ltda.", "Serviço", "Instalações elétricas", "03/2026 – 08/2027", "2 de 3", "8 de 9", "Com pendência"],
+  ["Engemax Serviços Ltda.", "Serviço", "Estrutura metálica", "02/2026 – 05/2027", "2 de 3", "9 de 9", "Apto"],
+  ["Hidro Norte Instalações Ltda.", "Serviço", "Hidráulica", "04/2026 – 09/2027", "2 de 3", "8 de 9", "Com pendência"],
+  ["Serralheria Ponto Firme ME", "Material", "Esquadrias metálicas", "06/2026 – 11/2027", "1 de 3", "5 de 5", "Apto"],
+  ["Aços do Recife Ltda.", "Material", "Vergalhões e telas", "01/2026 – 12/2027", "1 de 3", "8 de 10", "Com pendência"]
+];
+const OBRA_WFS = [[1, "4 de 6 fornecedores desta obra", "10/01/2026"], [3, "4 de 6 fornecedores desta obra", "10/01/2026"], [2, "2 de 6 fornecedores desta obra", "15/01/2026"]];
+const SEG_ITEMS = [
+  { n: "PGR – Programa de Gerenciamento de Riscos", ob: "Obrigatório", val: "Com data", av: "30 dias antes" },
+  { n: "PCMSO – Controle Médico de Saúde Ocupacional", ob: "Obrigatório", val: "Com data", av: "30 dias antes" },
+  { n: "Apólice de Seguro de Responsabilidade Civil", ob: "Obrigatório", val: "Com data", av: "15 dias antes" },
+  { n: "Certidão de Registro no CREA", ob: "Obrigatório", val: "Com data", av: "30 dias antes" },
+  { n: "Funcionários em campo", ob: "Obrigatório", func: true, resumo: "4 documentos por pessoa • até 10 por remessa" }
+];
+const EMPLOYEES = [
+  { n: "José Carlos de Souza", c: "123.456.789-00", t: "(81) 99876-1234", fn: "Mestre de obras", d: "4 de 4", s: "Aprovado" },
+  { n: "Marcos Vinícius Lima", c: "234.567.890-11", t: "(81) 99765-2345", fn: "Pedreiro", d: "4 de 4", s: "Em análise" },
+  { n: "Antônio Pereira da Silva", c: "345.678.901-22", t: "(81) 99654-3456", fn: "Pedreiro", d: "4 de 4", s: "Aprovado" },
+  { n: "Rafael Gomes Barbosa", c: "456.789.012-33", t: "(81) 99543-4567", fn: "Servente", d: "2 de 4", s: "Pendente" },
+  { n: "Edson Araújo Santos", c: "567.890.123-44", t: "(81) 99432-5678", fn: "Carpinteiro", d: "4 de 4", s: "Aprovado" },
+  { n: "Paulo Henrique Nogueira", c: "678.901.234-55", t: "(81) 99321-6789", fn: "Armador", d: "4 de 4", s: "Em análise" },
+  { n: "Cícero Bezerra da Costa", c: "789.012.345-66", t: "(81) 99210-7890", fn: "Pedreiro", d: "4 de 4", s: "Aprovado" },
+  { n: "Wellington Duarte", c: "890.123.456-77", t: "(81) 99109-8901", fn: "Servente", d: "3 de 4", s: "Reprovado" }
+];
+const PEND = [
+  { sup: "Construtora Exemplo Ltda.", count: "2 pendências", rows: [
+    ["PCMSO – Controle Médico de Saúde Ocupacional", "Documento da empresa", "Segurança do trabalho em obra", "Pendente", "há 14 dias"],
+    ["Certidão de Regularidade do FGTS", "Documento da empresa", "Habilitação — fornecedor de serviço", "Vencido", "há 6 dias"]] },
+  { sup: "Elétrica Aracaju Ltda.", count: "2 pendências", rows: [
+    ["ASO de Gilberto Ramos Cavalcanti", "Documento de funcionário", "Funcionários em campo", "Vencido", "há 10 dias"],
+    ["Certidão Negativa de Débitos Trabalhistas", "Documento da empresa", "Habilitação — fornecedor de serviço", "Pendente", "há 3 dias"]] },
+  { sup: "Aços do Recife Ltda.", count: "1 pendência", rows: [
+    ["Comprovante de dados bancários", "Documento da empresa", "Habilitação — fornecedor de material", "Pendente", "há 21 dias"]] }
+];
+const OBRA_PICK = ["Aços do Recife Ltda.", "Cimentos Nordeste S.A.", "Marcenaria Sol Nascente ME", "Transportes Vale Verde Ltda.", "Pinturas Litoral Ltda."];
+const TOASTS = {
+  employee: "Funcionário concluído", obraWf: "Workflow vinculado à obra", obraSup: "Fornecedor vinculado à obra e avisado",
+  wfObras: "Workflow vinculado às obras selecionadas", newdoc: "Documento adicionado ao workflow", empfuncs: "Item de funcionários adicionado ao workflow"
+};
+
+class Component extends DCLogic {
+  state = {
+    screen: "overview", tab: "docs", obraTab: "sup", queueEmpty: false, rejecting: false, validity: "", modal: null, drawer: null, toast: null,
+    queueFilter: "Todos", supFilter: "Todos", supType: "Todos os tipos", wfType: "Serviço", unlinkText: "",
+    obraWfSel: { 4: true }, wfObrasSel: { "OB-2404": true, "OB-2312": true }, newObrasSel: { "OB-2401": true, "OB-2402": true }, obraSupPick: "Aços do Recife Ltda."
+  };
+
+  go(screen, extra) { this.setState(Object.assign({ screen: screen, modal: null, drawer: null }, extra || {})); }
+
+  showToast(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: null }), 3200);
+  }
+
+  toggle(key, id) { this.setState(st => ({ [key]: Object.assign({}, st[key], { [id]: !st[key][id] }) })); }
+
+  filterStyle(active, first) {
+    return "height:34px;padding:0 14px;font-size:13px;font-weight:" + (active ? "600" : "500") + ";border:none;cursor:pointer;background:" + (active ? "#FFF1F1" : "#fff") + ";color:" + (active ? "#B80001" : "#656560") + ";border-left:" + (first ? "none" : "1px solid #E4E4E1");
+  }
+
+  tabStyle(on) {
+    return "height:40px;padding:0 2px;margin-right:20px;background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:" + (on ? "#B80001" : "#656560") + ";border-bottom:2px solid " + (on ? "#D60001" : "transparent");
+  }
+
+  itemRow(r, action, open) {
+    return {
+      item: r.n, tipoItem: r.func ? "Funcionários" : "Documento da empresa",
+      tipoStyle: r.func ? "display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:3px;padding:4px 7px;line-height:1.35;font-variant-numeric:tabular-nums;font-size:12px;font-weight:500;color:#B80001;background:#FFF1F1" : "font-size:14px;color:#656560",
+      obrig: r.ob, obrigTag: tag(r.ob), val: r.func ? r.resumo : r.val, aviso: r.av, span: r.func ? 2 : 1, showAviso: !r.func, action: action, open: open
+    };
+  }
+
+  queueRows() {
+    const s = this.state;
+    if (s.queueEmpty) return [];
+    const f = s.queueFilter;
+    return QUEUE.filter(r => f === "Todos" || (f === "Documentos" && r.k === "doc") || (f === "Funcionários" && r.k === "rem") || (f === "Urgentes" && r.p === "Urgente")).map(r => ({
+      f: r.f, i: r.i, o: r.o, x: r.x, w: r.w, d: r.d, e: r.e, p: r.p, badge: badge(r.p),
+      open: () => this.go(r.k === "rem" ? "shipment" : "review", { rejecting: false, validity: "" })
+    }));
+  }
+
+  renderVals() {
+    const s = this.state;
+    const grp = { overview: "overview", queue: "queue", review: "queue", shipment: "queue", obras: "obras", obra: "obras", suppliers: "suppliers", supplier: "suppliers", workflows: "workflows", wfConfig: "workflows", wfNew: "workflows", reports: "reports" }[s.screen];
+    const nv = k => grp === k ? NAV_ON : NAV_BASE;
+    const qRows = this.queueRows();
+    const wfById = id => WORKFLOWS.find(w => w.id === id);
+
+    const pickSup = SUPPLIERS.find(x => x.n === s.obraSupPick) || SUPPLIERS[7];
+    const obraWfCalc = OBRA_WFS.map(o => { const w = wfById(o[0]); return { n: w.n, t: w.t, applies: w.t === pickSup.t }; });
+    const ap = obraWfCalc.filter(w => w.applies), ig = obraWfCalc.filter(w => !w.applies);
+    const other = pickSup.t === "Serviço" ? "material" : "serviço";
+    const obraSupResumo = pickSup.n + " é fornecedor de " + pickSup.t.toLowerCase() + ". Nesta obra, " + ap.length + " dos 3 workflows " + (ap.length === 1 ? "se aplica" : "se aplicam") + " a ele: " + ap.map(w => w.n).join(" e ") + ". " + (ig.length === 1 ? "O outro é de " + other + " e será ignorado." : "Os outros " + ig.length + " são de " + other + " e serão ignorados.");
+
+    const owSel = WORKFLOWS.filter(w => w.id === 4 && s.obraWfSel[4]);
+    const woSelList = OBRAS.filter(o => s.wfObrasSel[o.c] && ["OB-2401", "OB-2402", "OB-2403"].indexOf(o.c) < 0);
+    const woSum = woSelList.reduce((a, o) => a + o.serv, 0);
+    const noSelList = OBRAS.filter(o => s.newObrasSel[o.c]);
+    const noSum = noSelList.reduce((a, o) => a + (s.wfType === "Serviço" ? o.serv : o.mat), 0);
+    const plural = (n, a, b) => n === 1 ? a : b;
+
+    const drawerActionLabels = { employee: "Concluir funcionário", obraWf: "Vincular workflow", obraSup: "Vincular fornecedor", wfObras: woSelList.length ? "Vincular a " + woSelList.length + " " + plural(woSelList.length, "obra", "obras") : "Vincular a obras", newdoc: "Adicionar documento", empfuncs: "Adicionar item" };
+
+    return {
+      navOverview: nv("overview"), navQueue: nv("queue"), navObras: nv("obras"), navSuppliers: nv("suppliers"), navWorkflows: nv("workflows"), navReports: nv("reports"),
+      goOverview: () => this.go("overview"), goQueue: () => this.go("queue"), goObras: () => this.go("obras"), goSuppliers: () => this.go("suppliers"),
+      goWorkflows: () => this.go("workflows"), goReports: () => this.go("reports"),
+      goObra: () => this.go("obra", { obraTab: "sup" }), goSupplier: () => this.go("supplier", { tab: "docs" }),
+      goWfConfig: () => this.go("wfConfig"), goWfNew: () => this.go("wfNew"),
+      noop: () => {},
+
+      isOverview: s.screen === "overview", isQueue: s.screen === "queue", isReview: s.screen === "review", isShipment: s.screen === "shipment",
+      isObras: s.screen === "obras", isObra: s.screen === "obra", isSuppliers: s.screen === "suppliers", isSupplier: s.screen === "supplier",
+      isWorkflows: s.screen === "workflows", isWfConfig: s.screen === "wfConfig", isWfNew: s.screen === "wfNew", isReports: s.screen === "reports",
+
+      priority: QUEUE.slice(0, 5).map(r => ({ i: r.i, f: r.f, o: r.o, e: r.e, p: r.p, badge: badge(r.p) })),
+      expiring: [
+        { day: "28", month: "set", doc: "Certidão Negativa de Débitos Trabalhistas", sup: "Construtora Exemplo Ltda.", alert: true },
+        { day: "02", month: "out", doc: "Certidão Negativa de Débitos Federais", sup: "Elétrica Aracaju Ltda.", alert: true },
+        { day: "09", month: "out", doc: "Apólice de Seguro de Responsabilidade Civil", sup: "Engemax Serviços Ltda.", alert: false },
+        { day: "14", month: "out", doc: "Certidão de Regularidade do FGTS", sup: "Transportes Vale Verde Ltda.", alert: false },
+        { day: "16", month: "out", doc: "Comprovante de dados bancários", sup: "Cimentos Nordeste S.A.", alert: false }
+      ].map(r => ({ day: r.day, month: r.month, doc: r.doc, sup: r.sup, box: "width:42px;height:42px;flex:none;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;" + (r.alert ? "background:#FFF6DB;color:#936200" : "background:#F9F9F7;color:#656560;border:1px solid #E4E4E1") })),
+      recent: [
+        { h: "14:20", who: "Marina Duarte", doc: "Cartão CNPJ", sup: "Marcenaria Sol Nascente ME", s: "Aprovado" },
+        { h: "13:48", who: "Rodrigo Alves", doc: "ASO — Wellington Duarte", sup: "Construtora Exemplo Ltda.", s: "Reprovado" },
+        { h: "11:05", who: "Camila Rocha", doc: "Certidão de Registro no CREA", sup: "Engemax Serviços Ltda.", s: "Aprovado" },
+        { h: "10:32", who: "Marina Duarte", doc: "Contrato Social consolidado", sup: "Transportes Vale Verde Ltda.", s: "Aprovado" },
+        { h: "09:14", who: "Rodrigo Alves", doc: "Apólice de Seguro de Responsabilidade Civil", sup: "Pinturas Litoral Ltda.", s: "Reprovado" }
+      ].map(r => ({ h: r.h, who: r.who, doc: r.doc, sup: r.sup, s: r.s, badge: badge(r.s) })),
+
+      queueRows: qRows, queueHasRows: qRows.length > 0, queueNoRows: qRows.length === 0,
+      queueFilters: ["Todos 12", "Documentos 9", "Funcionários 3", "Urgentes 3"].map((l, idx) => {
+        const name = l.split(" ")[0];
+        return { label: l, style: this.filterStyle(s.queueFilter === name, idx === 0), onClick: () => this.setState({ queueFilter: name, queueEmpty: false }) };
+      }),
+      toggleEmpty: () => this.setState({ queueEmpty: !s.queueEmpty }),
+      emptyToggleLabel: s.queueEmpty ? "Mostrar fila com itens" : "Ver fila vazia",
+
+      deciding: !s.rejecting, rejecting: s.rejecting, validity: s.validity,
+      setValidity: e => this.setState({ validity: e.target.value }),
+      startReject: () => this.setState({ rejecting: true }),
+      cancelReject: () => this.setState({ rejecting: false }),
+      openApprove: () => this.setState({ modal: "approve", validity: s.validity || "30/09/2027" }),
+      openReject: () => this.setState({ modal: "reject" }),
+      confirmApprove: () => { this.setState({ modal: null, validity: "30/09/2027", rejecting: false }); this.showToast("Documento aprovado e fornecedor avisado"); },
+      confirmReject: () => { this.setState({ modal: null, rejecting: false }); this.showToast("Documento reprovado e fornecedor avisado"); },
+
+      shipmentRows: EMPLOYEES.map(r => {
+        const act = r.s === "Em análise";
+        return {
+          n: r.n, c: r.c, d: r.d, s: r.s, badge: badge(r.s), action: act ? "Analisar" : "Ver",
+          btn: act ? "height:32px;padding:0 12px;background:#fff;border:1px solid #D2D2CE;border-radius:4px;font-size:13px;font-weight:600;color:#333330;cursor:pointer" : "height:32px;background:none;border:none;color:#656560;font-size:13px;font-weight:600;cursor:pointer",
+          open: () => this.setState({ drawer: "employee" })
+        };
+      }),
+      finishShipment: () => { this.go("queue"); this.showToast("Remessa concluída e fornecedor avisado"); },
+
+      obraRows: OBRAS.map(o => ({ n: o.n, c: o.c, city: o.city, wf: o.wf, sup: o.sup, emp: o.emp, pend: o.pend, s: o.s, badge: badge(o.s), noWf: o.wf === 0, noWfBadge: badge("Sem workflow"), open: () => this.go("obra", { obraTab: "sup" }) })),
+      obraTabs: [["Fornecedores", "sup"], ["Workflows", "wf"], ["Funcionários", "emp"], ["Pendências", "pend"], ["Histórico", "hist"]].map(t => ({ label: t[0], style: this.tabStyle(s.obraTab === t[1]), onClick: () => this.setState({ obraTab: t[1] }) })),
+      obraTabSup: s.obraTab === "sup", obraTabWf: s.obraTab === "wf", obraTabEmp: s.obraTab === "emp", obraTabPend: s.obraTab === "pend", obraTabHist: s.obraTab === "hist",
+      obraSupRows: OBRA_SUPS.map(r => ({ n: r[0], t: r[1], tb: badge(r[1]), ti: ICON_T[r[1]], svc: r[2], per: r[3], wa: r[4], d: r[5], s: r[6], badge: badge(r[6]), open: () => this.go("supplier", { tab: "docs" }) })),
+      obraWfRows: OBRA_WFS.map(o => { const w = wfById(o[0]); return { n: w.n, t: w.t, tb: badge(w.t), ti: ICON_T[w.t], itens: w.short, aplica: o[1], d: o[2], unlink: () => this.setState({ modal: "unlink", unlinkText: w.n + " deixa de valer em Residencial Mirante do Parque. Os fornecedores desta obra param de receber estas exigências." }) }; }),
+      obraEmpRows: EMPLOYEES.map(r => ({ n: r.n, fn: r.fn, d: r.d, s: r.s, badge: badge(r.s), open: () => this.setState({ drawer: "employee" }) })),
+      pendGroups: PEND.map(g => ({ sup: g.sup, count: g.count, rows: g.rows.map(r => ({ doc: r[0], tipo: r[1], por: r[2], s: r[3], ha: r[4], badge: badge(r[3]) })) })),
+      obraHistory: [
+        ["16/09/2026, 08:42", "Construtora Exemplo Ltda.", "enviou PGR – Programa de Gerenciamento de Riscos"],
+        ["11/09/2026, 14:03", "Construtora Exemplo Ltda.", "enviou remessa com 8 funcionários"],
+        ["06/09/2026, 00:00", "Sistema", "marcou como vencida a Certidão de Regularidade do FGTS da Construtora Exemplo"],
+        ["06/06/2026, 10:20", "Marina Duarte", "vinculou Serralheria Ponto Firme ME à obra"],
+        ["15/01/2026, 09:12", "Camila Rocha", "vinculou o workflow Habilitação — fornecedor de material"],
+        ["10/01/2026, 16:40", "Camila Rocha", "vinculou os workflows Habilitação — fornecedor de serviço e Segurança do trabalho em obra"],
+        ["08/01/2026, 07:00", "Integração", "enviou a obra Residencial Mirante do Parque para o sistema"]
+      ].map(r => ({ when: r[0], who: r[1], what: r[2] })),
+      openObraWf: () => this.setState({ drawer: "obraWf" }),
+      openObraSup: () => this.setState({ drawer: "obraSup" }),
+
+      supFilters: [["Todos 41", "Todos"], ["Aptos 34", "Aptos"], ["Com pendência 6", "Com"], ["Bloqueados 1", "Bloqueados"]].map((l, idx) => ({ label: l[0], style: this.filterStyle(s.supFilter === l[1], idx === 0), onClick: () => this.setState({ supFilter: l[1] }) })),
+      supType: s.supType,
+      setSupType: e => this.setState({ supType: e.target.value }),
+      supplierRows: SUPPLIERS.filter(r => (s.supFilter === "Todos" || (s.supFilter === "Aptos" && r.s === "Apto") || (s.supFilter === "Com" && r.s === "Com pendência") || (s.supFilter === "Bloqueados" && r.s === "Bloqueado")) && (s.supType === "Todos os tipos" || s.supType.indexOf(r.t) === 0)).map(r => ({
+        n: r.n, c: r.c, t: r.t, tb: badge(r.t), ti: ICON_T[r.t], o: r.o, wa: r.wa, d: r.d, s: r.s, badge: badge(r.s), open: () => this.go("supplier", { tab: "docs" })
+      })),
+
+      tabs: [["Documentos", "docs"], ["Workflows", "wf"], ["Obras", "obras"], ["Funcionários", "emp"], ["Histórico", "hist"], ["Contatos", "cont"]].map(t => ({ label: t[0], onClick: () => this.setState({ tab: t[1] }), style: this.tabStyle(s.tab === t[1]) })),
+      tabDocs: s.tab === "docs", tabWf: s.tab === "wf", tabObras: s.tab === "obras", tabEmp: s.tab === "emp", tabHist: s.tab === "hist", tabCont: s.tab === "cont",
+      docGroups: [
+        { name: "Habilitação — fornecedor de serviço", meta: "exigido em 3 obras • 4 de 5 obrigatórios em dia", s: "Com pendência", rows: [
+          ["Contrato Social consolidado", "Obrigatório", "Aprovado", "Sem validade", "10/01/2026"],
+          ["Cartão CNPJ", "Obrigatório", "Aprovado", "—", "10/01/2026"],
+          ["Certidão Negativa de Débitos Federais", "Obrigatório", "Aprovado", "12/03/2027", "25/08/2026"],
+          ["Certidão de Regularidade do FGTS", "Obrigatório", "Vencido", "10/09/2026", "12/03/2026"],
+          ["Certidão Negativa de Débitos Trabalhistas", "Obrigatório", "Vence em breve", "28/09/2026", "01/04/2026"],
+          ["Atestado de Capacidade Técnica", "Opcional", "Aprovado", "—", "18/02/2026"]] },
+        { name: "Segurança do trabalho em obra", meta: "exigido em 1 obra (Residencial Mirante do Parque) • 1 de 4 obrigatórios em dia", s: "Com pendência", func: true, rows: [
+          ["PGR – Programa de Gerenciamento de Riscos", "Obrigatório", "Em análise", "—", "16/09/2026"],
+          ["PCMSO – Controle Médico de Saúde Ocupacional", "Obrigatório", "Pendente", "—", "Ainda não enviado"],
+          ["Apólice de Seguro de Responsabilidade Civil", "Obrigatório", "Em análise", "—", "15/09/2026"],
+          ["Certidão de Registro no CREA", "Obrigatório", "Aprovado", "30/06/2027", "20/01/2026"]] }
+      ].map(g => ({
+        name: g.name, meta: g.meta, s: g.s, badge: badge(g.s), tb: badge("Serviço"), ti: ICON_T["Serviço"], func: !!g.func,
+        openEmployees: () => this.setState({ tab: "emp" }),
+        rows: g.rows.map(r => ({
+          doc: r[0], tipo: r[1], s: r[2], val: r[3], last: r[4], valStyle: cellStyle(r[3]), lastStyle: cellStyle(r[4]), badge: badge(r[2]), tag: tag(r[1]),
+          action: r[2] === "Em análise" ? "Analisar" : "Ver",
+          open: () => { if (r[2] === "Em análise") this.go("review", { rejecting: false, validity: "" }); }
+        }))
+      })),
+      supWfRows: [
+        ["Habilitação — fornecedor de serviço", "Residencial Mirante do Parque", "+2", "5 documentos • 1 opcional", "Com pendência"],
+        ["Segurança do trabalho em obra", "Residencial Mirante do Parque", "", "4 documentos • 1 item de funcionários", "Com pendência"]
+      ].map(r => ({ n: r[0], tb: badge("Serviço"), ti: ICON_T["Serviço"], o: r[1], x: r[2], itens: r[3], s: r[4], badge: badge(r[4]) })),
+      supObraRows: [
+        ["Residencial Mirante do Parque", "OB-2401", "Alvenaria e acabamento", "01/2026 – 12/2027", "2 de 3", "Em execução"],
+        ["Edifício Jardins da Torre", "OB-2402", "Revestimento de fachada", "05/2026 – 03/2027", "1 de 2", "Em execução"],
+        ["Centro Clínico Boa Viagem", "OB-2312", "Alvenaria e acabamento", "02/2024 – 06/2025", "1 de 3", "Concluída"]
+      ].map(r => ({ n: r[0], c: r[1], svc: r[2], per: r[3], wa: r[4], s: r[5], badge: badge(r[5]), open: () => this.go("obra", { obraTab: "sup" }) })),
+      employeeRows: EMPLOYEES.map(r => ({ n: r.n, c: r.c, t: r.t, d: r.d, s: r.s, badge: badge(r.s), open: () => this.setState({ drawer: "employee" }) })),
+      history: [
+        ["16/09/2026, 08:42", "Construtora Exemplo Ltda.", "enviou PGR – Programa de Gerenciamento de Riscos"],
+        ["15/09/2026, 16:10", "Rodrigo Alves", "reprovou ASO de Wellington Duarte — documento ilegível"],
+        ["11/09/2026, 14:03", "Construtora Exemplo Ltda.", "enviou remessa com 8 funcionários para Residencial Mirante do Parque"],
+        ["25/08/2026, 10:44", "Marina Duarte", "aprovou Certidão Negativa de Débitos Federais"],
+        ["05/05/2026, 11:15", "Camila Rocha", "vinculou a empresa à obra Edifício Jardins da Torre"],
+        ["10/01/2026, 17:32", "Camila Rocha", "vinculou a empresa à obra Residencial Mirante do Parque"]
+      ].map(r => ({ when: r[0], who: r[1], what: r[2] })),
+      openBlock: () => this.setState({ modal: "block" }),
+      confirmBlock: () => { this.setState({ modal: null }); this.showToast("Fornecedor bloqueado para novas contratações"); },
+      chargePending: () => this.showToast("Cobrança enviada para os 4 documentos pendentes"),
+
+      wfList: WORKFLOWS.map(w => ({ n: w.n, tb: badge(w.t), ti: ICON_T[w.t], t: w.t, d: w.d, comp: w.comp, obras: "vale em " + w.obras + " " + plural(w.obras, "obra", "obras"), alc: "alcança " + w.alc + " fornecedores de " + w.t.toLowerCase(), open: () => this.go("wfConfig") })),
+      wfItems: SEG_ITEMS.map(r => this.itemRow(r, "Editar", () => this.setState({ drawer: r.func ? "empfuncs" : "newdoc" }))),
+      newWfItems: SEG_ITEMS.map(r => this.itemRow(r, "Remover", () => {})),
+      wfObraRows: OBRAS.slice(0, 3).map(o => ({ n: o.n, c: o.c, city: o.city, s: o.s, badge: badge(o.s), remove: () => this.setState({ modal: "unlink", unlinkText: "Segurança do trabalho em obra deixa de valer em " + o.n + ". Os fornecedores de serviço desta obra param de receber estas exigências." }) })),
+      openNewDocDrawer: () => this.setState({ drawer: "newdoc" }),
+      openFuncDrawer: () => this.setState({ drawer: "empfuncs" }),
+      openWfObras: () => this.setState({ drawer: "wfObras" }),
+      modalUnlink: s.modal === "unlink", unlinkText: s.unlinkText,
+      confirmUnlink: () => { this.setState({ modal: null }); this.showToast("Workflow desvinculado da obra"); },
+
+      typeCards: ["Serviço", "Material"].map(t => ({
+        t: t, desc: t === "Serviço" ? "Empresas que executam serviço na obra e colocam pessoas em campo" : "Empresas que fornecem material e não executam serviço",
+        style: "height:100%;text-align:left;border:1px solid " + (s.wfType === t ? "#D60001" : "#D2D2CE") + ";background:" + (s.wfType === t ? "#FFF1F1" : "#fff") + ";border-radius:4px;padding:12px 16px;cursor:pointer;display:flex;gap:10px;align-items:flex-start",
+        box: box(s.wfType === t, false), pick: () => this.setState({ wfType: t })
+      })),
+      wfNewName: s.wfName === undefined ? "" : s.wfName,
+      setWfName: e => this.setState({ wfName: e.target.value }),
+      newObras: OBRAS.map(o => ({ n: o.n, c: o.c, city: o.city, box: box(!!s.newObrasSel[o.c], false), toggle: () => this.toggle("newObrasSel", o.c) })),
+      newObrasResumo: noSelList.length + " " + plural(noSelList.length, "obra selecionada", "obras selecionadas") + " • " + noSum + " fornecedores de " + s.wfType.toLowerCase() + " alcançados",
+      createWf: () => { this.go("workflows"); this.showToast("Workflow criado e vinculado às obras"); },
+
+      exportReport: () => this.showToast("Relatório exportado em CSV"),
+      analysisTimes: [
+        [1, "1,2 dia", 30, false], [3, "2,8 dias", 70, true], [2, "0,9 dia", 22, false], [4, "1,6 dia", 40, false]
+      ].map(r => { const w = wfById(r[0]); return { n: w.n, tb: badge(w.t), ti: ICON_T[w.t], t: w.t, time: r[1], bar: "height:6px;border-radius:3px;width:" + r[2] + "%;background:" + (r[3] ? "#936200" : "#536273") }; }),
+      expiringRows: [
+        ["28/09/2026", "Certidão Negativa de Débitos Trabalhistas", "Construtora Exemplo Ltda.", "12 dias", "Vence em breve"],
+        ["02/10/2026", "Certidão Negativa de Débitos Federais", "Elétrica Aracaju Ltda.", "16 dias", "Vence em breve"],
+        ["09/10/2026", "Apólice de Seguro de Responsabilidade Civil", "Engemax Serviços Ltda.", "23 dias", "Vence em breve"],
+        ["14/10/2026", "Certidão de Regularidade do FGTS", "Transportes Vale Verde Ltda.", "28 dias", "Vence em breve"],
+        ["16/10/2026", "Comprovante de dados bancários", "Cimentos Nordeste S.A.", "30 dias", "Vence em breve"],
+        ["10/09/2026", "Certidão de Regularidade do FGTS", "Construtora Exemplo Ltda.", "venceu há 6 dias", "Vencido"]
+      ].map(r => ({ date: r[0], doc: r[1], sup: r[2], days: r[3], s: r[4], badge: badge(r[4]) })),
+
+      hasDrawer: !!s.drawer,
+      drawerEmployee: s.drawer === "employee", drawerObraWf: s.drawer === "obraWf", drawerObraSup: s.drawer === "obraSup",
+      drawerWfObras: s.drawer === "wfObras", drawerNewDoc: s.drawer === "newdoc", drawerFuncs: s.drawer === "empfuncs",
+      drawerTitle: { employee: "Marcos Vinícius Lima", obraWf: "Vincular workflow", obraSup: "Vincular fornecedor", wfObras: "Vincular a obras", newdoc: "Novo documento exigido", empfuncs: "Adicionar item de funcionários" }[s.drawer],
+      drawerSubtitle: { employee: "Construtora Exemplo Ltda.", obraWf: "Residencial Mirante do Parque • OB-2401", obraSup: "Residencial Mirante do Parque • OB-2401", wfObras: "Segurança do trabalho em obra • Serviço", newdoc: "Adicionar documento da empresa • Segurança do trabalho em obra", empfuncs: "Segurança do trabalho em obra" }[s.drawer],
+      drawerActionLabel: drawerActionLabels[s.drawer],
+      drawerAction: () => { const d = s.drawer; this.setState({ drawer: null }); this.showToast(TOASTS[d]); },
+      closeOverlay: () => this.setState({ modal: null, drawer: null }),
+
+      obraWfList: WORKFLOWS.map(w => {
+        const already = w.id !== 4, on = already || !!s.obraWfSel[w.id];
+        return { n: w.n, tb: badge(w.t), ti: ICON_T[w.t], t: w.t, comp: w.short, already: already, box: box(on, already), row: "display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid #E4E4E1;cursor:" + (already ? "default" : "pointer") + ";background:" + (!already && on ? "#FFF1F1" : "#fff"), toggle: () => { if (!already) this.toggle("obraWfSel", w.id); } };
+      }),
+      obraWfResumo: owSel.length ? "1 workflow selecionado • passa a valer para 2 fornecedores de material desta obra • 5 documentos novos." : "Nenhum workflow selecionado.",
+      wfObrasList: OBRAS.map(o => {
+        const already = ["OB-2401", "OB-2402", "OB-2403"].indexOf(o.c) >= 0, on = already || !!s.wfObrasSel[o.c];
+        return { n: o.n, c: o.c, city: o.city, s: o.s, badge: badge(o.s), already: already, box: box(on, already), row: "display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid #E4E4E1;cursor:" + (already ? "default" : "pointer") + ";background:" + (!already && on ? "#FFF1F1" : "#fff"), toggle: () => { if (!already) this.toggle("wfObrasSel", o.c); } };
+      }),
+      wfObrasResumo: woSelList.length ? woSelList.length + " " + plural(woSelList.length, "obra selecionada", "obras selecionadas") + " • " + woSum + " fornecedores de serviço passam a ter estas exigências." : "Nenhuma obra selecionada.",
+      obraSupPick: s.obraSupPick,
+      setObraSupPick: e => this.setState({ obraSupPick: e.target.value }),
+      obraSupOptions: OBRA_PICK.map(n => ({ n: n })),
+      pickSup: { n: pickSup.n, c: pickSup.c, t: pickSup.t, tb: badge(pickSup.t), ti: ICON_T[pickSup.t] },
+      obraSupWfs: obraWfCalc.map(w => ({
+        n: w.n, tb: badge(w.t), ti: ICON_T[w.t], t: w.t, label: w.applies ? "Vai se aplicar" : "Não se aplica — tipo " + w.t,
+        nameStyle: "font-size:14px;font-weight:500;color:" + (w.applies ? "#1C1C1A" : "#92928C"),
+        labelStyle: "display:inline-block;white-space:nowrap;border-radius:3px;padding:2px 6px;font-size:11px;font-weight:500;" + (w.applies ? "color:#267A4A;background:#EDF7F1" : "color:#92928C;background:#F9F9F7")
+      })),
+      obraSupResumo: obraSupResumo,
+      empDocs: [
+        ["ASO – Atestado de Saúde Ocupacional", "Obrigatório", "aso-marcos-lima.pdf", "Reprovado"],
+        ["Ficha de entrega de EPI", "Obrigatório", "ficha-epi-marcos-lima.pdf", "Aprovado"],
+        ["RG ou CNH", "Obrigatório", "cnh-marcos-lima.jpg", "Aprovado"],
+        ["Certificado NR-35 – Trabalho em altura", "Opcional", "nr35-marcos-lima.pdf", "Aprovado"]
+      ].map(r => ({ doc: r[0], tipo: r[1], file: r[2], s: r[3], badge: badge(r[3]), tag: tag(r[1]) })),
+      personDocs: [
+        ["ASO – Atestado de Saúde Ocupacional", "Obrigatório", "Com data", "30 dias antes"],
+        ["Ficha de entrega de EPI", "Obrigatório", "Sem validade", "—"],
+        ["RG ou CNH", "Obrigatório", "Sem validade", "—"],
+        ["Certificado NR-35 – Trabalho em altura", "Opcional", "Com data", "15 dias antes"]
+      ].map(r => ({ doc: r[0], tipo: r[1], val: r[2], aviso: r[3], tag: tag(r[1]) })),
+      personFields: [["CPF", true], ["Nome completo", true], ["Telefone", false], ["Função", false], ["Obra", false]].map(f => ({ n: f[0], locked: f[1], box: box(true, false) })),
+
+      toast: s.toast, hasToast: !!s.toast, hasModal: !!s.modal,
+      modalApprove: s.modal === "approve", modalReject: s.modal === "reject", modalBlock: s.modal === "block"
+    };
+  }
+}
+</script>
+</body>
+</html>
