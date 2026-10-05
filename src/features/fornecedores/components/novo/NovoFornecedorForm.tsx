@@ -1,70 +1,86 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { cnpjValido, paths } from '@/shared/lib';
+import { paths, USAR_API } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { AlertBox, Button, ButtonLink, PageHeader, Stack, useToast } from '@/shared/ui';
 import { useAcoesFornecedor } from '../../hooks/useAcoesFornecedor';
 import { useCnpjCadastrado } from '../../hooks/useCnpjCadastrado';
 import { NOVO_FORNECEDOR_VAZIO, useExemploNovoFornecedor, useObrasParaCadastro } from '../../hooks/useObrasParaCadastro';
-import type { NovoFornecedor } from '../../types';
-import { BlocoContato } from './BlocoContato';
+import { errosDaApi, validarCnpj, validarDados } from '../../lib';
+import type { ErrosFormFornecedor, NovoFornecedor } from '../../types';
 import { BlocoIdentificacao } from './BlocoIdentificacao';
 import { BlocoObra } from './BlocoObra';
-import { BlocoTipo } from './BlocoTipo';
-import type { ErrosNovoFornecedor } from './types';
+import { SeletorTipos } from './SeletorTipos';
 
 const t = strings.pages.fornecedorNovo;
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validar(d: NovoFornecedor): ErrosNovoFornecedor {
+function validar(d: NovoFornecedor): ErrosFormFornecedor {
   return {
-    cnpj: cnpjValido(d.cnpj) ? undefined : t.identificacao.cnpjErro,
-    razaoSocial: d.razaoSocial.trim() ? undefined : t.identificacao.razaoErro,
-    contatoNome: d.contato.nome.trim() ? undefined : t.contato.nomeErro,
-    email: EMAIL.test(d.contato.email.trim()) ? undefined : t.contato.emailErro,
+    cnpj: validarCnpj(d.cnpj),
+    ...validarDados(d),
     servico: d.obraId && !d.servicoContratado.trim() ? t.obra.servicoErro : undefined,
   };
 }
 
 /**
- * Cadastro em quatro blocos. Abre preenchido com o exemplo; "Limpar" esvazia.
+ * Cadastro em três blocos, só com o que a API aceita. Na demonstração abre preenchido com o
+ * exemplo ("Limpar" esvazia); com a API abre vazio.
  * A URL aceita ?form=vazio e ?cnpj=<14 dígitos> — usados pela /_estados.
  */
 export function NovoFornecedorForm() {
   const [params] = useSearchParams();
   const exemplo = useExemploNovoFornecedor();
-  const obras = useObrasParaCadastro();
+  const { obras, podeVincular } = useObrasParaCadastro();
   const { cadastrar } = useAcoesFornecedor();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  const inicial = params.get('form') === 'vazio' ? NOVO_FORNECEDOR_VAZIO : exemplo;
+  // Com a API o formulário abre vazio: o que for salvo vai para o banco de verdade.
+  const inicial = USAR_API || params.get('form') === 'vazio' ? NOVO_FORNECEDOR_VAZIO : exemplo;
   const [dados, setDados] = useState<NovoFornecedor>({ ...inicial, cnpj: params.get('cnpj') ?? inicial.cnpj });
-  const [erros, setErros] = useState<ErrosNovoFornecedor>({});
+  const [erros, setErros] = useState<ErrosFormFornecedor>({});
+  const [errosServidor, setErrosServidor] = useState<ErrosFormFornecedor>({});
+  const [erroTopo, setErroTopo] = useState<string | undefined>();
   const [tentou, setTentou] = useState(false);
+  const [enviando, setEnviando] = useState(false);
   const duplicado = useCnpjCadastrado(dados.cnpj);
 
-  const errosVisiveis: ErrosNovoFornecedor = {
-    ...erros,
-    cnpj: duplicado ? t.identificacao.cnpjDuplicado(duplicado.razaoSocial) : erros.cnpj,
+  const errosVisiveis: ErrosFormFornecedor = {
+    ...errosServidor,
+    ...Object.fromEntries(Object.entries(erros).filter(([, v]) => v)),
+    cnpj: duplicado ? t.identificacao.cnpjDuplicado(duplicado.razaoSocial) : (erros.cnpj ?? errosServidor.cnpj),
   };
   const temErro = tentou && Object.values(erros).some(Boolean);
 
   function mudar(parcial: Partial<NovoFornecedor>) {
     setDados((atual) => ({ ...atual, ...parcial }));
     if (tentou) setErros(validar({ ...dados, ...parcial }));
+    // O que a API recusou deixa de valer para o campo que mudou.
+    setErrosServidor((atual) => Object.fromEntries(Object.entries(atual).filter(([campo]) => !(campo in parcial))));
   }
 
-  function salvar() {
+  async function salvar() {
     const novosErros = validar(dados);
     setErros(novosErros);
     setTentou(true);
+    setErroTopo(undefined);
     if (duplicado || Object.values(novosErros).some(Boolean)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    cadastrar(dados);
-    showToast(dados.enviarConvite ? strings.pages.fornecedores.novoToastConvite(dados.contato.email.trim()) : strings.pages.fornecedores.novoToast(dados.razaoSocial.trim()));
+    setEnviando(true);
+    try {
+      await cadastrar(dados);
+    } catch (erro) {
+      const { campos, topo } = errosDaApi(erro);
+      setErrosServidor(campos);
+      setErroTopo(topo);
+      setEnviando(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    setEnviando(false);
+    showToast(strings.pages.fornecedores.novoToast(dados.razaoSocial.trim()));
     navigate(paths.fornecedores);
   }
 
@@ -79,21 +95,29 @@ export function NovoFornecedorForm() {
           <>
             <Button
               variant="tertiary"
+              disabled={enviando}
               onClick={() => {
                 setDados(NOVO_FORNECEDOR_VAZIO);
                 setErros({});
+                setErrosServidor({});
+                setErroTopo(undefined);
                 setTentou(false);
               }}
             >
               {t.limpar}
             </Button>
             <ButtonLink to={paths.fornecedores}>{t.cancelar}</ButtonLink>
-            <Button variant="primary" onClick={salvar}>
-              {t.salvar}
+            <Button variant="primary" disabled={enviando} aria-busy={enviando} onClick={() => void salvar()}>
+              {enviando ? t.salvando : t.salvar}
             </Button>
           </>
         }
       />
+      {erroTopo && (
+        <AlertBox variant="error" title={t.alertaApiTitle} withIcon>
+          {erroTopo}
+        </AlertBox>
+      )}
       {duplicado && (
         <AlertBox variant="error" title={t.alertaCnpjTitle} withIcon>
           {t.alertaCnpj(duplicado.razaoSocial)}{' '}
@@ -102,15 +126,14 @@ export function NovoFornecedorForm() {
           </Link>
         </AlertBox>
       )}
-      {!duplicado && temErro && (
+      {!duplicado && !erroTopo && temErro && (
         <AlertBox variant="error" title={t.alertaErrosTitle} withIcon>
           {t.alertaErros}
         </AlertBox>
       )}
       <BlocoIdentificacao dados={dados} erros={errosVisiveis} onChange={mudar} />
-      <BlocoTipo dados={dados} erros={errosVisiveis} onChange={mudar} />
-      <BlocoContato dados={dados} erros={errosVisiveis} onChange={mudar} />
-      <BlocoObra dados={dados} erros={errosVisiveis} onChange={mudar} obras={obras} />
+      <SeletorTipos tipos={dados.tipos} onChange={(tipos) => mudar({ tipos })} erro={errosVisiveis.tipos} />
+      <BlocoObra dados={dados} erros={errosVisiveis} onChange={mudar} obras={obras} podeVincular={podeVincular} />
     </Stack>
   );
 }

@@ -1,9 +1,7 @@
 import { montarFila } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 
 /** Contador da sidebar. Não obedece aos estados simulados da página. */
 export function useQueueCount() {
-  const ds = useStore(datasetStore);
-  return useMockQuery('fila-contagem', () => montarFila(ds).length, { simulate: false, version: ds });
+  return useDatasetQuery('fila-contagem', (ds) => montarFila(ds).length, { simulate: false });
 }

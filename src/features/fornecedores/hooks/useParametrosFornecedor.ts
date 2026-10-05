@@ -2,11 +2,11 @@ import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 
 export type AbaFornecedor = 'documentos' | 'exigencias' | 'obras' | 'historico' | 'contatos';
-type ModalFornecedor = 'bloquear' | 'reenviar';
+type ModalFornecedor = 'bloquear' | 'reenviar' | 'editar';
 
 const ABAS: readonly AbaFornecedor[] = ['documentos', 'exigencias', 'obras', 'historico', 'contatos'];
 
-/** Estado da ficha do fornecedor na URL: ?aba=, ?modal=bloquear|reenviar. */
+/** Estado da ficha do fornecedor na URL: ?aba=, ?modal=bloquear|reenviar|editar. */
 export function useParametrosFornecedor() {
   const [params, setParams] = useSearchParams();
   const definir = useCallback(
@@ -27,7 +27,7 @@ export function useParametrosFornecedor() {
   const modal = params.get('modal');
   return {
     aba: ABAS.find((a) => a === params.get('aba')) ?? 'documentos',
-    modal: modal === 'bloquear' || modal === 'reenviar' ? (modal satisfies ModalFornecedor) : null,
+    modal: modal === 'bloquear' || modal === 'reenviar' || modal === 'editar' ? (modal satisfies ModalFornecedor) : null,
     setAba: (aba: AbaFornecedor) => definir({ aba: aba === 'documentos' ? null : aba }),
     setModal: (m: ModalFornecedor | null) => definir({ modal: m }),
   };

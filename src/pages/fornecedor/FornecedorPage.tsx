@@ -1,4 +1,5 @@
-import { BuildingStorefrontIcon, EnvelopeIcon, LockOpenIcon, NoSymbolIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { BuildingStorefrontIcon, EnvelopeIcon, LockOpenIcon, NoSymbolIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { useParams } from 'react-router';
 import {
   AbaContatos,
@@ -6,7 +7,9 @@ import {
   AbaExigenciasFornecedor,
   AbaHistoricoFornecedor,
   AbaObrasFornecedor,
+  errosDaApi,
   ModalBloquear,
+  ModalEditarFornecedor,
   ModalReenviarAcesso,
   SituacaoFornecedor,
   useAcoesFornecedor,
@@ -14,11 +17,11 @@ import {
   useParametrosFornecedor,
   type AbaFornecedor,
 } from '@/features/fornecedores';
-import { formatCnpj, formatDate, paths, useDocumentTitle } from '@/shared/lib';
+import { formatCnpj, formatDate, formatPhone, paths, useDocumentTitle } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import {
   AsyncContent,
-  Badge,
+  BadgeGroup,
   Button,
   ButtonLink,
   EmptyState,
@@ -48,6 +51,20 @@ export function FornecedorPage() {
   const p = useParametrosFornecedor();
   const { desbloquear } = useAcoesFornecedor();
   const { showToast } = useToast();
+  const [desbloqueando, setDesbloqueando] = useState(false);
+
+  async function confirmarDesbloqueio(id: string) {
+    setDesbloqueando(true);
+    try {
+      await desbloquear(id);
+      showToast(strings.modais.bloquear.desbloqueadoToast);
+    } catch (erro) {
+      // Sem formulário nem modal: o erro da API aparece no aviso.
+      showToast(errosDaApi(erro).topo ?? strings.api.semResposta, 'error');
+    } finally {
+      setDesbloqueando(false);
+    }
+  }
   useDocumentTitle(query.data?.fornecedor.razaoSocial ?? strings.pages.fornecedores.title);
 
   return (
@@ -81,7 +98,7 @@ export function FornecedorPage() {
               badges={
                 <>
                   <SituacaoFornecedor situacao={ficha.resumo.situacao} aguardandoAcesso={ficha.aguardandoAcesso} />
-                  <Badge status={ficha.fornecedor.tipo} />
+                  <BadgeGroup statuses={ficha.fornecedor.tipos} />
                 </>
               }
               subtitle={
@@ -90,25 +107,24 @@ export function FornecedorPage() {
                   <span>{strings.common.separator}</span>
                   <span>{t.subtitle.desde(formatDate(ficha.fornecedor.desde, 'date'))}</span>
                   <span>{strings.common.separator}</span>
+                  <span>{formatPhone(ficha.fornecedor.telefone)}</span>
+                  <span>{strings.common.separator}</span>
                   <span className="break-all">{ficha.fornecedor.email}</span>
                 </Inline>
               }
               actions={
                 <>
+                  <Button icon={PencilSquareIcon} onClick={() => p.setModal('editar')}>
+                    {t.editar}
+                  </Button>
                   {ficha.aguardandoAcesso && (
                     <Button icon={EnvelopeIcon} onClick={() => p.setModal('reenviar')}>
                       {t.reenviar}
                     </Button>
                   )}
                   {ficha.fornecedor.bloqueado ? (
-                    <Button
-                      icon={LockOpenIcon}
-                      onClick={() => {
-                        desbloquear(ficha.fornecedor.id);
-                        showToast(strings.modais.bloquear.desbloqueadoToast);
-                      }}
-                    >
-                      {t.desbloquear}
+                    <Button icon={LockOpenIcon} disabled={desbloqueando} aria-busy={desbloqueando} onClick={() => void confirmarDesbloqueio(ficha.fornecedor.id)}>
+                      {desbloqueando ? strings.modais.bloquear.desbloqueando : t.desbloquear}
                     </Button>
                   ) : (
                     <Button icon={NoSymbolIcon} onClick={() => p.setModal('bloquear')}>
@@ -130,6 +146,7 @@ export function FornecedorPage() {
                 {p.aba === 'contatos' && <AbaContatos ficha={ficha} onReenviar={() => p.setModal('reenviar')} />}
               </div>
             </Tabs>
+            <ModalEditarFornecedor fornecedor={ficha.fornecedor} open={p.modal === 'editar'} onClose={() => p.setModal(null)} />
             <ModalBloquear fornecedor={ficha.fornecedor} open={p.modal === 'bloquear' && !ficha.fornecedor.bloqueado} onClose={() => p.setModal(null)} />
             <ModalReenviarAcesso fornecedor={p.modal === 'reenviar' && ficha.aguardandoAcesso ? ficha.fornecedor : null} onClose={() => p.setModal(null)} />
           </Stack>

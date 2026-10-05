@@ -1,9 +1,7 @@
-import type { NovoFornecedor } from '../../types';
-
-export type ErrosNovoFornecedor = Partial<Record<'cnpj' | 'razaoSocial' | 'contatoNome' | 'email' | 'servico', string>>;
+import type { ErrosFormFornecedor, NovoFornecedor } from '../../types';
 
 export type BlocoProps = {
   dados: NovoFornecedor;
-  erros: ErrosNovoFornecedor;
+  erros: ErrosFormFornecedor;
   onChange: (parcial: Partial<NovoFornecedor>) => void;
 };

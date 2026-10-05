@@ -38,18 +38,26 @@ export function FornecedoresPage() {
         title={t.title}
         subtitle={query.data ? t.subtitle(query.data.porSituacao.todos) : undefined}
         actions={
-          <>
+          // Busca e botão sempre na mesma linha: a busca fica com o que sobrar; abaixo de sm o botão é só o "+".
+          <div className="flex w-full min-w-0 items-center gap-2 lg:w-auto">
             <SearchInput
               label={t.searchLabel}
               placeholder={t.searchPlaceholder}
               value={filtros.busca}
               onChange={(e) => atualizar({ busca: e.target.value })}
-              wrapperClassName="w-75 max-lg:w-full"
+              wrapperClassName="min-w-0 flex-1 lg:w-75 lg:flex-none"
             />
-            <ButtonLink to={paths.novoFornecedor} variant="primary" icon={PlusIcon}>
-              {t.cadastrar}
+            <ButtonLink
+              to={paths.novoFornecedor}
+              variant="primary"
+              icon={PlusIcon}
+              aria-label={t.cadastrar}
+              title={t.cadastrar}
+              className="flex-none max-sm:w-tap max-sm:px-0"
+            >
+              <span className="max-sm:sr-only">{t.cadastrar}</span>
             </ButtonLink>
-          </>
+          </div>
         }
       />
       <AsyncContent

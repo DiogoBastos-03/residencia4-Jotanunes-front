@@ -16,6 +16,8 @@ export { FornecedoresTabela } from './components/FornecedoresTabela';
 export { SituacaoFornecedor } from './components/SituacaoFornecedor';
 export { ModalReenviarAcesso } from './components/ModalReenviarAcesso';
 export { ModalBloquear } from './components/ModalBloquear';
+export { ModalEditarFornecedor } from './components/ModalEditarFornecedor';
+export { errosDaApi } from './lib';
 export { AbaDocumentos } from './components/AbaDocumentos';
 export { AbaExigenciasFornecedor } from './components/AbaExigenciasFornecedor';
 export { AbaObrasFornecedor } from './components/AbaObrasFornecedor';

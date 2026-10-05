@@ -1,6 +1,5 @@
 import { diasEntre, documentosExigidos, statusDocumento, type Dataset } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 import type { DetalheDocumento } from '../types';
 
 function carregar(ds: Dataset, id: string): DetalheDocumento | null {
@@ -37,6 +36,5 @@ function carregar(ds: Dataset, id: string): DetalheDocumento | null {
 
 /** Documento da empresa para analisar ou ler. `null` se não existe. */
 export function useDocumentoAnalise(id: string) {
-  const ds = useStore(datasetStore);
-  return useMockQuery(`documento-${id}`, () => carregar(ds, id), { version: ds });
+  return useDatasetQuery(`documento-${id}`, (ds) => carregar(ds, id));
 }

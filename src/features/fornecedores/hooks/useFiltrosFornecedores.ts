@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
+import { forneceTipo } from '@/entities';
 import type { FiltroSituacao, FiltroTipo, LinhaFornecedor } from '../types';
 
 const SITUACOES: readonly FiltroSituacao[] = ['todos', 'apto', 'comPendencia', 'bloqueado'];
@@ -17,7 +18,8 @@ export function filtrarFornecedores(linhas: readonly LinhaFornecedor[], f: Filtr
   const digitos = f.busca.replace(/\D/g, '');
   return linhas.filter((l) => {
     if (f.situacao !== 'todos' && l.resumo.situacao !== f.situacao) return false;
-    if (f.tipo !== 'todos' && l.fornecedor.tipo !== f.tipo) return false;
+    // "Contém": quem fornece os dois tipos aparece nos dois filtros.
+    if (f.tipo !== 'todos' && !forneceTipo(l.fornecedor, f.tipo)) return false;
     if (!termo) return true;
     return (
       normalizar(l.fornecedor.razaoSocial).includes(termo) ||

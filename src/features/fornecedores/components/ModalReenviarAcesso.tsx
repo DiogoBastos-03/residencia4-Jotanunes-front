@@ -20,19 +20,19 @@ export function ModalReenviarAcesso({ fornecedor, onClose }: Props) {
 
   useEffect(() => {
     if (fornecedor) {
-      setEmail(fornecedor.acessoPortal.emailConvite);
+      setEmail(fornecedor.acessoPortal?.emailConvite ?? fornecedor.email);
       setErro(null);
     }
   }, [fornecedor]);
 
-  const convidadoEm = fornecedor?.acessoPortal.convidadoEm;
+  const convidadoEm = fornecedor?.acessoPortal?.convidadoEm;
 
   return (
     <Modal
       open={fornecedor !== null}
       onClose={onClose}
       title={t.title}
-      description={fornecedor ? t.texto(fornecedor.razaoSocial, email || fornecedor.acessoPortal.emailConvite) : undefined}
+      description={fornecedor ? t.texto(fornecedor.razaoSocial, email || (fornecedor.acessoPortal?.emailConvite ?? fornecedor.email)) : undefined}
       footer={
         <>
           <Button onClick={onClose}>{t.cancelar}</Button>

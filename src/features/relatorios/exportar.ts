@@ -9,7 +9,7 @@ export function exportarRelatorio(relatorio: Relatorio, hoje: string): void {
   baixarCsv(t.arquivo(hoje), [
     t.csv.pendencias,
     t.csv.pendenciasCabecalho,
-    ...relatorio.pendencias.map((p) => [p.obra.nome, p.obra.codigo, p.total, p.fornecedores]),
+    ...relatorio.pendencias.map((p) => [p.obra.nome, p.obra.codigo ?? '', p.total, p.fornecedores]),
     [],
     [`${t.csv.tempos[0] ?? ''} — ${t.periodos[relatorio.periodo]}`],
     t.csv.temposCabecalho,

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router';
 import { formatCnpj, paths } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import { Badge, Mono, Table, type TableColumn } from '@/shared/ui';
+import { BadgeGroup, Mono, Table, type TableColumn } from '@/shared/ui';
 import type { LinhaFornecedor } from '../types';
 import { SituacaoFornecedor } from './SituacaoFornecedor';
 
@@ -10,7 +10,7 @@ const t = strings.pages.fornecedores;
 const COLUNAS: readonly TableColumn<LinhaFornecedor>[] = [
   { key: 'nome', header: t.colunas.fornecedor, tone: 'strong', mobile: 'title', cell: (l) => l.fornecedor.razaoSocial },
   { key: 'cnpj', header: t.colunas.cnpj, nowrap: true, cell: (l) => <Mono>{formatCnpj(l.fornecedor.cnpj)}</Mono> },
-  { key: 'tipo', header: t.colunas.tipo, cell: (l) => <Badge status={l.fornecedor.tipo} /> },
+  { key: 'tipo', header: t.colunas.tipo, cell: (l) => <BadgeGroup statuses={l.fornecedor.tipos} /> },
   { key: 'obras', header: t.colunas.obras, nowrap: true, cell: (l) => t.obras(l.resumo.obras) },
   { key: 'listas', header: t.colunas.listas, cell: (l) => l.resumo.listasAplicaveis },
   { key: 'docs', header: t.colunas.documentos, nowrap: true, cell: (l) => strings.dominio.documentosDe(l.resumo.obrigatoriosEmDia, l.resumo.obrigatoriosTotal) },

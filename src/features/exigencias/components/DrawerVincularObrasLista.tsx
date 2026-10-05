@@ -35,7 +35,7 @@ export function DrawerVincularObrasLista({ detalhe, open, vazio, exemplo, onClos
 
   const termo = semAcento(busca.trim());
   const visiveis = detalhe.obrasParaVincular.filter(
-    (o) => semAcento(o.obra.nome).includes(termo) || semAcento(o.obra.codigo).includes(termo),
+    (o) => semAcento(o.obra.nome).includes(termo) || semAcento(o.obra.codigo ?? '').includes(termo),
   );
   const escolhidas = disponiveis.filter((o) => selecionadas.includes(o.obra.id));
   const fornecedores = escolhidas.reduce((n, o) => n + o.fornecedoresDoTipo, 0);
@@ -102,7 +102,10 @@ export function DrawerVincularObrasLista({ detalhe, open, vazio, exemplo, onClos
                           {obra.nome}
                         </Text>
                         <Text as="span" size="support" tone="muted" className="mt-0.5 block">
-                          <Mono>{obra.codigo}</Mono> {strings.common.separator} {strings.dominio.cidadeUf(obra.cidade, obra.uf)}
+                          {/* Obra da API não tem código nem cidade: a linha some. */}
+                          {obra.codigo && <Mono>{obra.codigo}</Mono>}
+                          {obra.codigo && obra.cidade && ` ${strings.common.separator} `}
+                          {obra.cidade && strings.dominio.cidadeUf(obra.cidade, obra.uf)}
                         </Text>
                       </span>
                       {jaVinculada && (

@@ -1,24 +1,33 @@
+import { forneceTipo } from '@/entities';
 import { cn } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import { Card, Field, Heading, Input, Select, Tag, Text } from '@/shared/ui';
+import { Card, Field, Heading, InfoNote, Input, Select, Tag, Text } from '@/shared/ui';
 import type { ObraParaCadastro } from '../../types';
 import type { BlocoProps } from './types';
 
 const t = strings.pages.fornecedorNovo.obra;
 
-export function BlocoObra({ dados, erros, onChange, obras }: BlocoProps & { obras: readonly ObraParaCadastro[] }) {
-  const escolhida = obras.find((o) => o.obra.id === dados.obraId);
+type Props = BlocoProps & {
+  obras: readonly ObraParaCadastro[];
+  /** false com a API: não há endpoint para criar o vínculo — o bloco fica desabilitado, com o motivo. */
+  podeVincular: boolean;
+};
+
+export function BlocoObra({ dados, erros, onChange, obras, podeVincular }: Props) {
+  const escolhida = podeVincular ? obras.find((o) => o.obra.id === dados.obraId) : undefined;
   return (
     <Card as="section">
       <Heading>{t.title}</Heading>
       <Text size="support" tone="muted" className="mt-1">
         {t.description}
       </Text>
+      {!podeVincular && <InfoNote className="mt-3">{t.indisponivel}</InfoNote>}
       <div className="mt-3 grid gap-3 lg:grid-cols-2">
         <Field label={t.obra}>
           {(control) => (
             <Select
               {...control}
+              disabled={!podeVincular}
               value={dados.obraId}
               onChange={(e) => onChange({ obraId: e.target.value })}
               options={[{ value: '', label: t.nenhuma }, ...obras.map((o) => ({ value: o.obra.id, label: t.opcao(o.obra.nome, o.obra.codigo) }))]}
@@ -49,7 +58,7 @@ export function BlocoObra({ dados, erros, onChange, obras }: BlocoProps & { obra
           ) : (
             <ul className="overflow-hidden rounded-control border border-border">
               {escolhida.listas.map((lista) => {
-                const aplica = lista.tipo === dados.tipo;
+                const aplica = forneceTipo(dados, lista.tipo);
                 return (
                   <li key={lista.id} className="flex items-center gap-2.5 border-b border-border px-4 py-3 last:border-b-0">
                     <Text weight="medium" className={cn('min-w-0 flex-1', !aplica && 'text-ink-4')}>

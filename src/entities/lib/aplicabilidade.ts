@@ -1,6 +1,7 @@
 import type { Obrigatoriedade } from '../common';
 import type { Dataset } from '../dataset';
 import type { EscopoItem, ItemExigido, ListaExigencias } from '../listaExigencias';
+import { forneceTipo } from '../fornecedor/model';
 import type { Obra } from '../obra';
 
 export function listasDaObra(ds: Dataset, obraId: string): ListaExigencias[] {
@@ -23,11 +24,11 @@ export function fornecedoresDaObra(ds: Dataset, obraId: string) {
   return ds.fornecedores.filter((f) => ids.includes(f.id));
 }
 
-/** Listas da obra que valem para o fornecedor: só as do mesmo tipo. */
+/** Listas da obra que valem para o fornecedor: as de um tipo que ele fornece. */
 export function listasAplicaveisNaObra(ds: Dataset, fornecedorId: string, obraId: string): ListaExigencias[] {
   const fornecedor = ds.fornecedores.find((f) => f.id === fornecedorId);
   if (!fornecedor) return [];
-  return listasDaObra(ds, obraId).filter((l) => l.tipo === fornecedor.tipo);
+  return listasDaObra(ds, obraId).filter((l) => forneceTipo(fornecedor, l.tipo));
 }
 
 /** Listas de outro tipo, exigidas em obras do fornecedor — simplesmente ignoradas. */
@@ -37,7 +38,7 @@ export function listasIgnoradas(ds: Dataset, fornecedorId: string): Array<{ list
   const mapa = new Map<string, { lista: ListaExigencias; obras: Obra[] }>();
   for (const obra of obrasDoFornecedor(ds, fornecedorId)) {
     for (const lista of listasDaObra(ds, obra.id)) {
-      if (lista.tipo === fornecedor.tipo) continue;
+      if (forneceTipo(fornecedor, lista.tipo)) continue;
       const atual = mapa.get(lista.id) ?? { lista, obras: [] };
       atual.obras.push(obra);
       mapa.set(lista.id, atual);

@@ -18,7 +18,7 @@ type Props = { dados: NovaLista; obras: readonly ObraComTipos[]; onChange: (obra
 export function BlocoObrasLista({ dados, obras, onChange }: Props) {
   const [busca, setBusca] = useState('');
   const termo = semAcento(busca.trim());
-  const visiveis = obras.filter((o) => semAcento(o.obra.nome).includes(termo) || semAcento(o.obra.codigo).includes(termo));
+  const visiveis = obras.filter((o) => semAcento(o.obra.nome).includes(termo) || semAcento(o.obra.codigo ?? '').includes(termo));
   const escolhidas = obras.filter((o) => dados.obraIds.includes(o.obra.id));
   const alcance = escolhidas.reduce((n, o) => n + o[dados.tipo], 0);
   return (
@@ -50,7 +50,7 @@ export function BlocoObrasLista({ dados, obras, onChange }: Props) {
                   <Text as="span" weight="medium" className="min-w-0 flex-1">
                     {obra.nome}
                   </Text>
-                  <Mono className="w-20">{obra.codigo}</Mono>
+                  <Mono className="w-20">{strings.dominio.codigoObra(obra.codigo)}</Mono>
                   <Text as="span" size="support" tone="muted" className="w-55 max-md:w-auto">
                     {strings.dominio.cidadeUf(obra.cidade, obra.uf)}
                   </Text>

@@ -1,5 +1,6 @@
 import {
   documentoDoFornecedor,
+  aguardandoAcesso,
   arquivosDoItem,
   documentosExigidos,
   ehPendencia,
@@ -15,8 +16,7 @@ import {
   statusDocumento,
   type Dataset,
 } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 import type { FichaFornecedor } from '../types';
 
 function carregar(ds: Dataset, id: string): FichaFornecedor | null {
@@ -67,7 +67,7 @@ function carregar(ds: Dataset, id: string): FichaFornecedor | null {
   return {
     fornecedor,
     resumo: resumoFornecedor(ds, id),
-    aguardandoAcesso: !fornecedor.acessoPortal.acessouEm,
+    aguardandoAcesso: aguardandoAcesso(fornecedor),
     grupos,
     ignoradas: listasIgnoradas(ds, id),
     obras: obrasDoFornecedor(ds, id).flatMap((obra) => {
@@ -88,6 +88,5 @@ function carregar(ds: Dataset, id: string): FichaFornecedor | null {
 
 /** Ficha completa do fornecedor. `null` se não existe. */
 export function useFornecedor(id: string) {
-  const ds = useStore(datasetStore);
-  return useMockQuery(`fornecedor-${id}`, () => carregar(ds, id), { version: ds });
+  return useDatasetQuery(`fornecedor-${id}`, (ds) => carregar(ds, id));
 }

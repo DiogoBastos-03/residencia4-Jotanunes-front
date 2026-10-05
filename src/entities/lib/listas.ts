@@ -1,4 +1,5 @@
 import type { Dataset } from '../dataset';
+import { forneceTipo } from '../fornecedor/model';
 import type { ListaExigencias } from '../listaExigencias';
 import { fornecedoresDaObra, obrasDaLista } from './aplicabilidade';
 
@@ -28,7 +29,7 @@ export function alcanceDaLista(ds: Dataset, listaId: string): number {
   if (!lista) return 0;
   const ids = new Set<string>();
   for (const obra of obrasDaLista(ds, listaId)) {
-    for (const f of fornecedoresDaObra(ds, obra.id)) if (f.tipo === lista.tipo) ids.add(f.id);
+    for (const f of fornecedoresDaObra(ds, obra.id)) if (forneceTipo(f, lista.tipo)) ids.add(f.id);
   }
   return ids.size;
 }
@@ -37,5 +38,5 @@ export function alcanceDaLista(ds: Dataset, listaId: string): number {
 export function alcanceNaObra(ds: Dataset, listaId: string, obraId: string): { aplica: number; total: number } {
   const lista = ds.listas.find((l) => l.id === listaId);
   const fornecedores = fornecedoresDaObra(ds, obraId);
-  return { aplica: fornecedores.filter((f) => f.tipo === lista?.tipo).length, total: fornecedores.length };
+  return { aplica: fornecedores.filter((f) => lista !== undefined && forneceTipo(f, lista.tipo)).length, total: fornecedores.length };
 }

@@ -7,7 +7,7 @@ const t = strings.pages.obras;
 
 const COLUNAS: readonly TableColumn<LinhaObra>[] = [
   { key: 'obra', header: t.colunas.obra, tone: 'strong', mobile: 'title', cell: (l) => l.obra.nome },
-  { key: 'codigo', header: t.colunas.codigo, nowrap: true, cell: (l) => <Mono>{l.obra.codigo}</Mono> },
+  { key: 'codigo', header: t.colunas.codigo, nowrap: true, cell: (l) => <Mono>{strings.dominio.codigoObra(l.obra.codigo)}</Mono> },
   { key: 'cidade', header: t.colunas.cidade, cell: (l) => strings.dominio.cidadeUf(l.obra.cidade, l.obra.uf) },
   { key: 'listas', header: t.colunas.listas, cell: (l) => l.listas },
   { key: 'fornecedores', header: t.colunas.fornecedores, cell: (l) => l.fornecedores },

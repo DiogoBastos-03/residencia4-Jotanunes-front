@@ -1,4 +1,5 @@
 import {
+  forneceTipo,
   alcanceNaObra,
   composicaoLista,
   fornecedoresDaObra,
@@ -11,8 +12,7 @@ import {
   type ListaExigencias,
   type TipoFornecimento,
 } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 import type { FichaObra } from '../types';
 
 function documentosDoTipo(listas: ListaExigencias[], tipo: TipoFornecimento): string[] {
@@ -37,7 +37,7 @@ function carregar(ds: Dataset, id: string): FichaObra | null {
       return {
         lista,
         composicao: composicaoLista(lista),
-        vinculadaEm: ds.obraListas.find((ol) => ol.obraId === id && ol.listaId === lista.id)?.vinculadaEm ?? obra.recebidaEm,
+        vinculadaEm: ds.obraListas.find((ol) => ol.obraId === id && ol.listaId === lista.id)?.vinculadaEm ?? obra.recebidaEm ?? ds.hoje,
         aplicaA: alcance.aplica,
         fornecedoresNaObra: alcance.total,
       };
@@ -67,8 +67,8 @@ function carregar(ds: Dataset, id: string): FichaObra | null {
       .map((lista) => ({ lista, composicao: composicaoLista(lista) })),
     fornecedoresDisponiveis: ds.fornecedores.filter((f) => !fornecedores.includes(f)),
     fornecedoresPorTipo: {
-      servico: fornecedores.filter((f) => f.tipo === 'servico').length,
-      material: fornecedores.filter((f) => f.tipo === 'material').length,
+      servico: fornecedores.filter((f) => forneceTipo(f, 'servico')).length,
+      material: fornecedores.filter((f) => forneceTipo(f, 'material')).length,
     },
     documentosExigidosPorTipo: { servico: documentosDoTipo(listas, 'servico'), material: documentosDoTipo(listas, 'material') },
   };
@@ -76,6 +76,5 @@ function carregar(ds: Dataset, id: string): FichaObra | null {
 
 /** Ficha completa de uma obra. `null` se não existe. */
 export function useObra(id: string) {
-  const ds = useStore(datasetStore);
-  return useMockQuery(`obra-${id}`, () => carregar(ds, id), { version: ds });
+  return useDatasetQuery(`obra-${id}`, (ds) => carregar(ds, id));
 }

@@ -26,7 +26,6 @@ export const fornecedoresPage = {
   reenviar: 'Reenviar acesso',
   nota: 'Documentos conta só os obrigatórios da empresa, nas listas de exigências que se aplicam a ela. Fornecedor apto tem todos aprovados e dentro da validade.',
   novoToast: (razao: string) => `${razao} cadastrado`,
-  novoToastConvite: (email: string) => `Fornecedor cadastrado e convite enviado para ${email}`,
   semResultadoTitle: 'Nenhum fornecedor com estes filtros',
   semResultadoDescription: 'Troque a situação, o tipo ou apague a busca. Para incluir uma empresa nova, use "Cadastrar fornecedor".',
   limparFiltros: 'Limpar filtros',
@@ -54,6 +53,22 @@ export const modalBloquear = {
   alerta: 'O fornecedor continua acessando o portal para enviar documentos.',
   cancelar: 'Cancelar',
   confirmar: 'Bloquear',
+  confirmando: 'Bloqueando…',
   toast: 'Fornecedor bloqueado para novas contratações',
   desbloqueadoToast: 'Fornecedor desbloqueado',
+  desbloqueando: 'Desbloqueando…',
+  erroTitle: 'Não foi possível bloquear',
+} as const;
+
+/** Modal de editar os dados do fornecedor (os que a API aceita mudar). */
+export const modalEditarFornecedor = {
+  title: 'Editar dados do fornecedor',
+  descricao: 'O CNPJ não muda. Razão social, telefone, e-mail e tipos são salvos na API.',
+  tipos: 'Tipo de fornecimento',
+  cancelar: 'Cancelar',
+  salvar: 'Salvar',
+  salvando: 'Salvando…',
+  toast: 'Dados do fornecedor atualizados',
+  semMudanca: 'Nada foi alterado',
+  erroTitle: 'Não foi possível salvar',
 } as const;

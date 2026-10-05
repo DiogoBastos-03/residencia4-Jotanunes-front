@@ -1,4 +1,5 @@
 import type {
+  CampoFornecedor,
   DocumentoEmpresa,
   DocumentoExigido,
   EventoResolvido,
@@ -71,13 +72,27 @@ export type Vencimentos = { proximos: Vencimento[]; vencidos: Vencimento[] };
 /** Obra que pode ser escolhida no cadastro, com as listas que ela tem. */
 export type ObraParaCadastro = { obra: Obra; listas: ListaExigencias[] };
 
+/** Cadastro: só o que a API aceita (razão social, CNPJ, telefone, e-mail, tipos) e a obra, quando houver como vincular. */
 export type NovoFornecedor = {
   cnpj: string;
   razaoSocial: string;
-  nomeFantasia: string;
-  tipo: TipoFornecimento;
-  contato: { nome: string; cargo: string; email: string; telefone: string };
-  enviarConvite: boolean;
+  telefone: string;
+  email: string;
+  tipos: TipoFornecimento[];
+  /** Só nos dados de demonstração: a API não cria vínculo com obra. */
   obraId: string;
   servicoContratado: string;
 };
+
+/** Edição: o que a API deixa mudar depois do cadastro. */
+export type EdicaoFornecedor = {
+  razaoSocial: string;
+  telefone: string;
+  email: string;
+  tipos: TipoFornecimento[];
+};
+
+/** Campos dos formulários de fornecedor que podem ter erro. */
+export type CampoFormFornecedor = CampoFornecedor | 'servico';
+
+export type ErrosFormFornecedor = Partial<Record<CampoFormFornecedor, string>>;

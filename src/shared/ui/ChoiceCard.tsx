@@ -10,10 +10,12 @@ type ChoiceCardProps = {
   title: string;
   description: string;
   disabled?: boolean;
+  /** Várias podem ser marcadas (checkbox nativo por baixo) — ex.: fornecedor de serviço e de material. */
+  multiple?: boolean;
 };
 
-/** Opção exclusiva em forma de cartão (rádio nativo por baixo). Selecionado: borda e fundo grafite suave. */
-export function ChoiceCard({ name, value, checked, onChange, title, description, disabled = false }: ChoiceCardProps) {
+/** Opção em forma de cartão (rádio nativo por baixo; checkbox com `multiple`). Selecionado: borda e fundo grafite suave. */
+export function ChoiceCard({ name, value, checked, onChange, title, description, disabled = false, multiple = false }: ChoiceCardProps) {
   return (
     <label
       className={cn(
@@ -23,7 +25,7 @@ export function ChoiceCard({ name, value, checked, onChange, title, description,
       )}
     >
       <input
-        type="radio"
+        type={multiple ? 'checkbox' : 'radio'}
         name={name}
         value={value}
         checked={checked}

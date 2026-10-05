@@ -1,6 +1,5 @@
 import { pendenciasDaObra, vencidosRecentes, vencimentosProximos, type Dataset, type PeriodoRelatorio } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 import type { Relatorio } from '../types';
 
 function carregar(ds: Dataset, periodo: PeriodoRelatorio): Relatorio {
@@ -25,9 +24,7 @@ function carregar(ds: Dataset, periodo: PeriodoRelatorio): Relatorio {
 }
 
 export function useRelatorio(periodo: PeriodoRelatorio) {
-  const ds = useStore(datasetStore);
-  return useMockQuery(`relatorio-${periodo}`, () => carregar(ds, periodo), {
-    version: ds,
+  return useDatasetQuery(`relatorio-${periodo}`, (ds) => carregar(ds, periodo), {
     empty: { periodo, pendencias: [], tempos: [], vencimentos: [] },
   });
 }

@@ -5,7 +5,7 @@ type Status = ArquivoFuncionario['status'];
 const ANALISTAS = ['Marina Duarte', 'Rodrigo Alves', 'Camila Rocha'] as const;
 
 /** Nomes que aparecem nos arquivos — o arquivo se identifica pelo próprio nome. */
-const PESSOAS = [
+export const PESSOAS = [
   'jose-souza', 'marcos-lima', 'antonio-silva', 'rafael-barbosa', 'edson-santos', 'paulo-nogueira', 'cicero-costa',
   'joao-ferreira', 'manoel-pinheiro', 'francisco-melo', 'adriano-rocha', 'wellington-duarte', 'genival-santana',
   'luiz-tavares', 'roberto-macena', 'sergio-leite', 'everton-lira', 'claudio-moura', 'ivanildo-reis', 'diego-campos',

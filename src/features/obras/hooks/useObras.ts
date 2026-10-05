@@ -1,6 +1,5 @@
 import { fornecedoresDaObra, listasDaObra, totalPendenciasDaObra, type Dataset } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 import type { LinhaObra } from '../types';
 
 export function carregarObras(ds: Dataset): LinhaObra[] {
@@ -14,6 +13,5 @@ export function carregarObras(ds: Dataset): LinhaObra[] {
 
 /** Obras recebidas da integração, com as contagens de cada uma. */
 export function useObras() {
-  const ds = useStore(datasetStore);
-  return useMockQuery('obras', () => carregarObras(ds), { version: ds, empty: [] });
+  return useDatasetQuery('obras', (ds) => carregarObras(ds), { empty: [] });
 }

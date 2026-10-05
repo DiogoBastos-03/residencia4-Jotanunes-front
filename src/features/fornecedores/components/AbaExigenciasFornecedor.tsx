@@ -51,7 +51,7 @@ export function AbaExigenciasFornecedor({ ficha }: { ficha: FichaFornecedor }) {
         <InfoNote title={t.ignoradasTitle}>
           {ficha.ignoradas.map(({ lista, obras }) => (
             <p key={lista.id}>
-              {t.ignorada(lista.nome, strings.status[lista.tipo], obras.length, f.razaoSocial, strings.dominio.tipo[f.tipo])}
+              {t.ignorada(lista.nome, strings.status[lista.tipo], obras.length, f.razaoSocial, strings.dominio.tipos(f.tipos))}
             </p>
           ))}
         </InfoNote>

@@ -25,15 +25,9 @@ export const exemplosObra = {
 export const exemploNovoFornecedor = {
   cnpj: '45987321000160',
   razaoSocial: 'Revest Nordeste Revestimentos Ltda.',
-  nomeFantasia: 'Revest Nordeste',
-  tipo: 'servico',
-  contato: {
-    nome: 'Patrícia Moura',
-    cargo: 'Gerente comercial',
-    email: 'patricia.moura@revestnordeste.com.br',
-    telefone: '81988774410',
-  },
-  enviarConvite: true,
+  telefone: '8132447788',
+  email: 'contato@revestnordeste.com.br',
+  tipos: ['servico'],
   obraId: 'ob-2401',
   servicoContratado: 'Revestimento cerâmico das áreas comuns',
 } as const;

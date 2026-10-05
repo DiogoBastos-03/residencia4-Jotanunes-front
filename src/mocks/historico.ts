@@ -43,6 +43,7 @@ export function montarEventos(
   const eventos: EventoHistorico[] = [...EVENTOS_REGISTRADOS];
 
   for (const obra of obras) {
+    if (!obra.recebidaEm) continue;
     eventos.push({ id: `ev-obra-${obra.id}`, quando: obra.recebidaEm, autor: { kind: 'integracao' }, acao: { tipo: 'obraRecebida', obraId: obra.id }, obraId: obra.id });
   }
 
@@ -64,6 +65,8 @@ export function montarEventos(
   }
 
   vinculos.forEach((v, i) => {
+    // Vínculo vindo da API não tem data: não há o que registrar no histórico.
+    if (!v.vinculadoEm) return;
     eventos.push({
       id: `ev-vinculo-${v.fornecedorId}-${v.obraId}`,
       quando: v.vinculadoEm,

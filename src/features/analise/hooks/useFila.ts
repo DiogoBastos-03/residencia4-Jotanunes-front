@@ -1,6 +1,5 @@
 import { montarFila, type Dataset } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 import type { Fila } from '../types';
 
 const VAZIA: Fila = {
@@ -25,6 +24,5 @@ export function carregarFila(ds: Dataset): Fila {
 
 /** Fila de análise: documentos, renovações e envios de documento de funcionário esperando decisão. */
 export function useFila() {
-  const ds = useStore(datasetStore);
-  return useMockQuery('fila', () => carregarFila(ds), { version: ds, empty: VAZIA });
+  return useDatasetQuery('fila', (ds) => carregarFila(ds), { empty: VAZIA });
 }

@@ -1,3 +1,4 @@
+import { api } from './api';
 import { common } from './common';
 import { statusLabels, tagLabels } from './status';
 import { ui } from './ui';
@@ -8,7 +9,7 @@ import { analisePage } from './pages/analise';
 import { estadosPage } from './pages/estados';
 import { obrasPage } from './pages/obras';
 import { obraPage } from './pages/obra';
-import { fornecedoresPage, modalBloquear, modalReenviarAcesso } from './pages/fornecedores';
+import { fornecedoresPage, modalBloquear, modalEditarFornecedor, modalReenviarAcesso } from './pages/fornecedores';
 import { fornecedorNovoPage } from './pages/fornecedorNovo';
 import { fornecedorPage } from './pages/fornecedor';
 import {
@@ -34,8 +35,9 @@ export const strings = {
   status: statusLabels,
   tags: tagLabels,
   ui,
+  api,
   layout,
-  modais: { reenviarAcesso: modalReenviarAcesso, bloquear: modalBloquear },
+  modais: { reenviarAcesso: modalReenviarAcesso, bloquear: modalBloquear, editarFornecedor: modalEditarFornecedor },
   drawers: { documento: drawerDocumento, vincularObras: drawerVincularObras },
   dominio,
   eventos,

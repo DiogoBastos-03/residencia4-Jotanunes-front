@@ -1,7 +1,7 @@
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
-import { useDocumentTitle } from '@/shared/lib';
+import { useDocumentTitle, USAR_API } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import { Block, BlockRowLink, Icon, Mono, PageHeader, Stack, Text } from '@/shared/ui';
+import { Block, BlockRowLink, Icon, InfoNote, Mono, PageHeader, Stack, Text } from '@/shared/ui';
 import { CATALOGO } from './catalogo';
 
 const t = strings.pages.estados;
@@ -13,6 +13,7 @@ export function EstadosPage() {
   return (
     <Stack>
       <PageHeader title={t.title} subtitle={t.subtitle(TOTAL)} />
+      {USAR_API && <InfoNote>{t.avisoApi}</InfoNote>}
       {CATALOGO.map((grupo) => (
         <Block key={grupo.chave} title={t.grupos[grupo.chave]}>
           <ul>

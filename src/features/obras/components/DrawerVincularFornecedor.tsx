@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { BuildingStorefrontIcon } from '@heroicons/react/24/outline';
+import { forneceTipo, type TipoFornecimento } from '@/entities';
 import { cn, formatCnpj, formatDate, maskMonthBr, parseMonthBr } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import { Badge, Button, Drawer, EmptyState, Field, Inline, Input, Mono, Select, Stack, Tag, Text, useToast } from '@/shared/ui';
+import { BadgeGroup, Button, Drawer, EmptyState, Field, Inline, Input, Mono, Select, Stack, Tag, Text, useToast } from '@/shared/ui';
 import { useExemplosObra } from '../hooks/useExemplosObra';
 import { useVinculosObra } from '../hooks/useVinculosObra';
 import type { FichaObra } from '../types';
+
+const TIPOS: readonly TipoFornecimento[] = ['servico', 'material'];
 
 const t = strings.pages.obra.drawerFornecedor;
 
@@ -45,8 +48,8 @@ export function DrawerVincularFornecedor({ ficha, open, vazio, onClose, onVincul
   }, [open, vazio]);
 
   const fornecedor = disponiveis.find((f) => f.id === fornecedorId);
-  const aplicam = ficha.listas.filter((l) => l.lista.tipo === fornecedor?.tipo).map((l) => l.lista.nome);
-  const outroTipo = fornecedor?.tipo === 'servico' ? strings.dominio.tipo.material : strings.dominio.tipo.servico;
+  const aplicam = ficha.listas.filter((l) => fornecedor !== undefined && forneceTipo(fornecedor, l.lista.tipo)).map((l) => l.lista.nome);
+  const outroTipo = strings.dominio.tipos(TIPOS.filter((tipo) => fornecedor !== undefined && !forneceTipo(fornecedor, tipo)));
 
   function confirmar() {
     if (!fornecedor) return;
@@ -97,7 +100,7 @@ export function DrawerVincularFornecedor({ ficha, open, vazio, onClose, onVincul
           {fornecedor && (
             <Inline gap="sm">
               <Text weight="medium">{fornecedor.razaoSocial}</Text>
-              <Badge status={fornecedor.tipo} />
+              <BadgeGroup statuses={fornecedor.tipos} />
               <Mono>{formatCnpj(fornecedor.cnpj)}</Mono>
             </Inline>
           )}
@@ -151,7 +154,7 @@ export function DrawerVincularFornecedor({ ficha, open, vazio, onClose, onVincul
               <>
                 <ul className="overflow-hidden rounded-control border border-border">
                   {ficha.listas.map(({ lista }) => {
-                    const aplica = lista.tipo === fornecedor?.tipo;
+                    const aplica = fornecedor !== undefined && forneceTipo(fornecedor, lista.tipo);
                     return (
                       <li key={lista.id} className="flex items-center gap-2.5 border-b border-border px-4 py-3 last:border-b-0">
                         <Text weight="medium" className={cn('min-w-0 flex-1', !aplica && 'text-ink-4')}>
@@ -180,7 +183,7 @@ export function DrawerVincularFornecedor({ ficha, open, vazio, onClose, onVincul
               <Text className="mt-1 leading-[1.35]">
                 {t.resumoTexto(
                   fornecedor.razaoSocial,
-                  strings.dominio.tipo[fornecedor.tipo],
+                  strings.dominio.tipos(fornecedor.tipos),
                   aplicam,
                   ficha.listas.length,
                   outroTipo,

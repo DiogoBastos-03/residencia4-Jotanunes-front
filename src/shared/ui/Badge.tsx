@@ -71,3 +71,14 @@ export function Badge({ status, children, className }: BadgeProps) {
     </span>
   );
 }
+
+/** Vários badges lado a lado (ex.: fornecedor de serviço e de material). */
+export function BadgeGroup({ statuses, className }: { statuses: readonly StatusKey[]; className?: string }) {
+  return (
+    <span className={cn('inline-flex flex-wrap items-center gap-1', className)}>
+      {statuses.map((status) => (
+        <Badge key={status} status={status} />
+      ))}
+    </span>
+  );
+}

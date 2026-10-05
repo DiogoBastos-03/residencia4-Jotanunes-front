@@ -1,10 +1,13 @@
 export { cn } from './cn';
-export { formatCnpj, formatCpf, formatPhone, formatDate, cnpjValido, type DatePattern } from './format';
+export { USAR_API } from './config';
+export { ApiError } from './apiError';
+export { formatCnpj, formatCpf, formatPhone, formatDate, cnpjValido, telefoneValido, type DatePattern } from './format';
 export { pluralize } from './pluralize';
 export { useEscapeKey } from './useEscapeKey';
 export { useFocusTrap } from './useFocusTrap';
 export { useBodyScrollLock } from './useBodyScrollLock';
 export { useMockQuery, PARAM_ESTADO, type QueryResult, type EstadoSimulado } from './useMockQuery';
+export { useQuery } from './useQuery';
 export { useDocumentTitle } from './useDocumentTitle';
 export { paths } from './paths';
 export { useExitTransition, EXIT_MS } from './useExitTransition';

@@ -152,6 +152,7 @@ export const CATALOGO: readonly GrupoCatalogo[] = [
       { chave: 'ffDocsFuncionario', para: CONSTRUTORA },
       { chave: 'ffHistorico', para: `${CONSTRUTORA}?aba=historico` },
       { chave: 'ffContatos', para: `${CONSTRUTORA}?aba=contatos` },
+      { chave: 'ffModalEditar', para: `${CONSTRUTORA}?modal=editar` },
       { chave: 'ffModalBloquear', para: `${CONSTRUTORA}?modal=bloquear` },
       { chave: 'ffBloqueado', para: paths.fornecedor('pinturas-litoral') },
       { chave: 'ffModalReenviar', para: `${CERAMICA}?aba=contatos&modal=reenviar` },

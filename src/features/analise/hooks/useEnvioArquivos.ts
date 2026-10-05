@@ -1,6 +1,5 @@
 import { arquivosDoItem, documentosExigidos, resumoArquivos, statusArquivo, type Dataset } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 import type { DetalheEnvioArquivos } from '../types';
 
 function carregar(ds: Dataset, id: string): DetalheEnvioArquivos | null {
@@ -25,6 +24,5 @@ function carregar(ds: Dataset, id: string): DetalheEnvioArquivos | null {
 
 /** Envio de documento de funcionário com os arquivos. `null` se não existe. */
 export function useEnvioArquivos(id: string) {
-  const ds = useStore(datasetStore);
-  return useMockQuery(`envio-${id}`, () => carregar(ds, id), { version: ds });
+  return useDatasetQuery(`envio-${id}`, (ds) => carregar(ds, id));
 }

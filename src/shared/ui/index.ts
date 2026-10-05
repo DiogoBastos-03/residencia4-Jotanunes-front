@@ -1,5 +1,5 @@
 export { AlertBox } from './AlertBox';
-export { Badge, STATUS_TONE, TONE_CLASS, type Tone } from './Badge';
+export { Badge, BadgeGroup, STATUS_TONE, TONE_CLASS, type Tone } from './Badge';
 export { Block } from './Block';
 export { BlockRow } from './BlockRow';
 export { Button, type ButtonProps } from './Button';

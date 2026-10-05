@@ -27,7 +27,7 @@ export function ObrasDaListaBloco({ detalhe, onRemover }: { detalhe: DetalheList
               <Link to={paths.obra(obra.id)} className="focus-ring min-w-0 flex-1 rounded-control text-body font-medium hover:underline max-md:flex max-md:min-h-tap max-md:basis-full max-md:items-center">
                 {obra.nome}
               </Link>
-              <Mono className="w-20">{obra.codigo}</Mono>
+              <Mono className="w-20">{strings.dominio.codigoObra(obra.codigo)}</Mono>
               <Text as="span" size="support" tone="muted" className="w-55 max-md:w-auto max-md:flex-1">
                 {strings.dominio.cidadeUf(obra.cidade, obra.uf)}
               </Text>

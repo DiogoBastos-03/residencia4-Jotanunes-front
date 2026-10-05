@@ -13,12 +13,15 @@ import {
   useParametrosObra,
   type AbaObra,
 } from '@/features/obras';
-import { formatDate, paths, useDocumentTitle } from '@/shared/lib';
+import { formatDate, paths, useDocumentTitle, USAR_API } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import { AsyncContent, Badge, Button, ButtonLink, EmptyState, Icon, Inline, Mono, PageHeader, Stack, Tabs } from '@/shared/ui';
+import { AsyncContent, Badge, Button, ButtonLink, EmptyState, Icon, InfoNote, Inline, Mono, PageHeader, Stack, Tabs } from '@/shared/ui';
 import { ObraSkeleton } from './ObraSkeleton';
 
 const t = strings.pages.obra;
+
+/** Não há endpoint para criar vínculo obra ↔ fornecedor: com a API, só leitura. */
+const PODE_VINCULAR_FORNECEDOR = !USAR_API;
 
 const ABAS: ReadonlyArray<{ value: AbaObra; label: string }> = [
   { value: 'fornecedores', label: t.abas.fornecedores },
@@ -61,25 +64,33 @@ export function ObraPage() {
                 </>
               }
               subtitle={
-                <Inline gap="xs">
-                  <Mono>{ficha.obra.codigo}</Mono>
-                  <span>{strings.common.separator}</span>
-                  <span>{strings.dominio.cidadeUf(ficha.obra.cidade, ficha.obra.uf)}</span>
-                  <span>{strings.common.separator}</span>
-                  <Icon icon={ArrowsRightLeftIcon} size={16} />
-                  <span>{t.recebida(formatDate(ficha.obra.recebidaEm, 'date'))}</span>
-                </Inline>
+                // Obra da API só tem nome: o que não existe não aparece.
+                (ficha.obra.codigo || ficha.obra.cidade || ficha.obra.recebidaEm) && (
+                  <Inline gap="xs">
+                    {ficha.obra.codigo && <Mono>{ficha.obra.codigo}</Mono>}
+                    {ficha.obra.codigo && ficha.obra.cidade && <span>{strings.common.separator}</span>}
+                    {ficha.obra.cidade && <span>{strings.dominio.cidadeUf(ficha.obra.cidade, ficha.obra.uf)}</span>}
+                    {ficha.obra.recebidaEm && (
+                      <>
+                        <span>{strings.common.separator}</span>
+                        <Icon icon={ArrowsRightLeftIcon} size={16} />
+                        <span>{t.recebida(formatDate(ficha.obra.recebidaEm, 'date'))}</span>
+                      </>
+                    )}
+                  </Inline>
+                )
               }
               actions={
-                <Button variant="primary" icon={PlusIcon} onClick={() => p.abrirDrawer('fornecedor')}>
+                <Button variant="primary" icon={PlusIcon} disabled={!PODE_VINCULAR_FORNECEDOR} onClick={() => p.abrirDrawer('fornecedor')}>
                   {t.vincularFornecedor}
                 </Button>
               }
             />
+            {!PODE_VINCULAR_FORNECEDOR && <InfoNote>{t.vinculoIndisponivel}</InfoNote>}
             <ObraMetricas ficha={ficha} />
             <Tabs label={t.abasLabel} items={ABAS} value={p.aba} onChange={p.setAba}>
               <div className="mt-4">
-                {p.aba === 'fornecedores' && <AbaFornecedores ficha={ficha} onVincular={() => p.abrirDrawer('fornecedor')} />}
+                {p.aba === 'fornecedores' && <AbaFornecedores ficha={ficha} onVincular={PODE_VINCULAR_FORNECEDOR ? () => p.abrirDrawer('fornecedor') : undefined} />}
                 {p.aba === 'exigencias' && (
                   <AbaExigencias ficha={ficha} onVincular={() => p.abrirDrawer('lista')} onDesvincular={p.setDesvincular} />
                 )}
@@ -89,7 +100,7 @@ export function ObraPage() {
             </Tabs>
             <DrawerVincularFornecedor
               ficha={ficha}
-              open={p.drawer === 'fornecedor'}
+              open={PODE_VINCULAR_FORNECEDOR && p.drawer === 'fornecedor'}
               vazio={p.formVazio}
               onClose={() => p.abrirDrawer(null)}
               onVinculado={() => p.concluirDrawer('fornecedores')}

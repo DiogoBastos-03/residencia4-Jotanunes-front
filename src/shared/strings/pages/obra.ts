@@ -5,6 +5,8 @@ export const obraPage = {
   voltar: 'Obras',
   recebida: (data: string) => `recebida da integração em ${data}`,
   vincularFornecedor: 'Vincular fornecedor',
+  vinculoIndisponivel:
+    'Vincular fornecedor está indisponível: a API ainda não tem endpoint para criar o vínculo entre obra e fornecedor. Os vínculos desta obra vêm do banco.',
   metricas: { listas: 'Listas de exigências', fornecedores: 'Fornecedores', pendencias: 'Pendências' },
   abasLabel: 'Seções da obra',
   abas: { fornecedores: 'Fornecedores', exigencias: 'Exigências', pendencias: 'Pendências', historico: 'Histórico' },
@@ -65,7 +67,7 @@ export const obraPage = {
   },
   drawerFornecedor: {
     title: 'Vincular fornecedor',
-    subtitle: (obra: string, codigo: string) => `${obra} • ${codigo}`,
+    subtitle: (obra: string, codigo?: string) => (codigo ? `${obra} • ${codigo}` : obra),
     fornecedor: 'Fornecedor',
     servico: 'Serviço contratado',
     servicoPlaceholder: 'Ex.: Vergalhões e telas',
@@ -100,7 +102,7 @@ export const obraPage = {
   },
   drawerLista: {
     title: 'Vincular lista de exigências',
-    subtitle: (obra: string, codigo: string) => `${obra} • ${codigo}`,
+    subtitle: (obra: string, codigo?: string) => (codigo ? `${obra} • ${codigo}` : obra),
     buscaLabel: 'Buscar lista de exigências',
     buscaPlaceholder: 'Buscar lista de exigências',
     ativas: 'Listas ativas',

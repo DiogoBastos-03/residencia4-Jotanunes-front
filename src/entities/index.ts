@@ -1,7 +1,18 @@
 export type { IsoDate, TipoFornecimento, Obrigatoriedade } from './common';
 export type { Obra, ObraLista, SituacaoObra } from './obra';
+export { obraApi } from './obra';
 export type { EscopoItem, ExigenciaValidade, ItemExigido, ListaExigencias, SituacaoLista, TipoDocumento } from './listaExigencias';
-export type { AcessoPortal, Contato, Fornecedor, SituacaoFornecedor, VinculoObra } from './fornecedor';
+export type {
+  AcessoPortal,
+  CampoFornecedor,
+  Contato,
+  DadosCadastroFornecedor,
+  DadosEdicaoFornecedor,
+  Fornecedor,
+  SituacaoFornecedor,
+  VinculoObra,
+} from './fornecedor';
+export { aguardandoAcesso, camposRecusados, forneceTipo, fornecedorApi, normalizarTipos } from './fornecedor';
 export type {
   DecisaoRegistrada,
   DocumentoEmpresa,
@@ -16,7 +27,7 @@ export type { ArquivoFuncionario, EnvioArquivos } from './arquivo';
 export type { AcaoEvento, Analise, AutorEvento, EventoHistorico, PeriodoRelatorio, TempoAnalise } from './historico';
 export type { Dataset } from './dataset';
 
-export { diasEntre, somarDias, JANELA_VENCIMENTO_DIAS } from './lib/dates';
+export { diasEntre, somarDias, hojeLocal, lerDataApi, JANELA_VENCIMENTO_DIAS } from './lib/dates';
 export { ehPendencia, estaEmDia, statusArquivo, statusDocumento, statusPorValidade } from './lib/status';
 export {
   documentosExigidos,

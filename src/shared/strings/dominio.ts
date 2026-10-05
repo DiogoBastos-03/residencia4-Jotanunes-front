@@ -2,7 +2,10 @@
  * Vocabulário do produto usado em várias telas. Trocar "lista de exigências"
  * por outro termo é editar aqui.
  */
+import { common } from './common';
+
 const plural = (n: number, um: string, varios: string) => (n === 1 ? `1 ${um}` : `${n} ${varios}`);
+const tipo = { servico: 'serviço', material: 'material' } as const;
 
 export const dominio = {
   plural,
@@ -21,8 +24,13 @@ export const dominio = {
   faltam: (dias: number) => (dias < 0 ? `venceu há ${plural(-dias, 'dia', 'dias')}` : dias === 0 ? 'vence hoje' : plural(dias, 'dia', 'dias')),
   obrasExtras: (n: number) => (n > 0 ? `+${n}` : ''),
   documentosDe: (feitos: number, total: number) => `${feitos} de ${total}`,
-  cidadeUf: (cidade: string, uf: string) => `${cidade}/${uf}`,
-  tipo: { servico: 'serviço', material: 'material' },
+  /** Obras da API não têm cidade nem UF. */
+  cidadeUf: (cidade?: string, uf?: string) => (cidade && uf ? `${cidade}/${uf}` : (cidade ?? uf ?? common.emptyValue)),
+  /** Obras da API não têm código. */
+  codigoObra: (codigo?: string) => codigo ?? common.emptyValue,
+  tipo,
+  /** "serviço", "material" ou "serviço e material". */
+  tipos: (tipos: readonly (keyof typeof tipo)[]) => tipos.map((t) => tipo[t]).join(' e '),
   composicao: (obrigatorios: number, opcionais: number, funcionario: number) =>
     [
       plural(obrigatorios, 'documento', 'documentos'),

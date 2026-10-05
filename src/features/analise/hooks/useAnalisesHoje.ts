@@ -1,6 +1,5 @@
 import type { Dataset } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 import type { ResumoAnalisesHoje } from '../types';
 
 const LIMITE_RECENTES = 5;
@@ -22,8 +21,7 @@ function carregar(ds: Dataset): ResumoAnalisesHoje {
 }
 
 export function useAnalisesHoje() {
-  const ds = useStore(datasetStore);
-  return useMockQuery('analises-hoje', () => carregar(ds), {
+  return useDatasetQuery('analises-hoje', (ds) => carregar(ds), {
     empty: { recentes: [], total: 0, aprovados: 0, reprovados: 0 },
   });
 }

@@ -1,6 +1,5 @@
 import { alcanceDaLista, composicaoLista, obrasDaLista, type Dataset } from '@/entities';
-import { datasetStore } from '@/mocks';
-import { useMockQuery, useStore } from '@/shared/lib';
+import { useDatasetQuery } from '@/mocks';
 import type { LinhaLista } from '../types';
 
 export function carregarListas(ds: Dataset): LinhaLista[] {
@@ -14,6 +13,5 @@ export function carregarListas(ds: Dataset): LinhaLista[] {
 
 /** Listas de exigências com composição e em quantas obras valem. */
 export function useListas() {
-  const ds = useStore(datasetStore);
-  return useMockQuery('listas', () => carregarListas(ds), { version: ds, empty: [] });
+  return useDatasetQuery('listas', (ds) => carregarListas(ds), { empty: [] });
 }

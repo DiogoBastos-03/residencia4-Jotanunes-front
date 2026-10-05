@@ -64,3 +64,14 @@ export function cnpjValido(value: string): boolean {
   const d2 = calc(d.slice(0, 13), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
   return d.endsWith(`${d1}${d2}`);
 }
+
+/**
+ * Telefone com as mesmas regras do back (Phone): 10 ou 11 dígitos, DDD sem zero
+ * e, com 11 dígitos, o terceiro é 9 (celular).
+ */
+export function telefoneValido(value: string): boolean {
+  const d = onlyDigits(value);
+  if (d.length !== 10 && d.length !== 11) return false;
+  if (d.startsWith('0') || d.charAt(1) === '0') return false;
+  return d.length === 10 || d.charAt(2) === '9';
+}

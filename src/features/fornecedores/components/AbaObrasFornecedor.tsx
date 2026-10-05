@@ -8,13 +8,18 @@ const t = strings.pages.fornecedor.obras;
 
 const COLUNAS: readonly TableColumn<ObraDoFornecedor>[] = [
   { key: 'obra', header: t.colunas.obra, tone: 'strong', mobile: 'title', cell: (o) => o.obra.nome },
-  { key: 'codigo', header: t.colunas.codigo, nowrap: true, cell: (o) => <Mono>{o.obra.codigo}</Mono> },
-  { key: 'servico', header: t.colunas.servico, cell: (o) => o.vinculo.servicoContratado },
+  { key: 'codigo', header: t.colunas.codigo, nowrap: true, cell: (o) => <Mono>{strings.dominio.codigoObra(o.obra.codigo)}</Mono> },
+  { key: 'servico', header: t.colunas.servico, cell: (o) => o.vinculo.servicoContratado ?? strings.common.emptyValue },
   {
     key: 'periodo',
     header: t.colunas.periodo,
     nowrap: true,
-    cell: (o) => <Mono>{strings.pages.obra.fornecedores.periodo(formatDate(o.vinculo.inicio, 'monthYear'), formatDate(o.vinculo.fim, 'monthYear'))}</Mono>,
+    cell: (o) =>
+      o.vinculo.inicio && o.vinculo.fim ? (
+        <Mono>{strings.pages.obra.fornecedores.periodo(formatDate(o.vinculo.inicio, 'monthYear'), formatDate(o.vinculo.fim, 'monthYear'))}</Mono>
+      ) : (
+        strings.common.emptyValue
+      ),
   },
   { key: 'listas', header: t.colunas.listas, cell: (o) => strings.dominio.documentosDe(o.listasAplicaveis, o.listasNaObra) },
   { key: 'situacao', header: t.colunas.situacao, mobile: 'badge', cell: (o) => <Badge status={o.obra.situacao} /> },
