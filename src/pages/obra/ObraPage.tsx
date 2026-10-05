@@ -3,7 +3,6 @@ import { useParams } from 'react-router';
 import {
   AbaExigencias,
   AbaFornecedores,
-  AbaFuncionarios,
   AbaHistorico,
   AbaPendencias,
   DrawerVincularFornecedor,
@@ -14,7 +13,6 @@ import {
   useParametrosObra,
   type AbaObra,
 } from '@/features/obras';
-import { FuncionarioDrawer } from '@/features/funcionarios';
 import { formatDate, paths, useDocumentTitle } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { AsyncContent, Badge, Button, ButtonLink, EmptyState, Icon, Inline, Mono, PageHeader, Stack, Tabs } from '@/shared/ui';
@@ -25,7 +23,6 @@ const t = strings.pages.obra;
 const ABAS: ReadonlyArray<{ value: AbaObra; label: string }> = [
   { value: 'fornecedores', label: t.abas.fornecedores },
   { value: 'exigencias', label: t.abas.exigencias },
-  { value: 'funcionarios', label: t.abas.funcionarios },
   { value: 'pendencias', label: t.abas.pendencias },
   { value: 'historico', label: t.abas.historico },
 ];
@@ -86,7 +83,6 @@ export function ObraPage() {
                 {p.aba === 'exigencias' && (
                   <AbaExigencias ficha={ficha} onVincular={() => p.abrirDrawer('lista')} onDesvincular={p.setDesvincular} />
                 )}
-                {p.aba === 'funcionarios' && <AbaFuncionarios ficha={ficha} onAbrirPessoa={p.setPessoa} />}
                 {p.aba === 'pendencias' && <AbaPendencias ficha={ficha} />}
                 {p.aba === 'historico' && <AbaHistorico ficha={ficha} />}
               </div>
@@ -106,7 +102,6 @@ export function ObraPage() {
               onVinculado={() => p.concluirDrawer('exigencias')}
             />
             <ModalDesvincularLista ficha={ficha} listaId={p.desvincular} onClose={() => p.setDesvincular(null)} />
-            <FuncionarioDrawer funcionarioId={p.pessoa} onClose={() => p.setPessoa(null)} />
           </Stack>
         )
       }

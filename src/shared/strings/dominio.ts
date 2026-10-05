@@ -13,7 +13,8 @@ export const dominio = {
   itemExigido: 'Item exigido',
   documentoEmpresa: 'Documento da empresa',
   documentoFuncionario: 'Documento de funcionário',
-  remessa: (n: number) => `Remessa com ${plural(n, 'funcionário', 'funcionários')}`,
+  escopo: { empresa: 'Documento da empresa', funcionario: 'Documento de funcionário' },
+  arquivos: (n: number) => plural(n, 'arquivo', 'arquivos'),
   espera: (dias: number) => (dias <= 0 ? 'hoje' : plural(dias, 'dia', 'dias')),
   esperaCurta: (dias: number) => (dias <= 0 ? 'chegou hoje' : `espera ${plural(dias, 'dia', 'dias')}`),
   emAberto: (dias: number) => (dias <= 0 ? 'desde hoje' : `há ${plural(dias, 'dia', 'dias')}`),
@@ -21,13 +22,12 @@ export const dominio = {
   obrasExtras: (n: number) => (n > 0 ? `+${n}` : ''),
   documentosDe: (feitos: number, total: number) => `${feitos} de ${total}`,
   cidadeUf: (cidade: string, uf: string) => `${cidade}/${uf}`,
-  funcionarios: (n: number) => plural(n, 'funcionário', 'funcionários'),
   tipo: { servico: 'serviço', material: 'material' },
-  composicao: (obrigatorios: number, opcionais: number, funcionarios: number) =>
+  composicao: (obrigatorios: number, opcionais: number, funcionario: number) =>
     [
       plural(obrigatorios, 'documento', 'documentos'),
       opcionais > 0 ? plural(opcionais, 'opcional', 'opcionais') : '',
-      funcionarios > 0 ? plural(funcionarios, 'item de funcionários', 'itens de funcionários') : '',
+      funcionario > 0 ? `${funcionario} de funcionário` : '',
     ]
       .filter(Boolean)
       .join(' • '),
@@ -41,6 +41,18 @@ export const dominio = {
     incorreto: 'Documento incorreto',
     faltaAssinatura: 'Falta assinatura',
   },
+  /** Resumo de um documento de funcionário: nunca fica completo, é um retrato dos arquivos. */
+  resumoArquivos: (r: { total: number; aprovados: number; emAnalise: number; reprovados: number; vencidos: number }) =>
+    r.total === 0
+      ? 'nenhum arquivo enviado'
+      : [
+          `${r.aprovados} de ${r.total} aprovados`,
+          r.emAnalise > 0 ? `${r.emAnalise} em análise` : '',
+          r.reprovados > 0 ? plural(r.reprovados, 'reprovado', 'reprovados') : '',
+          r.vencidos > 0 ? plural(r.vencidos, 'vencido', 'vencidos') : '',
+        ]
+          .filter(Boolean)
+          .join(' • '),
   /** "PGR – Programa de…" → "PGR"; nomes sem sigla ficam inteiros. */
   nomeCurto: (nome: string) => nome.split(' – ')[0] ?? nome,
 } as const;

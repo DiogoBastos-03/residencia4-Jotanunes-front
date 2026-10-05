@@ -12,7 +12,6 @@ export const obrasPage = {
     cidade: 'Cidade',
     listas: 'Listas de exigências',
     fornecedores: 'Fornecedores',
-    funcionarios: 'Funcionários',
     pendencias: 'Pendências',
     situacao: 'Situação',
   },

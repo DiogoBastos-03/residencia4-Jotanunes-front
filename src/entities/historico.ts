@@ -12,6 +12,8 @@ export type Analise = {
   resultado: 'aprovado' | 'reprovado';
   /** Documento da empresa analisado, quando houver. */
   documentoId?: string;
+  /** Arquivo de documento de funcionário analisado, quando houver. */
+  arquivoId?: string;
   motivo?: MotivoReprovacao;
   observacao?: string;
 };
@@ -25,7 +27,7 @@ export type AutorEvento =
 /** O que aconteceu. O texto exibido é montado em shared/strings. */
 export type AcaoEvento =
   | { tipo: 'documentoEnviado'; documento: string }
-  | { tipo: 'remessaEnviada'; funcionarios: number; obraId: string }
+  | { tipo: 'arquivosEnviados'; quantidade: number; documento: string }
   | { tipo: 'documentoVencido'; documento: string; fornecedorId: string }
   | { tipo: 'documentoAprovado'; documento: string }
   | { tipo: 'documentoReprovado'; documento: string; motivo: MotivoReprovacao }
@@ -45,7 +47,10 @@ export type EventoHistorico = {
   fornecedorId?: string;
 };
 
+export type PeriodoRelatorio = '30d' | '90d' | 'ano';
+
 export type TempoAnalise = {
+  periodo: PeriodoRelatorio;
   listaId: string;
   diasMedios: number;
   /** Acima da meta de análise. */

@@ -1,5 +1,5 @@
 export { cn } from './cn';
-export { formatCnpj, formatCpf, formatPhone, formatDate, type DatePattern } from './format';
+export { formatCnpj, formatCpf, formatPhone, formatDate, cnpjValido, type DatePattern } from './format';
 export { pluralize } from './pluralize';
 export { useEscapeKey } from './useEscapeKey';
 export { useFocusTrap } from './useFocusTrap';
@@ -10,3 +10,5 @@ export { paths } from './paths';
 export { useExitTransition, EXIT_MS } from './useExitTransition';
 export { createStore, useStore, type Store } from './createStore';
 export { parseDateBr, maskDateBr, isoToBr, parseMonthBr, maskMonthBr } from './dateInput';
+export { baixarCsv } from './download';
+export { lerOrigem, serializarOrigem, PARAM_ORIGEM, type Origem } from './origem';

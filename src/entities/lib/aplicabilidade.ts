@@ -1,6 +1,6 @@
 import type { Obrigatoriedade } from '../common';
 import type { Dataset } from '../dataset';
-import type { ItemDocumento, ItemFuncionarios, ListaExigencias } from '../listaExigencias';
+import type { EscopoItem, ItemExigido, ListaExigencias } from '../listaExigencias';
 import type { Obra } from '../obra';
 
 export function listasDaObra(ds: Dataset, obraId: string): ListaExigencias[] {
@@ -67,26 +67,27 @@ export function listasAplicaveis(ds: Dataset, fornecedorId: string): ListaAplica
 export type DocumentoExigido = {
   tipoDocumentoId: string;
   nome: string;
+  escopo: EscopoItem;
   obrigatoriedade: Obrigatoriedade;
-  item: ItemDocumento;
+  item: ItemExigido;
   /** Listas que exigem este documento do fornecedor. */
   listas: ListaExigencias[];
   /** Obras em que o documento é exigido do fornecedor. */
   obras: Obra[];
 };
 
-/** Documentos da empresa exigidos do fornecedor — um por tipo, valendo para todas as obras. */
+/** Itens exigidos do fornecedor — um por tipo de documento, valendo para todas as obras. */
 export function documentosExigidos(ds: Dataset, fornecedorId: string): DocumentoExigido[] {
   const mapa = new Map<string, DocumentoExigido>();
   for (const { lista, obras } of listasAplicaveis(ds, fornecedorId)) {
     for (const item of lista.itens) {
-      if (item.kind !== 'documento') continue;
       const nome = ds.tiposDocumento.find((t) => t.id === item.tipoDocumentoId)?.nome ?? item.tipoDocumentoId;
       const atual = mapa.get(item.tipoDocumentoId);
       if (!atual) {
         mapa.set(item.tipoDocumentoId, {
           tipoDocumentoId: item.tipoDocumentoId,
           nome,
+          escopo: item.escopo,
           obrigatoriedade: item.obrigatoriedade,
           item,
           listas: [lista],
@@ -100,10 +101,6 @@ export function documentosExigidos(ds: Dataset, fornecedorId: string): Documento
     }
   }
   return [...mapa.values()];
-}
-
-export function itemFuncionarios(lista: ListaExigencias): ItemFuncionarios | undefined {
-  return lista.itens.find((i): i is ItemFuncionarios => i.kind === 'funcionarios');
 }
 
 export function nomeDoTipoDocumento(ds: Dataset, tipoDocumentoId: string): string {

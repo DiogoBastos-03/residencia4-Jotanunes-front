@@ -8,9 +8,19 @@ export type Contato = {
   telefone: string;
 };
 
+/** Convite de primeiro acesso ao portal. Sem `acessouEm`, o fornecedor está aguardando 1º acesso. */
+export type AcessoPortal = {
+  /** null: cadastrado sem enviar convite. */
+  convidadoEm: IsoDate | null;
+  emailConvite: string;
+  acessouEm?: IsoDate;
+};
+
 export type Fornecedor = {
   id: string;
   razaoSocial: string;
+  nomeFantasia?: string;
+  acessoPortal: AcessoPortal;
   /** Só dígitos. Formate com formatCnpj. */
   cnpj: string;
   tipo: TipoFornecimento;
@@ -28,8 +38,6 @@ export type VinculoObra = {
   inicio: IsoDate;
   fim: IsoDate;
   vinculadoEm: IsoDate;
-  /** Funcionários em campo acompanhados nesta obra. */
-  funcionariosEmCampo: number;
 };
 
 /** Situação calculada: apto tem todos os obrigatórios aprovados e dentro da validade. */

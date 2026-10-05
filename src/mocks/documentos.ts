@@ -1,4 +1,4 @@
-import type { DocumentoEmpresa, DocumentoExigido, Fornecedor } from '@/entities';
+import type { DecisaoRegistrada, DocumentoEmpresa, DocumentoExigido, Fornecedor } from '@/entities';
 
 type Explicito = Omit<DocumentoEmpresa, 'id' | 'enviosAnteriores'> & {
   enviosAnteriores?: DocumentoEmpresa['enviosAnteriores'];
@@ -12,7 +12,7 @@ const EXPLICITOS: readonly Explicito[] = [
   // Construtora Exemplo — 5 de 9 obrigatórios em dia
   { fornecedorId: 'construtora-exemplo', tipoDocumentoId: 'contrato-social', status: 'aprovado', arquivo: 'contrato-social-construtora-exemplo.pdf', tamanhoKb: 2140, enviadoEm: '2026-01-10T09:12' },
   { fornecedorId: 'construtora-exemplo', tipoDocumentoId: 'cartao-cnpj', status: 'aprovado', arquivo: 'cartao-cnpj-construtora-exemplo.pdf', tamanhoKb: 180, enviadoEm: '2026-01-10T09:14' },
-  { fornecedorId: 'construtora-exemplo', tipoDocumentoId: 'cnd-federal', status: 'aprovado', validade: '2027-03-12', arquivo: 'cnd-federal-2026-08.pdf', tamanhoKb: 210, enviadoEm: '2026-08-25T10:02' },
+  { fornecedorId: 'construtora-exemplo', tipoDocumentoId: 'cnd-federal', status: 'aprovado', validade: '2027-03-12', arquivo: 'cnd-federal-2026-08.pdf', tamanhoKb: 210, enviadoEm: '2026-08-25T10:02', decisao: { por: 'Marina Duarte', em: '2026-08-25T10:44' } },
   { fornecedorId: 'construtora-exemplo', tipoDocumentoId: 'fgts', status: 'aprovado', validade: '2026-09-10', arquivo: 'crf-fgts-2026-03.pdf', tamanhoKb: 160, enviadoEm: '2026-03-12T15:30' },
   { fornecedorId: 'construtora-exemplo', tipoDocumentoId: 'cndt', status: 'aprovado', validade: '2026-09-28', arquivo: 'cndt-2026-04.pdf', tamanhoKb: 150, enviadoEm: '2026-04-01T11:48' },
   { fornecedorId: 'construtora-exemplo', tipoDocumentoId: 'atestado-capacidade', status: 'aprovado', arquivo: 'atestado-capacidade-tecnica.pdf', tamanhoKb: 940, enviadoEm: '2026-02-18T16:05' },
@@ -74,7 +74,7 @@ const EXPLICITOS: readonly Explicito[] = [
     renovacao: { arquivo: 'pcmso-engemax-2026.pdf', tamanhoKb: 2210, paginas: 18, validadeInformada: '2027-09-15', enviadoEm: '2026-09-15T11:30', prioridade: 'normal' },
     enviosAnteriores: [{ arquivo: 'pcmso-engemax-2025.pdf', enviadoEm: '2025-10-16', resultado: 'aprovado' }],
   },
-  { fornecedorId: 'engemax', tipoDocumentoId: 'crea', status: 'aprovado', validade: '2027-09-16', arquivo: 'certidao-crea-engemax.pdf', tamanhoKb: 240, enviadoEm: '2026-09-14T17:02' },
+  { fornecedorId: 'engemax', tipoDocumentoId: 'crea', status: 'aprovado', validade: '2027-09-16', arquivo: 'certidao-crea-engemax.pdf', tamanhoKb: 240, enviadoEm: '2026-09-14T17:02', decisao: { por: 'Camila Rocha', em: '2026-09-16T11:05' } },
 
   // Hidro Norte — contrato social em análise, urgente
   { fornecedorId: 'hidro-norte', tipoDocumentoId: 'contrato-social', status: 'emAnalise', arquivo: 'contrato-social-hidro-norte.pdf', tamanhoKb: 2480, paginas: 14, enviadoEm: '2026-09-14T15:48', prioridade: 'urgente' },
@@ -109,10 +109,28 @@ const EXPLICITOS: readonly Explicito[] = [
   { fornecedorId: 'cimentos-nordeste', tipoDocumentoId: 'cnd-federal', status: 'aprovado', validade: '2027-03-15', arquivo: 'cnd-federal-cimentos-ne.pdf', tamanhoKb: 207, enviadoEm: '2026-09-15T16:18' },
 
   // Pinturas Litoral — bloqueada, 4 de 9
-  { fornecedorId: 'pinturas-litoral', tipoDocumentoId: 'fgts', status: 'reprovado', arquivo: 'fgts-pinturas-litoral.jpg', tamanhoKb: 820, enviadoEm: '2026-08-19T10:00', pendenteDesde: '2026-08-20' },
+  {
+    fornecedorId: 'pinturas-litoral',
+    tipoDocumentoId: 'fgts',
+    status: 'reprovado',
+    arquivo: 'fgts-pinturas-litoral.jpg',
+    tamanhoKb: 820,
+    enviadoEm: '2026-08-19T10:00',
+    pendenteDesde: '2026-08-20',
+    decisao: { por: 'Marina Duarte', em: '2026-08-20T11:02', motivo: 'foraValidade', observacao: 'A certidão enviada venceu em julho. Emita uma nova no site da Caixa e envie de novo.' },
+  },
   { fornecedorId: 'pinturas-litoral', tipoDocumentoId: 'pgr', status: 'pendente', pendenteDesde: '2026-07-15' },
   { fornecedorId: 'pinturas-litoral', tipoDocumentoId: 'pcmso', status: 'pendente', pendenteDesde: '2026-07-15' },
-  { fornecedorId: 'pinturas-litoral', tipoDocumentoId: 'apolice-rc', status: 'reprovado', arquivo: 'apolice-pinturas-litoral.pdf', tamanhoKb: 990, enviadoEm: '2026-09-15T18:20', pendenteDesde: '2026-09-16' },
+  {
+    fornecedorId: 'pinturas-litoral',
+    tipoDocumentoId: 'apolice-rc',
+    status: 'reprovado',
+    arquivo: 'apolice-pinturas-litoral.pdf',
+    tamanhoKb: 990,
+    enviadoEm: '2026-09-15T18:20',
+    pendenteDesde: '2026-09-16',
+    decisao: { por: 'Rodrigo Alves', em: '2026-09-16T09:14', motivo: 'incorreto', observacao: 'Foi enviada a apólice de outra empresa. Envie a apólice em nome da Pinturas Litoral.' },
+  },
   { fornecedorId: 'pinturas-litoral', tipoDocumentoId: 'crea', status: 'pendente', pendenteDesde: '2026-07-15' },
 
   // Gesso & Forro Nordeste — apta; CNDT vence em breve
@@ -155,6 +173,17 @@ function gerarPadrao(fornecedor: Fornecedor, exigido: DocumentoExigido, indice: 
   };
 }
 
+const ANALISTAS = ['Marina Duarte', 'Rodrigo Alves', 'Camila Rocha'] as const;
+
+/** Quem decidiu e quando, para documentos aprovados que não trazem a decisão explícita. */
+function decisaoPadrao(doc: DocumentoEmpresa, indice: number): DecisaoRegistrada | undefined {
+  if (doc.decisao || doc.status !== 'aprovado' || !doc.enviadoEm) return doc.decisao;
+  const d = new Date(`${doc.enviadoEm.slice(0, 10)}T12:00:00`);
+  d.setDate(d.getDate() + 1);
+  const dia = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return { por: ANALISTAS[indice % ANALISTAS.length] ?? 'Marina Duarte', em: `${dia}T${String(9 + (indice % 8)).padStart(2, '0')}:${String((indice * 11) % 60).padStart(2, '0')}` };
+}
+
 /** Monta todos os documentos: os explícitos e, para o resto do que é exigido, os padrões. */
 export function montarDocumentos(
   fornecedores: readonly Fornecedor[],
@@ -162,20 +191,23 @@ export function montarDocumentos(
 ): DocumentoEmpresa[] {
   const documentos: DocumentoEmpresa[] = [];
   fornecedores.forEach((fornecedor, fi) => {
-    exigidosDe(fornecedor.id).forEach((exigido, di) => {
+    exigidosDe(fornecedor.id)
+      .filter((exigido) => exigido.escopo === 'empresa')
+      .forEach((exigido, di) => {
       const explicito = EXPLICITOS.find(
         (e) => e.fornecedorId === fornecedor.id && e.tipoDocumentoId === exigido.tipoDocumentoId,
       );
       if (explicito) {
-        documentos.push({
+        const doc: DocumentoEmpresa = {
           ...explicito,
           id: `doc-${fornecedor.id}-${exigido.tipoDocumentoId}`,
           enviosAnteriores: explicito.enviosAnteriores ?? [],
-        });
+        };
+        documentos.push({ ...doc, decisao: decisaoPadrao(doc, fi + di) });
         return;
       }
       const padrao = gerarPadrao(fornecedor, exigido, fi + di);
-      if (padrao) documentos.push(padrao);
+      if (padrao) documentos.push({ ...padrao, decisao: decisaoPadrao(padrao, fi + di) });
     });
   });
   return documentos;
@@ -184,6 +216,6 @@ export function montarDocumentos(
 /** Explícitos que não casam com nenhuma exigência — usado para conferir os mocks. */
 export function explicitosOrfaos(exigidosDe: (fornecedorId: string) => DocumentoExigido[]): string[] {
   return EXPLICITOS.filter(
-    (e) => !exigidosDe(e.fornecedorId).some((x) => x.tipoDocumentoId === e.tipoDocumentoId),
+    (e) => !exigidosDe(e.fornecedorId).some((x) => x.escopo === 'empresa' && x.tipoDocumentoId === e.tipoDocumentoId),
   ).map((e) => `${e.fornecedorId}/${e.tipoDocumentoId}`);
 }

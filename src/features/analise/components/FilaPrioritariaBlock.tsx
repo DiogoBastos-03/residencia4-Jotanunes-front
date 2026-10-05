@@ -30,7 +30,15 @@ export function FilaPrioritariaBlock() {
                 <li key={entrada.id}>
                   <BlockRowLink to={rotaDaEntrada(entrada)}>
                     <div className="min-w-0 flex-1 max-md:basis-full">
-                      <Text weight="medium">{nomeDaEntrada(entrada)}</Text>
+                      <Text weight="medium">
+                        {nomeDaEntrada(entrada)}
+                        {entrada.kind === 'envio' && (
+                          <Text as="span" size="support" tone="muted">
+                            {' '}
+                            {strings.common.separator} {strings.pages.fila.arquivos(entrada.arquivos)}
+                          </Text>
+                        )}
+                      </Text>
                       <Text size="support" tone="muted" className="mt-0.5">
                         {entrada.fornecedor.razaoSocial} {strings.common.separator} {entrada.obraPrincipal.nome}
                       </Text>

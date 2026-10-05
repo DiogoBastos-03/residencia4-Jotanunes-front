@@ -2,19 +2,19 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import type { MotivoReprovacao } from '@/entities';
 import { diasEntre } from '@/entities';
-import { isoToBr, parseDateBr } from '@/shared/lib';
+import { isoToBr, parseDateBr, type Origem } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import { useToast } from '@/shared/ui';
+import { useAvancar } from '../hooks/useAvancar';
 import { useDecisoes } from '../hooks/useDecisoes';
 import { useExemploReprovacao } from '../hooks/useExemploReprovacao';
-import type { DetalheEnvio } from '../types';
+import type { DetalheDocumento } from '../types';
 import { DadosDoEnvio } from './DadosDoEnvio';
 import { DocumentViewer } from './DocumentViewer';
 import { EnviosAnteriores } from './EnviosAnteriores';
 import { ModalAprovar } from './ModalAprovar';
 import { ModalReprovar } from './ModalReprovar';
-import { PainelDecidido } from './PainelDecidido';
 import { PainelDecisao } from './PainelDecisao';
+import { PainelLeitura } from './PainelLeitura';
 import { PainelReprovacao } from './PainelReprovacao';
 
 const t = strings.pages.analise;
@@ -22,16 +22,19 @@ const t = strings.pages.analise;
 type Modo = 'decidindo' | 'reprovando';
 type ModalAberto = 'aprovar' | 'reprovar' | null;
 
+type Props = { detalhe: DetalheDocumento; hoje: string; origem: Origem };
+
 /**
- * Visualizador à esquerda, dados e decisão à direita.
+ * Visualizador à esquerda, dados e decisão à direita. Documento já decidido abre em modo leitura.
+ * Ao decidir, avança para o próximo pendente da mesma origem.
  * A URL pode abrir direto um estado (?painel=reprovar, ?modal=aprovar|reprovar, ?form=vazio) — usado em /_estados.
  */
-export function AnaliseDocumento({ detalhe, hoje }: { detalhe: DetalheEnvio; hoje: string }) {
+export function AnaliseDocumento({ detalhe, hoje, origem }: Props) {
   const [params] = useSearchParams();
   const vazio = params.get('form') === 'vazio';
   const exemplo = useExemploReprovacao();
   const { aprovarDocumento, reprovarDocumento } = useDecisoes();
-  const { showToast } = useToast();
+  const avancar = useAvancar(origem, detalhe.documento.id);
 
   const modalInicial = params.get('modal');
   const [modo, setModo] = useState<Modo>(params.get('painel') === 'reprovar' || modalInicial === 'reprovar' ? 'reprovando' : 'decidindo');
@@ -64,16 +67,13 @@ export function AnaliseDocumento({ detalhe, hoje }: { detalhe: DetalheEnvio; hoj
   }
 
   function confirmarAprovacao() {
-    aprovarDocumento(detalhe.documento.id, comValidade && validadeIso ? validadeIso : undefined);
     setModal(null);
-    showToast(t.modalAprovar.toast);
+    avancar(() => aprovarDocumento(detalhe.documento.id, comValidade && validadeIso ? validadeIso : undefined), t.modalAprovar.toast);
   }
 
   function confirmarReprovacao() {
-    reprovarDocumento(detalhe.documento.id, motivo, observacao.trim());
     setModal(null);
-    setModo('decidindo');
-    showToast(t.modalReprovar.toast);
+    avancar(() => reprovarDocumento(detalhe.documento.id, motivo, observacao.trim()), t.modalReprovar.toast);
   }
 
   return (
@@ -84,7 +84,12 @@ export function AnaliseDocumento({ detalhe, hoje }: { detalhe: DetalheEnvio; hoj
         <DadosDoEnvio detalhe={detalhe} />
         <EnviosAnteriores detalhe={detalhe} />
         {!detalhe.emAnalise ? (
-          <PainelDecidido detalhe={detalhe} />
+          <PainelLeitura
+            status={detalhe.status}
+            decisao={detalhe.documento.decisao}
+            validade={detalhe.documento.validade}
+            semValidade={!comValidade}
+          />
         ) : modo === 'decidindo' ? (
           <PainelDecisao
             comValidade={comValidade}

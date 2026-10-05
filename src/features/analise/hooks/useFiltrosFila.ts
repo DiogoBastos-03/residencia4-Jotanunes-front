@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 import type { FiltrosFila } from '../lib';
 
-const TIPOS: readonly FiltrosFila['tipo'][] = ['todos', 'documentos', 'funcionarios', 'urgentes'];
+const TIPOS: readonly FiltrosFila['tipo'][] = ['todos', 'empresa', 'funcionario', 'urgentes'];
 
 function lerTipo(valor: string | null): FiltrosFila['tipo'] {
   return TIPOS.find((t) => t === valor) ?? 'todos';

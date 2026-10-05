@@ -50,3 +50,17 @@ export function formatDate(iso: string, pattern: DatePattern = 'date'): string {
   const text = format(parseISO(iso), PATTERNS[pattern], { locale: ptBR });
   return pattern === 'long' ? text.charAt(0).toUpperCase() + text.slice(1) : text;
 }
+
+/** Confere os dígitos verificadores do CNPJ. */
+export function cnpjValido(value: string): boolean {
+  const d = onlyDigits(value);
+  if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
+  const calc = (base: string, pesos: number[]) => {
+    const soma = base.split('').reduce((t, n, i) => t + Number(n) * (pesos[i] ?? 0), 0);
+    const resto = soma % 11;
+    return resto < 2 ? 0 : 11 - resto;
+  };
+  const d1 = calc(d.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  const d2 = calc(d.slice(0, 13), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  return d.endsWith(`${d1}${d2}`);
+}

@@ -1,11 +1,11 @@
 import { formatDate } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { Badge, Block, BlockRow, Text } from '@/shared/ui';
-import type { DetalheEnvio } from '../types';
+import type { DetalheDocumento } from '../types';
 
 const t = strings.pages.analise.anteriores;
 
-export function EnviosAnteriores({ detalhe }: { detalhe: DetalheEnvio }) {
+export function EnviosAnteriores({ detalhe }: { detalhe: DetalheDocumento }) {
   const envios = detalhe.documento.enviosAnteriores;
   return (
     <Block title={t.title}>

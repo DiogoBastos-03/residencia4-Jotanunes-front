@@ -1,4 +1,5 @@
 import type { IsoDate } from '../common';
+import type { ArquivoFuncionario } from '../arquivo';
 import type { DocumentoEmpresa, StatusDocumento, StatusEnvio } from '../documento';
 import { diasEntre, JANELA_VENCIMENTO_DIAS } from './dates';
 
@@ -24,4 +25,9 @@ export function estaEmDia(status: StatusDocumento): boolean {
 /** Conta como pendência: o que falta enviar, o que foi reprovado e o que venceu. */
 export function ehPendencia(status: StatusDocumento): status is 'pendente' | 'reprovado' | 'vencido' {
   return status === 'pendente' || status === 'reprovado' || status === 'vencido';
+}
+
+/** Status de um arquivo de documento de funcionário, considerando a validade dele. */
+export function statusArquivo(arquivo: ArquivoFuncionario, hoje: IsoDate): StatusDocumento {
+  return statusPorValidade(arquivo.status, arquivo.validade, hoje);
 }

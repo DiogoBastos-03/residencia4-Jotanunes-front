@@ -2,7 +2,6 @@ import type {
   ComposicaoLista,
   EventoResolvido,
   Fornecedor,
-  Funcionario,
   GrupoPendencias,
   ListaExigencias,
   Obra,
@@ -15,7 +14,6 @@ export type LinhaObra = {
   obra: Obra;
   listas: number;
   fornecedores: number;
-  funcionarios: number;
   pendencias: number;
 };
 
@@ -37,17 +35,10 @@ export type FornecedorNaObra = {
   resumo: ResumoFornecedor;
 };
 
-export type PessoaNaObra = { funcionario: Funcionario; enviados: number; exigidos: number };
-
 export type FichaObra = {
   obra: Obra;
   listas: ListaNaObra[];
   fornecedores: FornecedorNaObra[];
-  funcionariosEmCampo: number;
-  /** Pessoas da remessa mais recente desta obra. */
-  remessaRecente: { fornecedor: Fornecedor; pessoas: PessoaNaObra[] } | null;
-  /** Alguma lista desta obra pede cadastro de funcionários. */
-  temItemFuncionarios: boolean;
   pendencias: GrupoPendencias[];
   totalPendencias: number;
   historico: EventoResolvido[];
@@ -60,7 +51,7 @@ export type FichaObra = {
   documentosExigidosPorTipo: Record<TipoFornecimento, string[]>;
 };
 
-export type PendenciasPorObra = { obra: Obra; total: number; fornecedores: number };
+
 
 export type NovoVinculo = {
   obraId: string;

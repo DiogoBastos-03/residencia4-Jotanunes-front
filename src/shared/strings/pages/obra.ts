@@ -5,9 +5,9 @@ export const obraPage = {
   voltar: 'Obras',
   recebida: (data: string) => `recebida da integração em ${data}`,
   vincularFornecedor: 'Vincular fornecedor',
-  metricas: { listas: 'Listas de exigências', fornecedores: 'Fornecedores', funcionarios: 'Funcionários em campo', pendencias: 'Pendências' },
+  metricas: { listas: 'Listas de exigências', fornecedores: 'Fornecedores', pendencias: 'Pendências' },
   abasLabel: 'Seções da obra',
-  abas: { fornecedores: 'Fornecedores', exigencias: 'Exigências', funcionarios: 'Funcionários', pendencias: 'Pendências', historico: 'Histórico' },
+  abas: { fornecedores: 'Fornecedores', exigencias: 'Exigências', pendencias: 'Pendências', historico: 'Histórico' },
   naoEncontradaTitle: 'Obra não encontrada',
   naoEncontradaDescription: 'O endereço pode estar incorreto ou a obra saiu da integração. Volte para a lista de obras.',
   naoEncontradaAction: 'Ver todas as obras',
@@ -43,25 +43,19 @@ export const obraPage = {
     vazioDescription:
       'Sem lista, os fornecedores desta obra não recebem nenhuma pendência. Vincule pelo menos uma lista — toda obra precisa de uma.',
   },
-  funcionarios: {
-    resumo: (total: number, fornecedor: string) =>
-      `${dominio.funcionarios(total)} em campo nesta obra • mostrando a remessa mais recente, da ${fornecedor}`,
-    caption: 'Funcionários da remessa mais recente',
-    colunas: { funcionario: 'Funcionário', fornecedor: 'Fornecedor', funcao: 'Função', documentos: 'Documentos', situacao: 'Situação' },
-    acao: 'Ver documentos',
-    vazioTitle: 'Nenhuma remessa de funcionários nesta obra',
-    vazioDescription:
-      'As pessoas aparecem aqui quando um fornecedor de serviço envia uma remessa para o item de funcionários de uma lista desta obra.',
-    semItemDescription:
-      'Nenhuma lista desta obra pede o cadastro de funcionários. Vincule uma lista com item de funcionários, como Segurança do trabalho em obra, para acompanhar as pessoas em campo.',
-  },
   pendencias: {
     intro:
       'Pendência não trava ninguém: o fornecedor pode pular item, pular prazo ou não enviar nada. O que falta fica aqui e entra na cobrança.',
     contagem: (n: number) => dominio.pendencias(n),
     caption: (fornecedor: string) => `Pendências de ${fornecedor}`,
     colunas: { pendencia: 'Pendência', tipo: 'Tipo', exigidoPor: 'Exigido por', situacao: 'Situação', emAberto: 'Em aberto' },
-    documentoDe: (documento: string, pessoa: string) => `${dominio.nomeCurto(documento)} de ${pessoa}`,
+    arquivos: (semArquivos: boolean, reprovados: number, vencidos: number) =>
+      semArquivos
+        ? 'nenhum arquivo enviado'
+        : [reprovados > 0 ? dominio.plural(reprovados, 'arquivo reprovado', 'arquivos reprovados') : '', vencidos > 0 ? dominio.plural(vencidos, 'arquivo vencido', 'arquivos vencidos') : '']
+            .filter(Boolean)
+            .join(' • '),
+    ver: 'Ver',
     vazioTitle: 'Nenhuma pendência nesta obra',
     vazioDescription: 'Todos os fornecedores estão com os documentos exigidos aprovados e dentro da validade.',
   },

@@ -1,19 +1,19 @@
 import type {
+  Analise,
+  ArquivoFuncionario,
   DocumentoEmpresa,
-  Obra,
-  StatusDocumento,
   DocumentoExigido,
   EntradaFila,
-  EntradaFilaRemessa,
-  Funcionario,
-  ItemFuncionarios,
-  Analise,
+  EnvioArquivos,
   Fornecedor,
   ListaExigencias,
-  TempoAnalise,
+  Obra,
+  ResumoArquivos,
+  StatusDocumento,
 } from '@/entities';
+import type { Alvo } from './lib';
 
-export type FiltroFila = 'todos' | 'documentos' | 'funcionarios' | 'urgentes';
+export type FiltroFila = 'todos' | 'empresa' | 'funcionario' | 'urgentes';
 
 export type ContagemFila = Record<FiltroFila, number>;
 
@@ -24,7 +24,8 @@ export type Fila = {
   atrasadas: number;
 };
 
-export type DetalheEnvio = {
+/** Documento da empresa aberto na análise — em análise (decidir) ou já decidido (leitura). */
+export type DetalheDocumento = {
   documento: DocumentoEmpresa;
   exigido: DocumentoExigido;
   fornecedor: Fornecedor;
@@ -41,25 +42,31 @@ export type DetalheEnvio = {
   enviadoEm: string;
   esperaDias: number;
   validadeInformada: string | undefined;
-  /** Última decisão sobre este documento, quando já foi analisado. */
-  decisao: Analise | undefined;
-  /** Próximo item da fila depois deste. */
-  proximo: EntradaFila | undefined;
 };
 
-export type PessoaNaRemessa = {
-  funcionario: Funcionario;
-  enviados: number;
-  exigidos: number;
+export type ArquivoNaAnalise = { arquivo: ArquivoFuncionario; status: StatusDocumento };
+
+/** Envio de documento de funcionário: os arquivos daquele envio, cada um com sua decisão. */
+export type DetalheEnvioArquivos = {
+  envio: EnvioArquivos;
+  exigido: DocumentoExigido;
+  fornecedor: Fornecedor;
+  lista: ListaExigencias;
+  arquivos: ArquivoNaAnalise[];
+  resumoEnvio: ResumoArquivos;
+  /** Somando todos os envios do item. */
+  resumoItem: ResumoArquivos;
+  emAnalise: boolean;
 };
 
-export type DetalheRemessa = {
-  entrada: EntradaFilaRemessa;
-  item: ItemFuncionarios;
-  pessoas: PessoaNaRemessa[];
-  aprovados: number;
-  aguardando: number;
-  reprovados: number;
+/** Onde estamos na sequência da origem: "3 de 7", anterior e próximo. */
+export type Sequencia = {
+  alvos: Alvo[];
+  indice: number;
+  anterior: Alvo | undefined;
+  proximo: Alvo | undefined;
+  /** Nome da origem para a migalha (fornecedor ou obra); undefined na fila. */
+  origemNome: string | undefined;
 };
 
 export type AnaliseComFornecedor = Analise & { fornecedor: Fornecedor };
@@ -70,5 +77,3 @@ export type ResumoAnalisesHoje = {
   aprovados: number;
   reprovados: number;
 };
-
-export type TempoAnaliseLista = TempoAnalise & { lista: ListaExigencias };

@@ -7,7 +7,7 @@ export type AutorResolvido = { kind: 'pessoa' | 'fornecedor'; nome: string } | {
 /** Ação com os nomes no lugar dos ids — pronta para virar texto. */
 export type AcaoResolvida =
   | { tipo: 'documentoEnviado'; documento: string }
-  | { tipo: 'remessaEnviada'; funcionarios: number; obra: string }
+  | { tipo: 'arquivosEnviados'; quantidade: number; documento: string }
   | { tipo: 'documentoVencido'; documento: string; fornecedor: string }
   | { tipo: 'documentoAprovado'; documento: string }
   | { tipo: 'documentoReprovado'; documento: string; motivo: MotivoReprovacao }
@@ -24,9 +24,7 @@ export function resolverEvento(ds: Dataset, evento: EventoHistorico): EventoReso
   const lista = (id: string) => ds.listas.find((l) => l.id === id)?.nome ?? id;
   const a = evento.acao;
   const acao: AcaoResolvida =
-    a.tipo === 'remessaEnviada'
-      ? { tipo: a.tipo, funcionarios: a.funcionarios, obra: obra(a.obraId) }
-      : a.tipo === 'documentoVencido'
+    a.tipo === 'documentoVencido'
         ? { tipo: a.tipo, documento: a.documento, fornecedor: fornecedor(a.fornecedorId) }
         : a.tipo === 'fornecedorVinculado'
           ? { tipo: a.tipo, fornecedor: fornecedor(a.fornecedorId), obra: obra(a.obraId) }

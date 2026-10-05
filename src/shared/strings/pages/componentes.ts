@@ -62,7 +62,7 @@ export const componentesPage = {
     options: [
       { value: 'todos', label: 'Todos', count: 12 },
       { value: 'documentos', label: 'Documentos', count: 9 },
-      { value: 'funcionarios', label: 'Funcionários', count: 3 },
+      { value: 'funcionario', label: 'Documentos de funcionário', count: 3 },
       { value: 'urgentes', label: 'Urgentes', count: 3 },
     ],
     selectSm: [
@@ -76,7 +76,6 @@ export const componentesPage = {
       { value: 'docs', label: 'Documentos' },
       { value: 'exigencias', label: 'Exigências' },
       { value: 'obras', label: 'Obras' },
-      { value: 'funcionarios', label: 'Funcionários' },
       { value: 'historico', label: 'Histórico' },
       { value: 'contatos', label: 'Contatos' },
     ],
@@ -84,7 +83,6 @@ export const componentesPage = {
       docs: 'O documento da empresa é enviado uma vez e vale para todas as obras que o exigem.',
       exigencias: 'Estas exigências vêm das obras em que a empresa está.',
       obras: 'A empresa está em 3 obras.',
-      funcionarios: '15 funcionários em 2 obras.',
       historico: '6 eventos registrados.',
       contatos: '2 contatos cadastrados.',
     },
@@ -100,7 +98,7 @@ export const componentesPage = {
     priorityAction: 'Ver fila completa',
     rows: [
       { key: 'pgr', title: 'PGR – Programa de Gerenciamento de Riscos', meta: 'Construtora Exemplo Ltda. • Residencial Mirante do Parque' },
-      { key: 'rem', title: 'Remessa com 8 funcionários', meta: 'Construtora Exemplo Ltda. • Residencial Mirante do Parque' },
+      { key: 'rem', title: 'ASO dos funcionários • 12 arquivos', meta: 'Construtora Exemplo Ltda. • Residencial Mirante do Parque' },
     ],
     contact: 'Contato principal',
     contactItems: [
@@ -135,18 +133,18 @@ export const componentesPage = {
     openModal: 'Abrir modal',
     showToast: 'Mostrar toast',
     showErrorToast: 'Mostrar toast de erro',
-    drawerTitle: 'Marcos Vinícius Lima',
-    drawerSubtitle: 'Construtora Exemplo Ltda.',
+    drawerTitle: 'aso-marcos-lima.pdf',
+    drawerSubtitle: 'ASO dos funcionários • Construtora Exemplo Ltda.',
     drawerItems: [
-      { key: 'cpf', label: 'CPF', value: '234.567.890-11' },
-      { key: 'tel', label: 'Telefone', value: '(81) 99765-2345' },
-      { key: 'funcao', label: 'Função', value: 'Pedreiro' },
-      { key: 'obra', label: 'Obra', value: 'Residencial Mirante do Parque' },
+      { key: 'validade', label: 'Validade informada', value: '21/05/2027' },
+      { key: 'enviado', label: 'Enviado em', value: '11/09/2026, 14:03' },
+      { key: 'tamanho', label: 'Tamanho', value: '312 KB' },
+      { key: 'envio', label: 'Envio', value: '12 arquivos' },
     ],
     drawerNote:
-      'O item de funcionários é acompanhado por pessoa, em cada obra, e não entra na conta de fornecedor apto.',
+      'Cada arquivo é analisado sozinho e tem a sua própria validade. Documento de funcionário não entra na conta de fornecedor apto.',
     drawerCancel: 'Cancelar',
-    drawerConfirm: 'Concluir funcionário',
+    drawerConfirm: 'Aprovar',
     modalTitle: 'Bloquear fornecedor?',
     modalDescription:
       'A Construtora Exemplo Ltda. deixa de aparecer como apta para novas contratações até regularizar a documentação.',
@@ -155,7 +153,7 @@ export const componentesPage = {
     modalConfirm: 'Bloquear',
     toastSuccess: 'Documento aprovado e fornecedor avisado',
     toastError: 'Não foi possível enviar a cobrança. Tente de novo.',
-    toastDone: 'Funcionário concluído',
+    toastDone: 'aso-marcos-lima.pdf aprovado.',
     toastBlocked: 'Fornecedor bloqueado para novas contratações',
   },
   feedback: {

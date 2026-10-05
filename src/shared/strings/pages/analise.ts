@@ -1,9 +1,16 @@
-/** Análise de documento (/fila/:id). */
+/** Análise de documento (/fila/:id) — também usada em modo leitura. */
 export const analisePage = {
-  voltar: 'Voltar para a fila',
-  naoEncontradoTitle: 'Este envio não está mais na fila',
-  naoEncontradoDescription: 'O documento pode ter sido analisado por outra pessoa ou o endereço está incorreto. Volte para a fila e escolha outro item.',
-  naoEncontradoAction: 'Voltar para a fila',
+  naoEncontradoTitle: 'Documento não encontrado',
+  naoEncontradoDescription: 'O endereço pode estar incorreto. Volte e escolha outro documento.',
+  naoEncontradoAction: 'Voltar',
+  navegacao: {
+    posicao: (atual: number, total: number) => `${atual} de ${total}`,
+    posicaoLabel: (atual: number, total: number) => `Documento ${atual} de ${total}`,
+    anterior: 'Documento anterior',
+    proximo: 'Próximo documento',
+    dica: 'Use as setas ← e → do teclado para passar de um documento ao outro.',
+    origemFila: 'Fila de análise',
+  },
   viewer: {
     paginaAnterior: 'Página anterior',
     proximaPagina: 'Próxima página',
@@ -28,6 +35,7 @@ export const analisePage = {
     enviadoEm: 'Enviado em',
     espera: 'Espera',
     validadeInformada: 'Validade informada',
+    validade: 'Validade',
     semValidade: 'Sem validade',
     renovacao: 'Envio',
     renovacaoTexto: 'Nova versão — a atual continua valendo até a decisão',
@@ -59,16 +67,17 @@ export const analisePage = {
     confirmar: 'Confirmar reprovação',
     limpar: 'Limpar',
   },
-  decidido: {
+  leitura: {
     title: 'Decisão registrada',
-    aprovado: (quem: string, hora: string) => `Aprovado por ${quem} às ${hora}.`,
-    reprovado: (quem: string, hora: string) => `Reprovado por ${quem} às ${hora}.`,
+    aprovado: (quem: string, data: string, hora: string) => `Aprovado por ${quem} em ${data}, às ${hora}.`,
+    reprovado: (quem: string, data: string, hora: string) => `Reprovado por ${quem} em ${data}, às ${hora}.`,
+    motivo: 'Motivo',
+    observacao: 'Observação ao fornecedor',
     validoAte: (data: string) => `Vale até ${data}.`,
+    venceu: (data: string) => `Venceu em ${data}. O documento continua pendente até o fornecedor enviar outro.`,
     semValidade: 'Vale até ser substituído.',
-    motivo: (motivo: string) => `Motivo: ${motivo}.`,
-    proximo: 'Próximo da fila',
-    voltar: 'Voltar para a fila',
-    filaVazia: 'Não há mais nada na fila.',
+    semRegistro: 'Não há registro de quem decidiu.',
+    leituraNota: 'Modo leitura: este documento já foi decidido. Uma nova versão enviada pelo fornecedor volta para a fila.',
   },
   modalAprovar: {
     title: 'Aprovar documento',
@@ -78,7 +87,7 @@ export const analisePage = {
     renovacao: 'A versão anterior deixa de valer e passa para o histórico de envios.',
     voltar: 'Voltar',
     confirmar: 'Aprovar documento',
-    toast: 'Documento aprovado e fornecedor avisado',
+    toast: 'Documento aprovado e fornecedor avisado.',
   },
   modalReprovar: {
     title: 'Confirmar reprovação',
@@ -87,6 +96,13 @@ export const analisePage = {
     alertaRenovacao: 'A versão atual continua valendo até o vencimento; só a nova versão é recusada.',
     voltar: 'Voltar',
     confirmar: 'Confirmar reprovação',
-    toast: 'Documento reprovado e fornecedor avisado',
+    toast: 'Documento reprovado e fornecedor avisado.',
+  },
+  /** Depois da decisão: avança para o próximo pendente da mesma origem, ou volta quando acaba. */
+  avanco: {
+    proximo: (decisao: string) => `${decisao} Abrindo o próximo pendente.`,
+    fimFila: (decisao: string) => `${decisao} A fila terminou: não há mais nada esperando análise.`,
+    fimFornecedor: (decisao: string) => `${decisao} Não há mais documentos deste fornecedor esperando análise.`,
+    fimObra: (decisao: string) => `${decisao} Não há mais documentos desta obra esperando análise.`,
   },
 } as const;

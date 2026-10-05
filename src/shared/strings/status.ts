@@ -22,7 +22,10 @@ export const statusLabels = {
   planejamento: 'Planejamento',
   concluida: 'Concluída',
   semLista: 'Sem lista de exigências',
-  funcionarios: 'Funcionários',
+  aguardandoAcesso: 'Aguardando 1º acesso',
+  emDia: 'Em dia',
+  funcionarios: 'Documento de funcionário',
+  semArquivos: 'Nenhum arquivo',
 } as const;
 
 export type StatusKey = keyof typeof statusLabels;
@@ -31,7 +34,7 @@ export type StatusKey = keyof typeof statusLabels;
 export const tagLabels = {
   obrigatorio: 'Obrigatório',
   opcional: 'Opcional',
-  funcionarios: 'Funcionários',
+  funcionarios: 'Documento de funcionário',
   sempreObrigatorio: 'sempre obrigatório',
   vaiSeAplicar: 'Vai se aplicar',
   naoSeAplica: 'Não se aplica',

@@ -39,6 +39,10 @@ type TableProps<T> = {
   rows: readonly T[];
   rowKey: (row: T) => string;
   action?: TableAction<T>;
+  /** Para onde o clique na linha leva, quando difere da ação do botão. */
+  rowTo?: (row: T) => string;
+  /** Desligue quando a ação da linha é destrutiva (ex.: Remover) — aí só o botão age. */
+  rowClick?: boolean;
   density?: 'default' | 'compact';
   className?: string;
 };
@@ -87,12 +91,16 @@ function ActionButton<T>({ action, row, mobile }: { action: TableAction<T>; row:
 }
 
 /** Clique em qualquer ponto da linha dispara a ação — menos quando o clique já foi num controle. */
-function useRowClick<T>(action: TableAction<T> | undefined) {
+function useRowClick<T>(action: TableAction<T> | undefined, rowTo: ((row: T) => string) | undefined) {
   const navigate = useNavigate();
-  if (!action) return undefined;
+  if (!action && !rowTo) return undefined;
   return (event: MouseEvent<HTMLElement>, row: T) => {
     if (event.target instanceof Element && event.target.closest('a,button,input,select,textarea,label')) return;
-    if (action.disabled?.(row)) return;
+    if (rowTo) {
+      navigate(rowTo(row));
+      return;
+    }
+    if (!action || action.disabled?.(row)) return;
     if (action.to) navigate(action.to(row));
     else action.onClick?.(row);
   };
@@ -114,9 +122,11 @@ function visibleCells<T>(columns: readonly TableColumn<T>[], row: T) {
 }
 
 /** Tabela no desktop; lista de cartões abaixo de 1024px. Sem zebra, sem rolagem lateral. */
-export function Table<T>({ caption, columns, rows, rowKey, action, density = 'default', className }: TableProps<T>) {
+export function Table<T>({ caption, columns, rows, rowKey, action, rowTo, rowClick: linhaClicavel = true, density = 'default', className }: TableProps<T>) {
   const compact = density === 'compact';
-  const rowClick = useRowClick(action);
+  const clique = useRowClick(action, rowTo);
+  const rowClick = linhaClicavel ? clique : undefined;
+  const clicavel = (row: T) => Boolean(rowClick) && (Boolean(rowTo) || !action?.disabled?.(row));
   const titleColumn = columns.find((c) => c.mobile === 'title') ?? columns[0];
   const badgeColumn = columns.find((c) => c.mobile === 'badge');
   const fieldColumns = columns.filter(
@@ -155,7 +165,7 @@ export function Table<T>({ caption, columns, rows, rowKey, action, density = 'de
               <tr
                 key={rowKey(row)}
                 onClick={rowClick ? (event) => rowClick(event, row) : undefined}
-                className={cn('border-b border-border last:border-b-0', rowClick && !action?.disabled?.(row) && 'interactive-row')}
+                className={cn('border-b border-border last:border-b-0', clicavel(row) && 'interactive-row')}
               >
                 {visibleCells(columns, row).map(({ column, span }) => (
                   <td
@@ -186,7 +196,7 @@ export function Table<T>({ caption, columns, rows, rowKey, action, density = 'de
           <li
             key={rowKey(row)}
             onClick={rowClick ? (event) => rowClick(event, row) : undefined}
-            className={cn('rounded-control border border-border bg-surface p-4', rowClick && !action?.disabled?.(row) && 'interactive-lift')}
+            className={cn('rounded-control border border-border bg-surface p-4', clicavel(row) && 'interactive-lift')}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 text-body font-medium text-ink">{titleColumn?.cell(row)}</div>

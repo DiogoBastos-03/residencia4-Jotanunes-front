@@ -44,7 +44,7 @@ export function DrawerVincularLista({ ficha, open, vazio, onClose, onVinculado }
   const novos = new Set(
     escolhidas.flatMap((l) =>
       l.lista.itens.flatMap((i) =>
-        i.kind === 'documento' && !ficha.documentosExigidosPorTipo[l.lista.tipo].includes(i.tipoDocumentoId) ? [`${l.lista.tipo}:${i.tipoDocumentoId}`] : [],
+        !ficha.documentosExigidosPorTipo[l.lista.tipo].includes(i.tipoDocumentoId) ? [`${l.lista.tipo}:${i.tipoDocumentoId}`] : [],
       ),
     ),
   ).size;
@@ -124,7 +124,7 @@ export function DrawerVincularLista({ ficha, open, vazio, onClose, onVinculado }
                         </span>
                         <Text as="span" size="support" tone="muted" className="mt-0.75 block" >
                           <span id={`composicao-${lista.id}`}>
-                            {strings.dominio.composicao(composicao.documentosObrigatorios, composicao.documentosOpcionais, composicao.itensFuncionarios)}
+                            {strings.dominio.composicao(composicao.documentosObrigatorios, composicao.documentosOpcionais, composicao.documentosFuncionario)}
                           </span>
                         </Text>
                       </span>

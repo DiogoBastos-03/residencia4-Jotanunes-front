@@ -14,6 +14,7 @@ type EntradaBase = {
   /** Outras obras em que o mesmo envio vale. */
   obrasExtras: number;
   lista: ListaExigencias;
+  documentoNome: string;
   enviadoEm: IsoDate;
   esperaDias: number;
   prioridade: Prioridade;
@@ -21,19 +22,18 @@ type EntradaBase = {
 
 export type EntradaFilaDocumento = EntradaBase & {
   kind: 'documento';
-  documentoId: string;
-  documentoNome: string;
   /** Renovação: a versão atual continua valendo enquanto a nova é analisada. */
   renovacao: boolean;
 };
 
-export type EntradaFilaRemessa = EntradaBase & {
-  kind: 'remessa';
-  remessaId: string;
-  funcionarios: number;
+/** Envio de documento de funcionário: uma linha só, não importa quantos arquivos. */
+export type EntradaFilaEnvio = EntradaBase & {
+  kind: 'envio';
+  arquivos: number;
+  emAnalise: number;
 };
 
-export type EntradaFila = EntradaFilaDocumento | EntradaFilaRemessa;
+export type EntradaFila = EntradaFilaDocumento | EntradaFilaEnvio;
 
 function ordenar(a: EntradaFila, b: EntradaFila): number {
   if (a.prioridade !== b.prioridade) return a.prioridade === 'urgente' ? -1 : 1;
@@ -41,9 +41,11 @@ function ordenar(a: EntradaFila, b: EntradaFila): number {
   return a.fornecedor.razaoSocial.localeCompare(b.fornecedor.razaoSocial, 'pt-BR');
 }
 
-/** Tudo o que espera decisão: documentos em análise, renovações e remessas abertas. */
+/** Tudo o que espera decisão: documentos em análise, renovações e envios de documentos de funcionário. */
 export function montarFila(ds: Dataset): EntradaFila[] {
   const entradas: EntradaFila[] = [];
+  const exigido = (fornecedorId: string, tipoDocumentoId: string) =>
+    documentosExigidos(ds, fornecedorId).find((d) => d.tipoDocumentoId === tipoDocumentoId);
 
   for (const doc of ds.documentos) {
     const envio =
@@ -54,19 +56,18 @@ export function montarFila(ds: Dataset): EntradaFila[] {
           : null;
     if (!envio) continue;
     const fornecedor = ds.fornecedores.find((f) => f.id === doc.fornecedorId);
-    const exigido = documentosExigidos(ds, doc.fornecedorId).find((d) => d.tipoDocumentoId === doc.tipoDocumentoId);
-    const obraPrincipal = exigido?.obras[0];
-    const lista = exigido?.listas[0];
-    if (!fornecedor || !obraPrincipal || !lista || !exigido) continue;
+    const e = exigido(doc.fornecedorId, doc.tipoDocumentoId);
+    const obraPrincipal = e?.obras[0];
+    const lista = e?.listas[0];
+    if (!fornecedor || !obraPrincipal || !lista || !e) continue;
     entradas.push({
       kind: 'documento',
       id: doc.id,
-      documentoId: doc.id,
       documentoNome: nomeDoTipoDocumento(ds, doc.tipoDocumentoId),
       renovacao: envio.renovacao,
       fornecedor,
       obraPrincipal,
-      obrasExtras: exigido.obras.length - 1,
+      obrasExtras: e.obras.length - 1,
       lista,
       enviadoEm: envio.enviadoEm,
       esperaDias: diasEntre(envio.enviadoEm.slice(0, 10), ds.hoje),
@@ -74,24 +75,28 @@ export function montarFila(ds: Dataset): EntradaFila[] {
     });
   }
 
-  for (const remessa of ds.remessas) {
-    if (remessa.situacao !== 'emAnalise') continue;
-    const fornecedor = ds.fornecedores.find((f) => f.id === remessa.fornecedorId);
-    const obraPrincipal = ds.obras.find((o) => o.id === remessa.obraId);
-    const lista = ds.listas.find((l) => l.id === remessa.listaId);
-    if (!fornecedor || !obraPrincipal || !lista) continue;
+  for (const envio of ds.envios) {
+    const arquivos = ds.arquivos.filter((a) => a.envioId === envio.id);
+    const emAnalise = arquivos.filter((a) => a.status === 'emAnalise').length;
+    if (emAnalise === 0) continue;
+    const fornecedor = ds.fornecedores.find((f) => f.id === envio.fornecedorId);
+    const e = exigido(envio.fornecedorId, envio.tipoDocumentoId);
+    const obraPrincipal = e?.obras[0];
+    const lista = e?.listas[0];
+    if (!fornecedor || !obraPrincipal || !lista || !e) continue;
     entradas.push({
-      kind: 'remessa',
-      id: remessa.id,
-      remessaId: remessa.id,
-      funcionarios: ds.funcionarios.filter((f) => f.remessaId === remessa.id).length,
+      kind: 'envio',
+      id: envio.id,
+      documentoNome: nomeDoTipoDocumento(ds, envio.tipoDocumentoId),
+      arquivos: arquivos.length,
+      emAnalise,
       fornecedor,
       obraPrincipal,
-      obrasExtras: 0,
+      obrasExtras: e.obras.length - 1,
       lista,
-      enviadoEm: remessa.enviadaEm,
-      esperaDias: diasEntre(remessa.enviadaEm.slice(0, 10), ds.hoje),
-      prioridade: remessa.prioridade,
+      enviadoEm: envio.enviadoEm,
+      esperaDias: diasEntre(envio.enviadoEm.slice(0, 10), ds.hoje),
+      prioridade: envio.prioridade,
     });
   }
 

@@ -3,18 +3,21 @@ import type { ListaExigencias } from '../listaExigencias';
 import { fornecedoresDaObra, obrasDaLista } from './aplicabilidade';
 
 export type ComposicaoLista = {
+  /** Documentos da empresa obrigatórios. */
   documentosObrigatorios: number;
+  /** Documentos da empresa opcionais. */
   documentosOpcionais: number;
-  itensFuncionarios: number;
+  /** Itens de documento de funcionário (obrigatórios e opcionais). */
+  documentosFuncionario: number;
   total: number;
 };
 
 export function composicaoLista(lista: ListaExigencias): ComposicaoLista {
-  const docs = lista.itens.filter((i) => i.kind === 'documento');
+  const empresa = lista.itens.filter((i) => i.escopo === 'empresa');
   return {
-    documentosObrigatorios: docs.filter((i) => i.obrigatoriedade === 'obrigatorio').length,
-    documentosOpcionais: docs.filter((i) => i.obrigatoriedade === 'opcional').length,
-    itensFuncionarios: lista.itens.filter((i) => i.kind === 'funcionarios').length,
+    documentosObrigatorios: empresa.filter((i) => i.obrigatoriedade === 'obrigatorio').length,
+    documentosOpcionais: empresa.filter((i) => i.obrigatoriedade === 'opcional').length,
+    documentosFuncionario: lista.itens.filter((i) => i.escopo === 'funcionario').length,
     total: lista.itens.length,
   };
 }

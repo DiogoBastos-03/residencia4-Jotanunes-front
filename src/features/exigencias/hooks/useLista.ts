@@ -1,24 +1,22 @@
-import { alcanceDaLista, composicaoLista, fornecedoresDaObra, obrasDaLista, type Dataset } from '@/entities';
+import { alcanceDaLista, composicaoLista, fornecedoresDaObra, listasDaObra, obrasDaLista, type Dataset } from '@/entities';
 import { datasetStore } from '@/mocks';
 import { useMockQuery, useStore } from '@/shared/lib';
+import { itensDaLista } from '../lib';
 import type { DetalheLista } from '../types';
 
 function carregar(ds: Dataset, id: string): DetalheLista | null {
   const lista = ds.listas.find((l) => l.id === id);
   if (!lista) return null;
-  const obrasVinculadas = obrasDaLista(ds, id);
+  const vinculadas = obrasDaLista(ds, id);
+  const doTipo = (obraId: string) => fornecedoresDaObra(ds, obraId).filter((f) => f.tipo === lista.tipo).length;
   return {
     lista,
     composicao: composicaoLista(lista),
-    obras: obrasVinculadas.length,
+    obras: vinculadas.length,
     alcance: alcanceDaLista(ds, id),
-    obrasVinculadas,
-    obrasParaVincular: ds.obras.map((obra) => ({
-      obra,
-      jaVinculada: obrasVinculadas.includes(obra),
-      fornecedoresDoTipo: fornecedoresDaObra(ds, obra.id).filter((f) => f.tipo === lista.tipo).length,
-    })),
-    tiposDocumento: ds.tiposDocumento,
+    itens: itensDaLista(ds, lista),
+    obrasVinculadas: vinculadas.map((obra) => ({ obra, unica: listasDaObra(ds, obra.id).length <= 1, fornecedoresDoTipo: doTipo(obra.id) })),
+    obrasParaVincular: ds.obras.map((obra) => ({ obra, jaVinculada: vinculadas.includes(obra), fornecedoresDoTipo: doTipo(obra.id) })),
   };
 }
 

@@ -22,6 +22,12 @@ const COLUNAS: readonly TableColumn<EntradaFila>[] = [
             {strings.common.separator} {t.renovacao}
           </Text>
         )}
+        {e.kind === 'envio' && (
+          <Text as="span" size="label" tone="muted">
+            {' '}
+            {strings.common.separator} {t.arquivos(e.arquivos)}
+          </Text>
+        )}
       </>
     ),
   },
@@ -51,7 +57,7 @@ export function FilaTabela({ entradas }: { entradas: readonly EntradaFila[] }) {
       columns={COLUNAS}
       rows={entradas}
       rowKey={(e) => e.id}
-      action={{ label: () => t.acao, describe: (e) => `${nomeDaEntrada(e)}, ${e.fornecedor.razaoSocial}`, to: rotaDaEntrada }}
+      action={{ label: () => t.acao, describe: (e) => `${nomeDaEntrada(e)}, ${e.fornecedor.razaoSocial}`, to: (e) => rotaDaEntrada(e) }}
     />
   );
 }

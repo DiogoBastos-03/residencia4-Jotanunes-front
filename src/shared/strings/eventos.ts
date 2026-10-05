@@ -4,7 +4,7 @@ type Autor = { kind: 'pessoa' | 'fornecedor'; nome: string } | { kind: 'sistema'
 
 type Acao =
   | { tipo: 'documentoEnviado'; documento: string }
-  | { tipo: 'remessaEnviada'; funcionarios: number; obra: string }
+  | { tipo: 'arquivosEnviados'; quantidade: number; documento: string }
   | { tipo: 'documentoVencido'; documento: string; fornecedor: string }
   | { tipo: 'documentoAprovado'; documento: string }
   | { tipo: 'documentoReprovado'; documento: string; motivo: keyof typeof dominio.motivos }
@@ -24,10 +24,8 @@ export const eventos = {
     switch (acao.tipo) {
       case 'documentoEnviado':
         return `enviou ${acao.documento}`;
-      case 'remessaEnviada':
-        return contexto === 'obra'
-          ? `enviou remessa com ${dominio.funcionarios(acao.funcionarios)}`
-          : `enviou remessa com ${dominio.funcionarios(acao.funcionarios)} para ${acao.obra}`;
+      case 'arquivosEnviados':
+        return `enviou ${dominio.arquivos(acao.quantidade)} de ${acao.documento}`;
       case 'documentoVencido':
         return contexto === 'obra'
           ? `marcou como vencida a ${acao.documento} da ${acao.fornecedor}`

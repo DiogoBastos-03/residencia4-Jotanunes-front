@@ -13,11 +13,11 @@ export type ResumoFornecedor = {
 
 /**
  * Documentos conta só os obrigatórios da empresa, nas listas que se aplicam.
- * O item de funcionários não entra na conta de fornecedor apto.
+ * Documento de funcionário não entra na conta de fornecedor apto.
  */
 export function resumoFornecedor(ds: Dataset, fornecedorId: string): ResumoFornecedor {
   const fornecedor = ds.fornecedores.find((f) => f.id === fornecedorId);
-  const obrigatorios = documentosExigidos(ds, fornecedorId).filter((d) => d.obrigatoriedade === 'obrigatorio');
+  const obrigatorios = documentosExigidos(ds, fornecedorId).filter((d) => d.escopo === 'empresa' && d.obrigatoriedade === 'obrigatorio');
   const emDia = obrigatorios.filter((d) =>
     estaEmDia(
       statusDocumento(

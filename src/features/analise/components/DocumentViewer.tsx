@@ -9,14 +9,14 @@ import {
 } from '@heroicons/react/24/outline';
 import { strings } from '@/shared/strings';
 import { Button, Icon, IconButton, Text, useToast } from '@/shared/ui';
-import type { DetalheEnvio } from '../types';
+import type { DetalheDocumento } from '../types';
 import { DocumentPreview } from './DocumentPreview';
 
 const t = strings.pages.analise.viewer;
 const ZOOMS = [50, 75, 100, 125, 150, 200] as const;
 
 /** Visualizador do arquivo enviado: páginas, zoom e download. */
-export function DocumentViewer({ detalhe }: { detalhe: DetalheEnvio }) {
+export function DocumentViewer({ detalhe }: { detalhe: DetalheDocumento }) {
   const [pagina, setPagina] = useState(1);
   const [zoom, setZoom] = useState(2);
   const { showToast } = useToast();
@@ -70,7 +70,14 @@ export function DocumentViewer({ detalhe }: { detalhe: DetalheEnvio }) {
       </div>
       <div className="flex min-h-140 flex-1 justify-center overflow-auto bg-surface-3 p-5 max-lg:min-h-100 max-sm:p-3">
         <div className="w-full max-w-107.5 origin-top transition-transform" style={{ transform: `scale(${pct / 100})` }}>
-          <DocumentPreview detalhe={detalhe} pagina={pagina} />
+          <DocumentPreview
+            empresa={detalhe.fornecedor.razaoSocial}
+            cnpj={detalhe.fornecedor.cnpj}
+            titulo={detalhe.exigido.nome}
+            enviadoEm={detalhe.enviadoEm}
+            pagina={pagina}
+            paginas={detalhe.paginas}
+          />
         </div>
       </div>
     </section>

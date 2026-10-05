@@ -1,7 +1,7 @@
 import type { IsoDate } from './common';
 import type { DocumentoEmpresa } from './documento';
 import type { Fornecedor, VinculoObra } from './fornecedor';
-import type { Funcionario, Remessa } from './funcionario';
+import type { ArquivoFuncionario, EnvioArquivos } from './arquivo';
 import type { Analise, EventoHistorico, TempoAnalise } from './historico';
 import type { ListaExigencias, TipoDocumento } from './listaExigencias';
 import type { Obra, ObraLista } from './obra';
@@ -18,8 +18,8 @@ export type Dataset = {
   fornecedores: readonly Fornecedor[];
   vinculos: readonly VinculoObra[];
   documentos: readonly DocumentoEmpresa[];
-  remessas: readonly Remessa[];
-  funcionarios: readonly Funcionario[];
+  envios: readonly EnvioArquivos[];
+  arquivos: readonly ArquivoFuncionario[];
   analises: readonly Analise[];
   eventos: readonly EventoHistorico[];
   temposAnalise: readonly TempoAnalise[];

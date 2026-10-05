@@ -1,9 +1,7 @@
 import {
   alcanceNaObra,
   composicaoLista,
-  documentosDaPessoa,
   fornecedoresDaObra,
-  funcionariosEmCampoNaObra,
   listasAplicaveisNaObra,
   listasDaObra,
   pendenciasDaObra,
@@ -20,7 +18,7 @@ import type { FichaObra } from '../types';
 function documentosDoTipo(listas: ListaExigencias[], tipo: TipoFornecimento): string[] {
   return [
     ...new Set(
-      listas.filter((l) => l.tipo === tipo).flatMap((l) => l.itens.flatMap((i) => (i.kind === 'documento' ? [i.tipoDocumentoId] : []))),
+      listas.filter((l) => l.tipo === tipo).flatMap((l) => l.itens.map((i) => i.tipoDocumentoId)),
     ),
   ];
 }
@@ -31,8 +29,6 @@ function carregar(ds: Dataset, id: string): FichaObra | null {
   const listas = listasDaObra(ds, id);
   const fornecedores = fornecedoresDaObra(ds, id);
   const pendencias = pendenciasDaObra(ds, id);
-  const remessa = ds.remessas.filter((r) => r.obraId === id).sort((a, b) => b.enviadaEm.localeCompare(a.enviadaEm))[0];
-  const fornecedorRemessa = remessa ? ds.fornecedores.find((f) => f.id === remessa.fornecedorId) : undefined;
 
   return {
     obra,
@@ -60,17 +56,6 @@ function carregar(ds: Dataset, id: string): FichaObra | null {
           ]
         : [];
     }),
-    funcionariosEmCampo: funcionariosEmCampoNaObra(ds, id),
-    remessaRecente:
-      remessa && fornecedorRemessa
-        ? {
-            fornecedor: fornecedorRemessa,
-            pessoas: ds.funcionarios
-              .filter((f) => f.remessaId === remessa.id)
-              .map((funcionario) => ({ funcionario, ...documentosDaPessoa(ds, funcionario) })),
-          }
-        : null,
-    temItemFuncionarios: listas.some((l) => l.itens.some((i) => i.kind === 'funcionarios')),
     pendencias,
     totalPendencias: pendencias.reduce((t, g) => t + g.pendencias.length, 0),
     historico: ds.eventos

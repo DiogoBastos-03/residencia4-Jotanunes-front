@@ -26,8 +26,8 @@ export function FilaFiltros({ fila, filtros, onChange }: FilaFiltrosProps) {
         onChange={(tipo) => onChange({ tipo })}
         options={[
           { value: 'todos', label: t.filtros.todos, count: fila.contagem.todos },
-          { value: 'documentos', label: t.filtros.documentos, count: fila.contagem.documentos },
-          { value: 'funcionarios', label: t.filtros.funcionarios, count: fila.contagem.funcionarios },
+          { value: 'empresa', label: t.filtros.empresa, count: fila.contagem.empresa },
+          { value: 'funcionario', label: t.filtros.funcionario, count: fila.contagem.funcionario },
           { value: 'urgentes', label: t.filtros.urgentes, count: fila.contagem.urgentes },
         ]}
       />

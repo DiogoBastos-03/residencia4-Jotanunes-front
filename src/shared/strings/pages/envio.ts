@@ -1,0 +1,48 @@
+import { dominio } from '../dominio';
+
+/** Envio de documentos de funcionário (/fila/envio/:id). */
+export const envioPage = {
+  title: (documento: string) => documento,
+  subtitle: (fornecedor: string, lista: string, arquivos: number, data: string) =>
+    `${fornecedor} • ${lista} • ${dominio.arquivos(arquivos)} enviados em ${data}`,
+  metricas: { aprovados: 'Aprovados', aguardando: 'Aguardando análise', reprovados: 'Reprovados' },
+  resumoItem: (texto: string) => `No item, somando todos os envios: ${texto}.`,
+  nota: 'Cada arquivo é analisado sozinho e tem a sua própria validade. Este item nunca fica completo: o fornecedor pode enviar mais arquivos a qualquer momento, e ele não entra na conta de fornecedor apto.',
+  caption: 'Arquivos do envio',
+  colunas: { arquivo: 'Arquivo', validade: 'Validade', situacao: 'Situação', decisao: 'Decisão' },
+  semValidade: 'Sem validade',
+  aprovar: 'Aprovar',
+  reprovar: 'Reprovar',
+  aprovarArquivo: (nome: string) => `Aprovar ${nome}`,
+  reprovarArquivo: (nome: string) => `Reprovar ${nome}`,
+  visualizar: 'Visualizar',
+  decididoPor: (quem: string, data: string) => `${quem}, ${data}`,
+  aprovadoToast: (nome: string) => `${nome} aprovado.`,
+  reprovadoToast: (nome: string) => `${nome} reprovado e fornecedor avisado.`,
+  envioAnalisado: 'Envio analisado.',
+  leituraNota: 'Modo leitura: todos os arquivos deste envio já foram decididos.',
+  naoEncontradoTitle: 'Envio não encontrado',
+  naoEncontradoDescription: 'O endereço pode estar incorreto. Volte e escolha outro envio.',
+  naoEncontradoAction: 'Voltar',
+  drawer: {
+    subtitle: (documento: string, fornecedor: string) => `${documento} • ${fornecedor}`,
+    validadeInformada: 'Validade informada',
+    validade: 'Validade',
+    enviadoEm: 'Enviado em',
+    tamanho: 'Tamanho',
+    situacao: 'Situação',
+    decisao: 'Decisão',
+    motivo: 'Motivo',
+    observacao: 'Observação ao fornecedor',
+    fechar: 'Fechar',
+  },
+  modalReprovar: {
+    title: 'Reprovar arquivo',
+    description: (nome: string) => `${nome} volta para o fornecedor corrigir. Os outros arquivos do envio não mudam.`,
+    motivo: 'Motivo da reprovação',
+    observacao: 'Observação para o fornecedor',
+    observacaoErro: 'Explique ao fornecedor o que corrigir.',
+    cancelar: 'Cancelar',
+    confirmar: 'Reprovar arquivo',
+  },
+} as const;

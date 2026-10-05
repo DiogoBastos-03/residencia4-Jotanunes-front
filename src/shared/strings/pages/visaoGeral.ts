@@ -20,7 +20,7 @@ export const visaoGeralPage = {
     title: 'Obras em execução',
     action: 'Ver todas as obras',
     fornecedores: 'Fornecedores',
-    funcionarios: 'Em campo',
+    listas: 'Listas',
     pendencias: 'Pendências',
     semLista: 'Sem lista de exigências',
     emptyTitle: 'Nenhuma obra em execução',
@@ -30,7 +30,7 @@ export const visaoGeralPage = {
     title: 'Fila prioritária',
     action: 'Ver fila completa',
     emptyTitle: 'A fila está vazia',
-    emptyDescription: 'Nenhum documento ou remessa espera decisão. Novos envios dos fornecedores aparecem aqui primeiro.',
+    emptyDescription: 'Nenhum documento ou envio espera decisão. Novos envios dos fornecedores aparecem aqui primeiro.',
   },
   vencimentos: {
     title: 'Vencimentos próximos',

@@ -10,7 +10,7 @@ export function useVinculosObra() {
   const vincularFornecedor = useCallback((novo: NovoVinculo) => {
     datasetStore.set((ds) => ({
       ...ds,
-      vinculos: [...ds.vinculos, { ...novo, vinculadoEm: ds.agora, funcionariosEmCampo: 0 }],
+      vinculos: [...ds.vinculos, { ...novo, vinculadoEm: ds.agora }],
       eventos: [
         {
           id: `ev-vinculo-${novo.fornecedorId}-${novo.obraId}-${ds.eventos.length}`,

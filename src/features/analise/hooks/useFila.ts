@@ -5,7 +5,7 @@ import type { Fila } from '../types';
 
 const VAZIA: Fila = {
   entradas: [],
-  contagem: { todos: 0, documentos: 0, funcionarios: 0, urgentes: 0 },
+  contagem: { todos: 0, empresa: 0, funcionario: 0, urgentes: 0 },
   atrasadas: 0,
 };
 
@@ -15,15 +15,15 @@ export function carregarFila(ds: Dataset): Fila {
     entradas,
     contagem: {
       todos: entradas.length,
-      documentos: entradas.filter((e) => e.kind === 'documento').length,
-      funcionarios: entradas.filter((e) => e.kind === 'remessa').length,
+      empresa: entradas.filter((e) => e.kind === 'documento').length,
+      funcionario: entradas.filter((e) => e.kind === 'envio').length,
       urgentes: entradas.filter((e) => e.prioridade === 'urgente').length,
     },
     atrasadas: entradas.filter((e) => e.esperaDias > 2).length,
   };
 }
 
-/** Fila de análise: documentos, renovações e remessas esperando decisão. */
+/** Fila de análise: documentos, renovações e envios de documento de funcionário esperando decisão. */
 export function useFila() {
   const ds = useStore(datasetStore);
   return useMockQuery('fila', () => carregarFila(ds), { version: ds, empty: VAZIA });

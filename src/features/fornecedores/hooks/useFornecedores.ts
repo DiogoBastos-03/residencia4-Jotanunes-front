@@ -4,7 +4,11 @@ import { useMockQuery, useStore } from '@/shared/lib';
 import type { ListaFornecedores } from '../types';
 
 export function carregarFornecedores(ds: Dataset): ListaFornecedores {
-  const linhas = ds.fornecedores.map((fornecedor) => ({ fornecedor, resumo: resumoFornecedor(ds, fornecedor.id) }));
+  const linhas = ds.fornecedores.map((fornecedor) => ({
+    fornecedor,
+    resumo: resumoFornecedor(ds, fornecedor.id),
+    aguardandoAcesso: !fornecedor.acessoPortal.acessouEm,
+  }));
   return {
     linhas,
     porSituacao: {

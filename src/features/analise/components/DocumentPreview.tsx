@@ -1,6 +1,5 @@
 import { formatCnpj, formatDate } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import type { DetalheEnvio } from '../types';
 
 const t = strings.pages.analise.viewer;
 const LARGURAS = ['w-full', 'w-11/12', 'w-5/6', 'w-[92%]', 'w-3/5', 'w-full', 'w-4/5', 'w-[94%]', 'w-1/2'];
@@ -15,14 +14,23 @@ function Linhas({ inicio, quantas }: { inicio: number; quantas: number }) {
   );
 }
 
-/** Folha simulada do documento. Muda o desenho a cada página. */
-export function DocumentPreview({ detalhe, pagina }: { detalhe: DetalheEnvio; pagina: number }) {
+export type PreviewProps = {
+  empresa: string;
+  cnpj: string;
+  titulo: string;
+  enviadoEm: string;
+  pagina: number;
+  paginas: number;
+};
+
+/** Folha simulada do arquivo enviado. Muda o desenho a cada página. */
+export function DocumentPreview({ empresa, cnpj, titulo, enviadoEm, pagina, paginas }: PreviewProps) {
   return (
     <div className="w-full max-w-107.5 border border-border bg-surface px-9.5 py-8.5 max-sm:px-5 max-sm:py-6">
       <p className="text-tag font-medium text-ink-4 uppercase">
-        {detalhe.fornecedor.razaoSocial} — {formatCnpj(detalhe.fornecedor.cnpj)}
+        {empresa} — {formatCnpj(cnpj)}
       </p>
-      <p className="mt-3 text-block font-semibold">{detalhe.exigido.nome}</p>
+      <p className="mt-3 text-block font-semibold">{titulo}</p>
       <span className="my-3 block h-px bg-border" />
       <Linhas inicio={pagina} quantas={5} />
       <p className="mt-5 text-label font-semibold">{t.secao}</p>
@@ -47,7 +55,7 @@ export function DocumentPreview({ detalhe, pagina }: { detalhe: DetalheEnvio; pa
           </div>
         ))}
       </div>
-      <p className="mt-5 text-tag text-ink-4">{t.rodape(formatDate(detalhe.enviadoEm, 'date'), pagina, detalhe.paginas)}</p>
+      <p className="mt-5 text-tag text-ink-4">{t.rodape(formatDate(enviadoEm, 'date'), pagina, paginas)}</p>
     </div>
   );
 }

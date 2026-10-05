@@ -6,8 +6,9 @@
 - `pages/*.ts`: textos de cada página. `layout.ts`: menu e sidebar. `ui.ts`: componentes base. `status.ts`: rótulos dos badges e tags.
 
 **Dados de exemplo** — `src/mocks/`
-- Um arquivo por domínio: `obras.ts`, `fornecedores.ts`, `exigencias.ts`, `documentos.ts`, `funcionarios.ts`, `historico.ts`.
-- `exemplos.ts`: o conteúdo que preenche os formulários e drawers ao abrir.
+- Um arquivo por domínio: `obras.ts`, `fornecedores.ts`, `exigencias.ts`, `documentos.ts`, `arquivos.ts` (documentos de funcionário: envios e arquivos), `historico.ts`.
+- `exemplos.ts`: o conteúdo que preenche os formulários e drawers ao abrir (cadastro de fornecedor, nova lista, novo documento, vínculos).
+- `historico.ts` também guarda o tempo médio de análise por período (Relatórios).
 - `tempo.ts`: o "hoje" do sistema (16/09/2026). Esperas e vencimentos são calculados a partir dele.
 - Contagens (fila, "5 de 9", aptos, pendências, vencimentos) não são digitadas: saem dos dados, por `src/entities/lib/`.
 
@@ -22,5 +23,9 @@
 - Movimento reduzido: `src/app/styles/reset.css` e os blocos `prefers-reduced-motion` de cada utilitária.
 
 **Logo** — `src/app/brand/`. Um arquivo com "simbolo" ou "symbol" no nome é a versão só do símbolo; qualquer outro é a versão com o nome. Lido por `src/shared/ui/Logo.tsx`.
+
+**Ações em memória** — `src/mocks/index.ts` (`datasetStore`). Cada feature tem um hook de ações (`useDecisoes`, `useVinculosObra`, `useAcoesFornecedor`, `useAcoesLista`…) que altera a store; o F5 volta tudo ao exemplo.
+
+**Navegação da análise** — a origem (fila, fornecedor ou obra) viaja na URL (`?de=`); helpers em `src/shared/lib/origem.ts` e `paths.ts`. A sequência "3 de 7" e o avanço depois de decidir estão em `src/features/analise/hooks/useSequencia.ts` e `useAvancar.ts`.
 
 **Estados para revisão** — `/_estados` (lista em `src/pages/estados/catalogo.ts`; textos em `src/shared/strings/pages/estados.ts`).

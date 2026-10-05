@@ -47,3 +47,4 @@ export { Logo, hasLogo, type LogoVariant } from './Logo';
 export { AsyncContent } from './AsyncContent';
 export { MetricSkeleton } from './MetricSkeleton';
 export { HistoryList, type HistoryItem } from './HistoryList';
+export { ChoiceCard } from './ChoiceCard';

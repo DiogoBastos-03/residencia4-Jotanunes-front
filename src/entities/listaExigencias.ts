@@ -8,41 +8,24 @@ export type TipoDocumento = {
 
 export type ExigenciaValidade = 'comData' | 'semValidade';
 
-export type ItemDocumento = {
+/**
+ * empresa: um arquivo, que vale para todas as obras.
+ * funcionario: vários arquivos no mesmo item, aceitos ao longo do tempo, cada um analisado e com validade própria.
+ */
+export type EscopoItem = 'empresa' | 'funcionario';
+
+export type ItemExigido = {
   id: string;
-  kind: 'documento';
   tipoDocumentoId: string;
+  escopo: EscopoItem;
   obrigatoriedade: Obrigatoriedade;
+  /** Para documento de funcionário, a validade é de cada arquivo. */
   validade: ExigenciaValidade;
   /** Dias de antecedência do aviso de vencimento (só com validade). */
   avisoDias?: number;
   formatos: 'pdfImagem' | 'pdf';
   instrucoes?: string;
 };
-
-export type CampoPessoa = 'cpf' | 'nome' | 'telefone' | 'funcao' | 'obra';
-
-export type DocumentoPessoaExigido = {
-  id: string;
-  nome: string;
-  obrigatoriedade: Obrigatoriedade;
-  validade: ExigenciaValidade;
-  avisoDias?: number;
-};
-
-/** Item de funcionários: acompanhado por pessoa, não entra na conta de fornecedor apto. */
-export type ItemFuncionarios = {
-  id: string;
-  kind: 'funcionarios';
-  nome: string;
-  obrigatoriedade: Obrigatoriedade;
-  camposPessoa: readonly CampoPessoa[];
-  documentosPessoa: readonly DocumentoPessoaExigido[];
-  limitePorRemessa: number | null;
-  envioDeUmaVez: boolean;
-};
-
-export type ItemExigido = ItemDocumento | ItemFuncionarios;
 
 export type SituacaoLista = 'ativo' | 'rascunho';
 

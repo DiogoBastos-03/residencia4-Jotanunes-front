@@ -12,7 +12,7 @@ const COLUNAS: readonly TableColumn<ListaNaObra>[] = [
   {
     key: 'itens',
     header: t.colunas.itens,
-    cell: (l) => strings.dominio.composicao(l.composicao.documentosObrigatorios, l.composicao.documentosOpcionais, l.composicao.itensFuncionarios),
+    cell: (l) => strings.dominio.composicao(l.composicao.documentosObrigatorios, l.composicao.documentosOpcionais, l.composicao.documentosFuncionario),
   },
   { key: 'aplica', header: t.colunas.aplica, cell: (l) => t.aplica(l.aplicaA, l.fornecedoresNaObra) },
   { key: 'vinculada', header: t.colunas.vinculada, nowrap: true, cell: (l) => <Mono>{formatDate(l.vinculadaEm, 'date')}</Mono> },

@@ -9,6 +9,14 @@ export type Prioridade = 'urgente' | 'normal';
 
 export type MotivoReprovacao = 'ilegivel' | 'foraValidade' | 'incorreto' | 'faltaAssinatura';
 
+/** Quem decidiu, quando e por quê — mostrado no modo leitura da análise. */
+export type DecisaoRegistrada = {
+  por: string;
+  em: IsoDate;
+  motivo?: MotivoReprovacao;
+  observacao?: string;
+};
+
 export type EnvioAnterior = {
   arquivo: string;
   enviadoEm: IsoDate;
@@ -46,5 +54,7 @@ export type DocumentoEmpresa = {
   /** Validade que o fornecedor informou ao enviar — a equipe confirma ou corrige na análise. */
   validadeInformada?: IsoDate;
   renovacao?: Renovacao;
+  /** Última decisão sobre a versão em vigor. */
+  decisao?: DecisaoRegistrada;
   enviosAnteriores: readonly EnvioAnterior[];
 };

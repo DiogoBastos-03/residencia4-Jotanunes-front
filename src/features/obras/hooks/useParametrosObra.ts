@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 
-export type AbaObra = 'fornecedores' | 'exigencias' | 'funcionarios' | 'pendencias' | 'historico';
+export type AbaObra = 'fornecedores' | 'exigencias' | 'pendencias' | 'historico';
 export type DrawerObra = 'fornecedor' | 'lista';
 
-const ABAS: readonly AbaObra[] = ['fornecedores', 'exigencias', 'funcionarios', 'pendencias', 'historico'];
+const ABAS: readonly AbaObra[] = ['fornecedores', 'exigencias', 'pendencias', 'historico'];
 
 /**
- * Estado da ficha da obra na URL: ?aba=, ?drawer=, ?desvincular=<lista>, ?pessoa=, ?form=vazio.
+ * Estado da ficha da obra na URL: ?aba=, ?drawer=, ?desvincular=<lista>, ?form=vazio.
  * Tudo abre clicando; a URL só permite voltar e abrir direto pela /_estados.
  */
 export function useParametrosObra() {
@@ -36,12 +36,10 @@ export function useParametrosObra() {
     aba,
     drawer,
     desvincular: params.get('desvincular'),
-    pessoa: params.get('pessoa'),
     formVazio: params.get('form') === 'vazio',
     setAba: (valor: AbaObra) => definir({ aba: valor === 'fornecedores' ? null : valor }),
     abrirDrawer: (valor: DrawerObra | null) => definir({ drawer: valor, form: null }),
     setDesvincular: (listaId: string | null) => definir({ desvincular: listaId }),
-    setPessoa: (id: string | null) => definir({ pessoa: id }),
     /** Fecha o drawer e mostra a aba onde o resultado aparece. */
     concluirDrawer: (aba: AbaObra) => definir({ drawer: null, form: null, aba: aba === 'fornecedores' ? null : aba }),
   };

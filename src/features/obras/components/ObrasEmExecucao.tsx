@@ -49,7 +49,7 @@ export function ObrasEmExecucao() {
               <EmptyState framed={false} title={t.emptyTitle} description={t.emptyDescription} />
             ) : (
               <ul className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {emExecucao.map(({ obra, fornecedores, funcionarios, pendencias, listas }) => (
+                {emExecucao.map(({ obra, fornecedores, pendencias, listas }) => (
                   <li key={obra.id}>
                     <CardLink to={paths.obra(obra.id)}>
                       <div className="flex items-start justify-between gap-2">
@@ -61,7 +61,7 @@ export function ObrasEmExecucao() {
                       </Text>
                       <dl className="mt-auto grid grid-cols-3 gap-3 pt-4">
                         <Numero label={t.fornecedores} valor={fornecedores} />
-                        <Numero label={t.funcionarios} valor={funcionarios} />
+                        <Numero label={t.listas} valor={listas} />
                         <Numero label={t.pendencias} valor={pendencias} />
                       </dl>
                     </CardLink>
