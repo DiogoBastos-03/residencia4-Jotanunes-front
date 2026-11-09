@@ -70,8 +70,10 @@ export const fornecedorPage = {
     aguardando: (data: string) => `Convite enviado em ${data}. Ainda não entrou no portal.`,
     semConvite: 'Cadastrado sem convite. Envie o convite para o fornecedor entrar no portal.',
     emailConvite: 'E-mail do convite',
-    vazioTitle: 'Nenhum contato cadastrado',
-    vazioDescription: 'A API não guarda contatos de pessoas da empresa. O telefone e o e-mail da empresa estão no topo da ficha.',
-    acessoIndisponivel: 'Sem endpoint de convite na API: o primeiro acesso ao portal e o reenvio do convite ficam indisponíveis.',
+    editar: 'Editar',
+    editarDescricao: (papel: string) => `Editar ${papel.toLowerCase()}`,
+    enviarConvite: 'Enviar convite',
+    semSeguranca: 'Ninguém indicado para a segurança do trabalho. Fornecedor de serviço precisa de alguém para receber os avisos do canteiro.',
+    adicionarSeguranca: 'Adicionar contato',
   },
 } as const;

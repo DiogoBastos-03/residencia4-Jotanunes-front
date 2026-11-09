@@ -57,10 +57,7 @@ export function ObrasEmExecucao() {
                         {listas === 0 && <Badge status="semLista" />}
                       </div>
                       <Text size="support" tone="muted" className="mt-1">
-                        {/* Obra da API não tem código nem cidade: a linha some. */}
-                        {obra.codigo && <Mono>{obra.codigo}</Mono>}
-                        {obra.codigo && obra.cidade && ` ${strings.common.separator} `}
-                        {obra.cidade && strings.dominio.cidadeUf(obra.cidade, obra.uf)}
+                        <Mono>{obra.codigo}</Mono> {strings.common.separator} {strings.dominio.cidadeUf(obra.cidade, obra.uf)}
                       </Text>
                       <dl className="mt-auto grid grid-cols-3 gap-3 pt-4">
                         <Numero label={t.fornecedores} valor={fornecedores} />

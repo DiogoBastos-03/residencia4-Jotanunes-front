@@ -9,17 +9,12 @@ const t = strings.pages.obra.fornecedores;
 const COLUNAS: readonly TableColumn<FornecedorNaObra>[] = [
   { key: 'nome', header: t.colunas.fornecedor, tone: 'strong', mobile: 'title', cell: (f) => f.fornecedor.razaoSocial },
   { key: 'tipo', header: t.colunas.tipo, cell: (f) => <BadgeGroup statuses={f.fornecedor.tipos} /> },
-  { key: 'servico', header: t.colunas.servico, cell: (f) => f.vinculo.servicoContratado ?? strings.common.emptyValue },
+  { key: 'servico', header: t.colunas.servico, cell: (f) => f.vinculo.servicoContratado },
   {
     key: 'periodo',
     header: t.colunas.periodo,
     nowrap: true,
-    cell: (f) =>
-      f.vinculo.inicio && f.vinculo.fim ? (
-        <Mono>{t.periodo(formatDate(f.vinculo.inicio, 'monthYear'), formatDate(f.vinculo.fim, 'monthYear'))}</Mono>
-      ) : (
-        strings.common.emptyValue
-      ),
+    cell: (f) => <Mono>{t.periodo(formatDate(f.vinculo.inicio, 'monthYear'), formatDate(f.vinculo.fim, 'monthYear'))}</Mono>,
   },
   { key: 'listas', header: t.colunas.listas, cell: (f) => strings.dominio.documentosDe(f.listasAplicaveis, f.listasNaObra) },
   {
@@ -30,8 +25,7 @@ const COLUNAS: readonly TableColumn<FornecedorNaObra>[] = [
   { key: 'situacao', header: t.colunas.situacao, mobile: 'badge', cell: (f) => <Badge status={f.resumo.situacao} /> },
 ];
 
-/** Sem `onVincular`, o botão aparece desabilitado (a API não cria vínculo; o motivo fica no topo da ficha). */
-export function AbaFornecedores({ ficha, onVincular }: { ficha: FichaObra; onVincular: (() => void) | undefined }) {
+export function AbaFornecedores({ ficha, onVincular }: { ficha: FichaObra; onVincular: () => void }) {
   if (ficha.fornecedores.length === 0) {
     return (
       <EmptyState
@@ -39,7 +33,7 @@ export function AbaFornecedores({ ficha, onVincular }: { ficha: FichaObra; onVin
         title={t.vazioTitle}
         description={t.vazioDescription}
         action={
-          <Button variant="primary" icon={PlusIcon} disabled={!onVincular} onClick={onVincular}>
+          <Button variant="primary" icon={PlusIcon} onClick={onVincular}>
             {strings.pages.obra.vincularFornecedor}
           </Button>
         }

@@ -1,5 +1,4 @@
 export { datasetStore } from './store';
-export { garantirDataset, recarregarFornecedor } from './hidratacao';
 export { useDatasetQuery } from './useDatasetQuery';
 export {
   exemplosFormulario,

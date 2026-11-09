@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
-import { fornecedorApi, normalizarTipos, type Fornecedor } from '@/entities';
-import { datasetStore, recarregarFornecedor } from '@/mocks';
-import { USAR_API } from '@/shared/lib';
+import { normalizarTipos, type Contato, type Fornecedor } from '@/entities';
+import { datasetStore } from '@/mocks';
 import type { EdicaoFornecedor, NovoFornecedor } from '../types';
 
 function slug(texto: string): string {
@@ -15,50 +14,23 @@ function slug(texto: string): string {
 
 const mesmosTipos = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((t) => b.includes(t));
 
-/**
- * Depois de mudar algo na API, a tela mostra o que o banco devolve — não o que a tela mandou.
- * Se só o recarregamento falhar, a mudança já está no banco: aparece no próximo carregamento.
- */
-async function recarregarSemFalhar(id: string): Promise<void> {
-  try {
-    await recarregarFornecedor(id);
-  } catch {
-    // A mutação deu certo; não há o que desfazer.
-  }
-}
-
-/**
- * Ações sobre fornecedores. Com a API (VITE_USE_API=true), chamam o back e recarregam o
- * fornecedor afetado; sem a API, alteram os dados em memória. Erros da API sobem como
- * ApiError para a tela decidir onde mostrar (ver errosDaApi em ../lib.ts).
- */
+/** Ações sobre fornecedores. Alteram os dados em memória; todas as telas recalculam. Some no F5. */
 export function useAcoesFornecedor() {
-  const definirBloqueio = useCallback(async (id: string, bloqueado: boolean) => {
-    if (USAR_API) {
-      await fornecedorApi.definirBloqueio(id, bloqueado);
-      await recarregarSemFalhar(id);
-      return;
-    }
+  const definirBloqueio = useCallback((id: string, bloqueado: boolean) => {
     datasetStore.set((ds) => ({ ...ds, fornecedores: ds.fornecedores.map((f) => (f.id === id ? { ...f, bloqueado } : f)) }));
   }, []);
 
-  /** Só nos dados de demonstração: a API não tem endpoint de convite. */
   const reenviarAcesso = useCallback((id: string, email: string) => {
     datasetStore.set((ds) => ({
       ...ds,
       fornecedores: ds.fornecedores.map((f) =>
-        f.id === id ? { ...f, acessoPortal: { acessouEm: f.acessoPortal?.acessouEm, convidadoEm: ds.agora, emailConvite: email } } : f,
+        f.id === id ? { ...f, acessoPortal: { ...f.acessoPortal, convidadoEm: ds.agora, emailConvite: email } } : f,
       ),
     }));
   }, []);
 
-  /** Cria o fornecedor (e, só na demonstração, o vínculo com a obra). Devolve o id criado. */
-  const cadastrar = useCallback(async (novo: NovoFornecedor): Promise<string> => {
-    if (USAR_API) {
-      const id = await fornecedorApi.cadastrar(novo);
-      await recarregarSemFalhar(id);
-      return id;
-    }
+  /** Cria o fornecedor (e o vínculo com a obra, se houver). Devolve o id criado. */
+  const cadastrar = useCallback((novo: NovoFornecedor): string => {
     const base = slug(novo.razaoSocial) || novo.cnpj;
     let id = base;
     datasetStore.set((ds) => {
@@ -68,14 +40,23 @@ export function useAcoesFornecedor() {
       const fornecedor: Fornecedor = {
         id,
         razaoSocial: novo.razaoSocial.trim(),
+        nomeFantasia: novo.nomeFantasia.trim() || undefined,
         cnpj: novo.cnpj.replace(/\D/g, ''),
         tipos: normalizarTipos(novo.tipos),
         telefone: novo.telefone.replace(/\D/g, ''),
         email: novo.email.trim(),
         desde: hoje,
         bloqueado: false,
-        acessoPortal: { convidadoEm: null, emailConvite: novo.email.trim() },
-        contatos: [],
+        acessoPortal: { convidadoEm: novo.enviarConvite ? ds.agora : null, emailConvite: novo.contato.email.trim() },
+        contatos: [
+          {
+            papel: 'principal',
+            nome: novo.contato.nome.trim(),
+            cargo: novo.contato.cargo.trim(),
+            email: novo.contato.email.trim(),
+            telefone: novo.contato.telefone,
+          },
+        ],
       };
       return {
         ...ds,
@@ -98,35 +79,32 @@ export function useAcoesFornecedor() {
     return id;
   }, []);
 
-  /**
-   * Edita dados e tipos. Na API são duas chamadas (PATCH dos dados, PUT dos tipos), feitas só
-   * se aquela parte mudou. Devolve false quando nada mudou.
-   */
-  const editar = useCallback(async (atual: Fornecedor, dados: EdicaoFornecedor): Promise<boolean> => {
+  /** Edita dados e tipos. Devolve false quando nada mudou. */
+  const editar = useCallback((atual: Fornecedor, dados: EdicaoFornecedor): boolean => {
     const tipos = normalizarTipos(dados.tipos);
-    const mudouDados =
-      dados.razaoSocial.trim() !== atual.razaoSocial || dados.telefone.replace(/\D/g, '') !== atual.telefone || dados.email.trim() !== atual.email;
-    const mudouTipos = !mesmosTipos(tipos, atual.tipos);
-    if (!mudouDados && !mudouTipos) return false;
-    if (USAR_API) {
-      try {
-        if (mudouDados) await fornecedorApi.editarDados(atual, dados);
-        if (mudouTipos) await fornecedorApi.trocarTipos(atual.id, tipos);
-      } finally {
-        // Mesmo se a segunda chamada falhar, a primeira pode ter salvo: mostra o que está no banco.
-        await recarregarSemFalhar(atual.id);
-      }
-      return true;
-    }
+    const telefone = dados.telefone.replace(/\D/g, '');
+    const mudou =
+      dados.razaoSocial.trim() !== atual.razaoSocial || telefone !== atual.telefone || dados.email.trim() !== atual.email || !mesmosTipos(tipos, atual.tipos);
+    if (!mudou) return false;
     datasetStore.set((ds) => ({
       ...ds,
       fornecedores: ds.fornecedores.map((f) =>
-        f.id === atual.id
-          ? { ...f, razaoSocial: dados.razaoSocial.trim(), telefone: dados.telefone.replace(/\D/g, ''), email: dados.email.trim(), tipos }
-          : f,
+        f.id === atual.id ? { ...f, razaoSocial: dados.razaoSocial.trim(), telefone, email: dados.email.trim(), tipos } : f,
       ),
     }));
     return true;
+  }, []);
+
+  /** Cria ou substitui o contato do papel informado (principal ou segurança do trabalho). */
+  const salvarContato = useCallback((id: string, contato: Contato) => {
+    datasetStore.set((ds) => ({
+      ...ds,
+      fornecedores: ds.fornecedores.map((f) => {
+        if (f.id !== id) return f;
+        const existe = f.contatos.some((c) => c.papel === contato.papel);
+        return { ...f, contatos: existe ? f.contatos.map((c) => (c.papel === contato.papel ? contato : c)) : [...f.contatos, contato] };
+      }),
+    }));
   }, []);
 
   return {
@@ -135,5 +113,6 @@ export function useAcoesFornecedor() {
     reenviarAcesso,
     cadastrar,
     editar,
+    salvarContato,
   };
 }

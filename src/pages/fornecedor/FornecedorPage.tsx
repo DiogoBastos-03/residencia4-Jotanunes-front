@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { BuildingStorefrontIcon, EnvelopeIcon, LockOpenIcon, NoSymbolIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { useParams } from 'react-router';
+import type { Contato } from '@/entities';
 import {
   AbaContatos,
   AbaDocumentos,
   AbaExigenciasFornecedor,
   AbaHistoricoFornecedor,
   AbaObrasFornecedor,
-  errosDaApi,
   ModalBloquear,
+  ModalEditarContato,
   ModalEditarFornecedor,
   ModalReenviarAcesso,
   SituacaoFornecedor,
@@ -51,20 +52,7 @@ export function FornecedorPage() {
   const p = useParametrosFornecedor();
   const { desbloquear } = useAcoesFornecedor();
   const { showToast } = useToast();
-  const [desbloqueando, setDesbloqueando] = useState(false);
-
-  async function confirmarDesbloqueio(id: string) {
-    setDesbloqueando(true);
-    try {
-      await desbloquear(id);
-      showToast(strings.modais.bloquear.desbloqueadoToast);
-    } catch (erro) {
-      // Sem formulário nem modal: o erro da API aparece no aviso.
-      showToast(errosDaApi(erro).topo ?? strings.api.semResposta, 'error');
-    } finally {
-      setDesbloqueando(false);
-    }
-  }
+  const [contatoAberto, setContatoAberto] = useState<Contato['papel'] | null>(null);
   useDocumentTitle(query.data?.fornecedor.razaoSocial ?? strings.pages.fornecedores.title);
 
   return (
@@ -123,8 +111,14 @@ export function FornecedorPage() {
                     </Button>
                   )}
                   {ficha.fornecedor.bloqueado ? (
-                    <Button icon={LockOpenIcon} disabled={desbloqueando} aria-busy={desbloqueando} onClick={() => void confirmarDesbloqueio(ficha.fornecedor.id)}>
-                      {desbloqueando ? strings.modais.bloquear.desbloqueando : t.desbloquear}
+                    <Button
+                      icon={LockOpenIcon}
+                      onClick={() => {
+                        desbloquear(ficha.fornecedor.id);
+                        showToast(strings.modais.bloquear.desbloqueadoToast);
+                      }}
+                    >
+                      {t.desbloquear}
                     </Button>
                   ) : (
                     <Button icon={NoSymbolIcon} onClick={() => p.setModal('bloquear')}>
@@ -143,9 +137,10 @@ export function FornecedorPage() {
                 {p.aba === 'exigencias' && <AbaExigenciasFornecedor ficha={ficha} />}
                 {p.aba === 'obras' && <AbaObrasFornecedor ficha={ficha} />}
                 {p.aba === 'historico' && <AbaHistoricoFornecedor ficha={ficha} />}
-                {p.aba === 'contatos' && <AbaContatos ficha={ficha} onReenviar={() => p.setModal('reenviar')} />}
+                {p.aba === 'contatos' && <AbaContatos ficha={ficha} onReenviar={() => p.setModal('reenviar')} onEditar={setContatoAberto} />}
               </div>
             </Tabs>
+            <ModalEditarContato fornecedor={ficha.fornecedor} papel={contatoAberto} onClose={() => setContatoAberto(null)} />
             <ModalEditarFornecedor fornecedor={ficha.fornecedor} open={p.modal === 'editar'} onClose={() => p.setModal(null)} />
             <ModalBloquear fornecedor={ficha.fornecedor} open={p.modal === 'bloquear' && !ficha.fornecedor.bloqueado} onClose={() => p.setModal(null)} />
             <ModalReenviarAcesso fornecedor={p.modal === 'reenviar' && ficha.aguardandoAcesso ? ficha.fornecedor : null} onClose={() => p.setModal(null)} />

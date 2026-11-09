@@ -1,3 +1,5 @@
+> **Nota (09/11/2026): a integração foi removida nesta etapa.** O painel interno voltou a ser 100% demonstração, para ir para a Vercel antes de o back existir. A camada de API (`http`, `apiError`, `dto`/`mapper`/`api` de fornecedor e obra, hidratação, proxy do Vite, `.env`) foi apagada. Este documento fica como registro do que foi feito e do que o back precisa, para ser retomado quando a API subir. Continuam no código, por serem melhorias de modelo: fornecedor com `tipos` (um ou dois), `telefone`, o modal "Editar dados", `BadgeGroup` e a opção `multiple` do `ChoiceCard`.
+
 # Integração com a API interna
 
 O front agora usa a API real (`../residenciaIV-api-interna-dev`) **no que ela já tem**: fornecedores, obras e o vínculo entre eles (só leitura). O resto continua sendo demonstração, mas gerado **sobre os fornecedores e obras reais**.

@@ -5,7 +5,7 @@ import type { BlocoProps } from './types';
 
 const t = strings.pages.fornecedorNovo.identificacao;
 
-/** Identificação da empresa: tudo o que a API guarda dela, menos o tipo. */
+/** Identificação da empresa: CNPJ, nomes, telefone e e-mail. */
 export function BlocoIdentificacao({ dados, erros, onChange }: BlocoProps) {
   return (
     <Card as="section">
@@ -25,6 +25,9 @@ export function BlocoIdentificacao({ dados, erros, onChange }: BlocoProps) {
         </Field>
         <Field label={t.razao} error={erros.razaoSocial}>
           {(control) => <Input {...control} value={dados.razaoSocial} onChange={(e) => onChange({ razaoSocial: e.target.value })} />}
+        </Field>
+        <Field label={t.fantasia} className="lg:col-span-2">
+          {(control) => <Input {...control} value={dados.nomeFantasia} onChange={(e) => onChange({ nomeFantasia: e.target.value })} />}
         </Field>
         <Field label={t.telefone} error={erros.telefone}>
           {(control) => (

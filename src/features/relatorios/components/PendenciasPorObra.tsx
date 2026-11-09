@@ -21,12 +21,7 @@ export function PendenciasPorObra({ linhas }: { linhas: readonly PendenciasDaObr
                 <div className="min-w-0 flex-1">
                   <Text weight="medium">{l.obra.nome}</Text>
                   <Text size="support" tone="muted" className="mt-0.5">
-                    {l.obra.codigo && (
-                      <>
-                        <Mono>{l.obra.codigo}</Mono> {strings.common.separator}{' '}
-                      </>
-                    )}
-                    {t.linha(l.fornecedores)}
+                    <Mono>{l.obra.codigo}</Mono> {strings.common.separator} {t.linha(l.fornecedores)}
                   </Text>
                 </div>
                 <Text as="span" weight="semibold" className="tabular w-28 text-right">

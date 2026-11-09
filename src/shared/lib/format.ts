@@ -66,7 +66,7 @@ export function cnpjValido(value: string): boolean {
 }
 
 /**
- * Telefone com as mesmas regras do back (Phone): 10 ou 11 dígitos, DDD sem zero
+ * Telefone: 10 ou 11 dígitos, DDD sem zero
  * e, com 11 dígitos, o terceiro é 9 (celular).
  */
 export function telefoneValido(value: string): boolean {
