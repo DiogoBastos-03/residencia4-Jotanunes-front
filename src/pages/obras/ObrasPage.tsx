@@ -23,7 +23,7 @@ export function ObrasPage() {
       />
       <AsyncContent
         query={query}
-        skeleton={<SkeletonTable rows={10} columns={8} />}
+        skeleton={<SkeletonTable rows={10} columns={2} />}
         isEmpty={(linhas) => linhas.length === 0}
         empty={<EmptyState icon={BuildingOffice2Icon} title={t.vaziaTitle} description={t.vaziaDescription} />}
       >

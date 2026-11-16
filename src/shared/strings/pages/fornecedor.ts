@@ -15,7 +15,6 @@ export const fornecedorPage = {
   abas: { documentos: 'Documentos', exigencias: 'Exigências', obras: 'Obras', historico: 'Histórico', contatos: 'Contatos', dados: 'Dados' },
   dados: {
     title: 'Dados cadastrais',
-    nota: 'Estes dados vêm do cadastro. As outras abas são demonstração gerada sobre ele.',
     razao: 'Razão social',
     cnpj: 'CNPJ',
     telefone: 'Telefone',
@@ -63,7 +62,7 @@ export const fornecedorPage = {
     colunas: { obra: 'Obra', codigo: 'Código', servico: 'Serviço contratado', periodo: 'Período', listas: 'Listas aplicáveis', situacao: 'Situação da obra' },
     abrir: 'Abrir obra',
     vazioTitle: 'Ainda não está em nenhuma obra',
-    vazioDescription: 'Vincule o fornecedor na ficha da obra. A partir daí ele recebe as exigências das listas do mesmo tipo.',
+    vazioDescription: 'Nenhuma obra da integração tem este fornecedor vinculado.',
     verObras: 'Ver obras',
   },
   historico: {

@@ -1,12 +1,16 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 
-export type AbaFornecedor = 'documentos' | 'exigencias' | 'obras' | 'historico' | 'contatos' | 'dados';
-type ModalFornecedor = 'bloquear' | 'reenviar' | 'editar';
+/**
+ * Abas em uso: só o que a API fornece. Documentos, Exigências, Histórico e Contatos
+ * saíram da interface (ver src/pages/fornecedor/FornecedorPage.tsx).
+ */
+export type AbaFornecedor = 'dados' | 'obras';
+type ModalFornecedor = 'bloquear' | 'editar';
 
-const ABAS: readonly AbaFornecedor[] = ['documentos', 'exigencias', 'obras', 'historico', 'contatos', 'dados'];
+const ABAS: readonly AbaFornecedor[] = ['dados', 'obras'];
 
-/** Estado da ficha do fornecedor na URL: ?aba=, ?modal=bloquear|reenviar|editar. */
+/** Estado da ficha do fornecedor na URL: ?aba=obras, ?modal=bloquear|editar. */
 export function useParametrosFornecedor() {
   const [params, setParams] = useSearchParams();
   const definir = useCallback(
@@ -26,9 +30,9 @@ export function useParametrosFornecedor() {
   );
   const modal = params.get('modal');
   return {
-    aba: ABAS.find((a) => a === params.get('aba')) ?? 'documentos',
-    modal: modal === 'bloquear' || modal === 'reenviar' || modal === 'editar' ? (modal satisfies ModalFornecedor) : null,
-    setAba: (aba: AbaFornecedor) => definir({ aba: aba === 'documentos' ? null : aba }),
+    aba: ABAS.find((a) => a === params.get('aba')) ?? 'dados',
+    modal: modal === 'bloquear' || modal === 'editar' ? (modal satisfies ModalFornecedor) : null,
+    setAba: (aba: AbaFornecedor) => definir({ aba: aba === 'dados' ? null : aba }),
     setModal: (m: ModalFornecedor | null) => definir({ modal: m }),
   };
 }

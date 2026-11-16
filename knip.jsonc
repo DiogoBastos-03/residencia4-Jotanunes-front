@@ -1,0 +1,31 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
+  "entry": [
+    "src/main.tsx",
+    // Telas fora das rotas até a API ter os endpoints (ver src/app/router.tsx).
+    // Os arquivos ficam; declarados como entrada para o knip não os tratar como lixo.
+    "src/pages/fila/FilaPage.tsx",
+    "src/pages/analise/AnalisePage.tsx",
+    "src/pages/envio/EnvioPage.tsx",
+    "src/pages/exigencias/ExigenciasPage.tsx",
+    "src/pages/nova-lista/NovaListaPage.tsx",
+    "src/pages/lista/ListaPage.tsx",
+    "src/pages/relatorios/RelatoriosPage.tsx",
+    // Abas da ficha do fornecedor fora da interface (ver src/pages/fornecedor/FornecedorPage.tsx).
+    "src/features/fornecedores/components/AbaDocumentos.tsx",
+    "src/features/fornecedores/components/AbaExigenciasFornecedor.tsx",
+    "src/features/fornecedores/components/AbaHistoricoFornecedor.tsx",
+    "src/features/fornecedores/components/AbaContatos.tsx",
+    "src/features/fornecedores/components/ModalEditarContato.tsx",
+    "src/features/fornecedores/components/ModalReenviarAcesso.tsx",
+    "src/features/fornecedores/hooks/useFichaDocumental.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    // Protótipo estático de referência, fora do app.
+    "Protótipo de fila com 22 telas/**",
+    // Contrato da Fase 1: schemas e mappers exportam todos os tipos do contrato de propósito.
+    "src/entities/*/schema.ts"
+  ],
+  "ignoreExportsUsedInFile": true
+}

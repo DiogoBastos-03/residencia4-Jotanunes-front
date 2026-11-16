@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Fornecedor } from '@/entities';
+import type { FornecedorCadastro } from '@/entities';
 import { formatCnpj, formatPhone } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { AlertBox, Button, Field, Input, Modal, Stack, Text, useToast } from '@/shared/ui';
@@ -11,12 +11,12 @@ import { SeletorTipos } from './novo/SeletorTipos';
 const t = strings.modais.editarFornecedor;
 const tf = strings.pages.fornecedorNovo;
 
-function dadosDe(f: Fornecedor): EdicaoFornecedor {
+function dadosDe(f: FornecedorCadastro): EdicaoFornecedor {
   return { razaoSocial: f.razaoSocial, telefone: f.telefone, email: f.email, tipos: [...f.tipos] };
 }
 
 /** Edita razão social, telefone, e-mail e tipos. O CNPJ não muda. Chama PATCH /enterprises/{id} e PUT /types. */
-export function ModalEditarFornecedor({ fornecedor, open, onClose }: { fornecedor: Fornecedor; open: boolean; onClose: () => void }) {
+export function ModalEditarFornecedor({ fornecedor, open, onClose }: { fornecedor: FornecedorCadastro; open: boolean; onClose: () => void }) {
   const edicao = useEditarFornecedor();
   const { showToast } = useToast();
   const [dados, setDados] = useState<EdicaoFornecedor>(() => dadosDe(fornecedor));

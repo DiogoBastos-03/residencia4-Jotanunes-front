@@ -3,5 +3,5 @@ export { ApiError, mensagemDoErro, CODIGOS_CONTRATO, CODIGOS_FRONT, type CodigoC
 export { guid, dataHoraUtc, dataSimples, paginaSchema, PAGE_SIZE_MAX, type PaginacaoQuery } from './schemas';
 export { queryKeys } from './keys';
 export { verificarSaude } from './health';
-export { buscarTodasAsPaginas, TETO_LISTAGEM, type ListagemCompleta } from './paginas';
-export { useServicoAcordando, LIMIAR_LENTIDAO_MS } from './lentidao';
+export { buscarTodasAsPaginas } from './paginas';
+export { useServicoAcordando } from './lentidao';

@@ -1,14 +1,19 @@
 import type { Dataset } from '../dataset';
-import type { SituacaoFornecedor } from '../fornecedor';
 import { documentosExigidos, listasAplicaveis, obrasDoFornecedor } from './aplicabilidade';
 import { estaEmDia, statusDocumento } from './status';
+
+/**
+ * Situação documental (apto / com pendência), calculada sobre documentos. Não vem da API:
+ * só as telas fora de uso a usam. Volta com o acervo (Fase 3).
+ */
+export type SituacaoDocumental = 'apto' | 'comPendencia' | 'bloqueado';
 
 export type ResumoFornecedor = {
   obras: number;
   listasAplicaveis: number;
   obrigatoriosEmDia: number;
   obrigatoriosTotal: number;
-  situacao: SituacaoFornecedor;
+  situacao: SituacaoDocumental;
 };
 
 /**
@@ -26,7 +31,7 @@ export function resumoFornecedor(ds: Dataset, fornecedorId: string): ResumoForne
       ),
     ),
   ).length;
-  const situacao: SituacaoFornecedor = fornecedor?.bloqueado
+  const situacao: SituacaoDocumental = fornecedor?.bloqueado
     ? 'bloqueado'
     : emDia === obrigatorios.length
       ? 'apto'

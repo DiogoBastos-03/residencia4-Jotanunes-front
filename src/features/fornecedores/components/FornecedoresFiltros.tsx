@@ -18,8 +18,7 @@ type Props = {
 export function FornecedoresFiltros({ lista, filtros, onChange }: Props) {
   const opcoes: ReadonlyArray<{ value: FiltroSituacao; label: string; count: number }> = [
     { value: 'todos', label: t.filtros.todos, count: lista.porSituacao.todos },
-    { value: 'apto', label: t.filtros.apto, count: lista.porSituacao.apto },
-    { value: 'comPendencia', label: t.filtros.comPendencia, count: lista.porSituacao.comPendencia },
+    { value: 'ativo', label: t.filtros.ativo, count: lista.porSituacao.ativo },
     { value: 'bloqueado', label: t.filtros.bloqueado, count: lista.porSituacao.bloqueado },
   ];
   return (

@@ -10,14 +10,18 @@ import type {
   ResumoArquivos,
   EnvioArquivos,
   FornecedorCadastro,
+  FornecedorResumo,
+  ObraResumo,
   StatusDocumento,
   SituacaoFornecedor,
   TipoFornecimento,
-  Vencimento,
   VinculoObra,
 } from '@/entities';
 
-export type LinhaFornecedor = { fornecedor: Fornecedor; resumo: ResumoFornecedor; aguardandoAcesso: boolean };
+// ——— Telas em uso: só dados da API ———
+
+/** Linha da lista: o fornecedor como a listagem da API devolve, mais quantas obras ele tem (filtro por obra da API). */
+export type LinhaFornecedor = { fornecedor: FornecedorResumo; obras: number };
 
 export type FiltroSituacao = 'todos' | SituacaoFornecedor;
 export type FiltroTipo = 'todos' | TipoFornecimento;
@@ -27,6 +31,35 @@ export type ListaFornecedores = {
   porSituacao: Record<FiltroSituacao, number>;
   porTipo: { servico: number; material: number };
 };
+
+/** Ficha do fornecedor: o detalhe da API e as obras dele (GET /constructions?enterpriseId=). */
+export type FichaCadastral = { cadastro: FornecedorCadastro; obras: ObraResumo[] };
+
+/** Cadastro: exatamente o que o POST /enterprises aceita. */
+export type NovoFornecedor = {
+  cnpj: string;
+  razaoSocial: string;
+  telefone: string;
+  email: string;
+  tipos: TipoFornecimento[];
+};
+
+/** Edição dos dados da empresa e dos tipos. */
+export type EdicaoFornecedor = {
+  razaoSocial: string;
+  telefone: string;
+  email: string;
+  tipos: TipoFornecimento[];
+};
+
+/** Campos dos formulários de fornecedor que podem ter erro. */
+export type CampoFormFornecedor = 'cnpj' | 'razaoSocial' | 'telefone' | 'email' | 'tipos';
+
+export type ErrosFormFornecedor = Partial<Record<CampoFormFornecedor, string>>;
+
+// ——— Fora de uso: ficha documental, montada sobre o dataset em memória ———
+// Alimentava as abas Documentos, Exigências, Histórico e Contatos, que saíram da interface
+// até a API ter os endpoints (ver src/pages/fornecedor/FornecedorPage.tsx).
 
 export type DocumentoNaFicha = {
   exigido: DocumentoExigido;
@@ -57,8 +90,6 @@ export type ObraDoFornecedor = { obra: Obra; vinculo: VinculoObra; listasAplicav
 
 export type FichaFornecedor = {
   fornecedor: Fornecedor;
-  /** Dados cadastrais como a API devolve (aba Dados). */
-  cadastro: FornecedorCadastro;
   resumo: ResumoFornecedor;
   aguardandoAcesso: boolean;
   grupos: GrupoDocumentos[];
@@ -69,34 +100,3 @@ export type FichaFornecedor = {
   pendenciasParaCobrar: number;
 };
 
-export type Vencimentos = { proximos: Vencimento[]; vencidos: Vencimento[] };
-
-/** Obra que pode ser escolhida no cadastro, com as listas que ela tem. */
-export type ObraParaCadastro = { obra: Obra; listas: ListaExigencias[] };
-
-/** Cadastro de fornecedor (dados em memória, na demonstração). */
-export type NovoFornecedor = {
-  cnpj: string;
-  razaoSocial: string;
-  nomeFantasia: string;
-  telefone: string;
-  email: string;
-  tipos: TipoFornecimento[];
-  contato: { nome: string; cargo: string; email: string; telefone: string };
-  enviarConvite: boolean;
-  obraId: string;
-  servicoContratado: string;
-};
-
-/** Edição dos dados da empresa e dos tipos. */
-export type EdicaoFornecedor = {
-  razaoSocial: string;
-  telefone: string;
-  email: string;
-  tipos: TipoFornecimento[];
-};
-
-/** Campos dos formulários de fornecedor que podem ter erro. */
-export type CampoFormFornecedor = 'cnpj' | 'razaoSocial' | 'telefone' | 'email' | 'tipos' | 'contatoNome' | 'contatoEmail' | 'servico';
-
-export type ErrosFormFornecedor = Partial<Record<CampoFormFornecedor, string>>;

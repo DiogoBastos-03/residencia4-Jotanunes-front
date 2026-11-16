@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
-import { forneceTipo } from '@/entities';
+import { forneceTipo, situacaoDe } from '@/entities';
 import type { FiltroSituacao, FiltroTipo, LinhaFornecedor } from '../types';
 
-const SITUACOES: readonly FiltroSituacao[] = ['todos', 'apto', 'comPendencia', 'bloqueado'];
+const SITUACOES: readonly FiltroSituacao[] = ['todos', 'ativo', 'bloqueado'];
 const TIPOS: readonly FiltroTipo[] = ['todos', 'servico', 'material'];
 
 export type FiltrosFornecedores = { situacao: FiltroSituacao; tipo: FiltroTipo; busca: string };
@@ -12,18 +12,17 @@ function normalizar(texto: string) {
   return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 }
 
-/** Situação, tipo e busca (nome ou CNPJ, com ou sem pontuação). */
+/** Situação (ativo/bloqueado), tipo e busca (nome ou CNPJ, com ou sem pontuação). Tudo no cliente. */
 export function filtrarFornecedores(linhas: readonly LinhaFornecedor[], f: FiltrosFornecedores): LinhaFornecedor[] {
   const termo = normalizar(f.busca.trim());
   const digitos = f.busca.replace(/\D/g, '');
   return linhas.filter((l) => {
-    if (f.situacao !== 'todos' && l.resumo.situacao !== f.situacao) return false;
+    if (f.situacao !== 'todos' && situacaoDe(l.fornecedor) !== f.situacao) return false;
     // "Contém": quem fornece os dois tipos aparece nos dois filtros.
     if (f.tipo !== 'todos' && !forneceTipo(l.fornecedor, f.tipo)) return false;
     if (!termo) return true;
     return (
       normalizar(l.fornecedor.razaoSocial).includes(termo) ||
-      normalizar(l.fornecedor.nomeFantasia ?? '').includes(termo) ||
       (digitos.length >= 3 && l.fornecedor.cnpj.includes(digitos))
     );
   });

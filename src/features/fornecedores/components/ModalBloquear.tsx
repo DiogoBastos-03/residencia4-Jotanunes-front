@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NoSymbolIcon } from '@heroicons/react/24/outline';
-import type { Fornecedor } from '@/entities';
+import type { FornecedorResumo } from '@/entities';
 import { mensagemDoErro } from '@/shared/api';
 import { strings } from '@/shared/strings';
 import { AlertBox, Button, Modal, Stack, useToast } from '@/shared/ui';
@@ -9,7 +9,7 @@ import { useDefinirBloqueio } from '../hooks/useMutacoesFornecedor';
 const t = strings.modais.bloquear;
 
 /** Confirmação destrutiva: o botão "Bloquear" é o vermelho de perigo. Chama PATCH /enterprises/{id}/status. */
-export function ModalBloquear({ fornecedor, open, onClose }: { fornecedor: Fornecedor; open: boolean; onClose: () => void }) {
+export function ModalBloquear({ fornecedor, open, onClose }: { fornecedor: Pick<FornecedorResumo, 'id' | 'razaoSocial'>; open: boolean; onClose: () => void }) {
   const bloqueio = useDefinirBloqueio();
   const { showToast } = useToast();
   const [erro, setErro] = useState<string | null>(null);

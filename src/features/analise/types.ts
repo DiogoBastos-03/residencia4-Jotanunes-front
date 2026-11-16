@@ -71,9 +71,3 @@ export type Sequencia = {
 
 export type AnaliseComFornecedor = Analise & { fornecedor: Fornecedor };
 
-export type ResumoAnalisesHoje = {
-  recentes: AnaliseComFornecedor[];
-  total: number;
-  aprovados: number;
-  reprovados: number;
-};

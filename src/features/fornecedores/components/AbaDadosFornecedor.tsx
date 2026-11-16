@@ -1,12 +1,12 @@
 import { formatCnpj, formatDate, formatPhone } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import { Badge, BadgeGroup, Card, Heading, KeyValueList, Mono, Text } from '@/shared/ui';
-import type { FichaFornecedor } from '../types';
+import { Badge, BadgeGroup, Card, Heading, KeyValueList, Mono } from '@/shared/ui';
+import type { FichaCadastral } from '../types';
 
 const t = strings.pages.fornecedor.dados;
 
 /** Dados cadastrais como a API devolve (GET /enterprises/{id}). */
-export function AbaDadosFornecedor({ ficha }: { ficha: FichaFornecedor }) {
+export function AbaDadosFornecedor({ ficha }: { ficha: FichaCadastral }) {
   const c = ficha.cadastro;
   return (
     <Card>
@@ -25,9 +25,6 @@ export function AbaDadosFornecedor({ ficha }: { ficha: FichaFornecedor }) {
           { key: 'atualizado', label: t.atualizadoEm, value: formatDate(c.atualizadoEm, 'dateTime') },
         ]}
       />
-      <Text size="support" tone="muted" className="mt-4">
-        {t.nota}
-      </Text>
     </Card>
   );
 }

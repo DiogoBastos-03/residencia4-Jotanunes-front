@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import { Outlet } from 'react-router';
-import { useQueueCount } from '@/features/analise';
 import { strings } from '@/shared/strings';
 import { MobileSidebar } from './MobileSidebar';
 import { MobileTopBar } from './MobileTopBar';
@@ -14,7 +13,6 @@ import { Sidebar } from './Sidebar';
 export function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
-  const { data: queueCount } = useQueueCount();
 
   return (
     <div className="flex min-h-dvh gap-2 bg-app p-3 nav:h-dvh">
@@ -24,8 +22,8 @@ export function AppLayout() {
       >
         {strings.layout.skipToContent}
       </a>
-      <Sidebar queueCount={queueCount} className="hidden nav:flex" />
-      <MobileSidebar open={menuOpen} onClose={closeMenu} queueCount={queueCount} />
+      <Sidebar className="hidden nav:flex" />
+      <MobileSidebar open={menuOpen} onClose={closeMenu} />
       <main
         id="conteudo"
         tabIndex={-1}

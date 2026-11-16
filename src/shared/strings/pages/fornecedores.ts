@@ -8,7 +8,7 @@ export const fornecedoresPage = {
   searchLabel: 'Buscar fornecedor',
   searchPlaceholder: 'Buscar por nome ou CNPJ',
   filtrosLabel: 'Filtrar por situação',
-  filtros: { todos: 'Todos', apto: 'Aptos', comPendencia: 'Com pendência', bloqueado: 'Bloqueados' },
+  filtros: { todos: 'Todos', ativo: 'Ativos', bloqueado: 'Bloqueados' },
   tipoLabel: 'Filtrar por tipo',
   tipos: { todos: 'Todos os tipos', servico: (n: number) => `Serviço ${n}`, material: (n: number) => `Material ${n}` },
   caption: 'Fornecedores cadastrados',
@@ -28,12 +28,11 @@ export const fornecedoresPage = {
     `Mostrando os primeiros ${carregados} de ${total} fornecedores. A busca e os filtros valem só para estes.`,
   nota: 'Documentos conta só os obrigatórios da empresa, nas listas de exigências que se aplicam a ela. Fornecedor apto tem todos aprovados e dentro da validade.',
   novoToast: (razao: string) => `${razao} cadastrado`,
-  novoToastConvite: (email: string) => `Fornecedor cadastrado e convite enviado para ${email}`,
   semResultadoTitle: 'Nenhum fornecedor com estes filtros',
   semResultadoDescription: 'Troque a situação, o tipo ou apague a busca. Para incluir uma empresa nova, use "Cadastrar fornecedor".',
   limparFiltros: 'Limpar filtros',
   vazioTitle: 'Nenhum fornecedor cadastrado',
-  vazioDescription: 'Cadastre a primeira empresa: ela recebe um convite para o portal e passa a ver as exigências das obras em que estiver.',
+  vazioDescription: 'Nenhuma empresa no cadastro ainda. Cadastre a primeira.',
 } as const;
 
 /** Modal de reenviar primeiro acesso — usado na lista e na ficha. */
@@ -52,13 +51,13 @@ export const modalReenviarAcesso = {
 /** Modal de bloquear fornecedor. */
 export const modalBloquear = {
   title: 'Bloquear fornecedor?',
-  texto: (razao: string) => `${razao} deixa de aparecer como apta para novas contratações até regularizar a documentação.`,
-  alerta: 'O fornecedor continua acessando o portal para enviar documentos.',
+  texto: (razao: string) => `${razao} fica marcada como bloqueada no cadastro.`,
+  alerta: 'Dá para desbloquear depois, na ficha do fornecedor.',
   cancelar: 'Cancelar',
   confirmar: 'Bloquear',
   confirmando: 'Bloqueando…',
   erroTitle: 'Não foi possível bloquear',
-  toast: 'Fornecedor bloqueado para novas contratações',
+  toast: 'Fornecedor bloqueado',
   desbloqueadoToast: 'Fornecedor desbloqueado',
   desbloqueando: 'Desbloqueando…',
   erroDesbloquear: (mensagem: string) => `Não foi possível desbloquear. ${mensagem}`,
@@ -67,7 +66,7 @@ export const modalBloquear = {
 /** Modal de editar os dados do fornecedor (razão social, telefone, e-mail e tipos). */
 export const modalEditarFornecedor = {
   title: 'Editar dados do fornecedor',
-  descricao: 'O CNPJ não muda. Contatos de pessoas se editam na aba Contatos.',
+  descricao: 'O CNPJ não muda.',
   tipos: 'Tipo de fornecimento',
   cancelar: 'Cancelar',
   salvar: 'Salvar',

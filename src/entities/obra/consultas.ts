@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { fornecedorApi } from '@/entities/fornecedor';
-import { obraApi, type ObraResumo } from '@/entities/obra';
 import { buscarTodasAsPaginas, queryKeys } from '@/shared/api';
+import { fornecedorApi } from '../fornecedor/api';
+import { obraApi } from './api';
+import type { ObraResumo } from './model';
 
 const TODAS = { todas: true } as const;
 
-/** Todas as obras da API (GET /constructions, página a página, até 200). Só id e nome. */
+/** Todas as obras (GET /constructions, página a página, até 200). Só id e nome. */
 export function useObrasApi() {
   return useQuery({
     queryKey: queryKeys.obras.lista(TODAS),
@@ -13,11 +14,19 @@ export function useObrasApi() {
   });
 }
 
+/** Obras de um fornecedor (GET /constructions?enterpriseId=). */
+export function useObrasDoFornecedor(fornecedorId: string) {
+  return useQuery({
+    queryKey: queryKeys.obras.lista({ fornecedorId }),
+    queryFn: ({ signal }) => buscarTodasAsPaginas((pagina, porPagina) => obraApi.listar({ fornecedorId, pagina, porPagina }, signal)),
+  });
+}
+
 export type VinculoApi = { fornecedorId: string; obraId: string };
 
 /**
- * Quem está em cada obra. A API não tem rota de vínculo: ele sai do filtro
- * GET /enterprises?constructionIds=<obra>, uma chamada por obra (em paralelo).
+ * Quem está em cada obra, para as contagens das listas. A API não tem rota de vínculo:
+ * ele sai do filtro GET /enterprises?constructionIds=<obra>, uma chamada por obra (em paralelo).
  */
 export function useVinculosApi(obras: readonly ObraResumo[] | undefined) {
   const obraIds = obras?.map((o) => o.id) ?? [];

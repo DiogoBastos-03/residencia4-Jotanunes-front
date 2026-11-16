@@ -1,24 +1,20 @@
-export type { IsoDate, TipoFornecimento, Obrigatoriedade } from './common';
-export type { Obra, ObraLista, ObraResumo, SituacaoObra } from './obra';
+export type { TipoFornecimento, Obrigatoriedade } from './common';
+export type { Obra, ObraResumo} from './obra';
 export type { EscopoItem, ExigenciaValidade, ItemExigido, ListaExigencias, SituacaoLista, TipoDocumento } from './listaExigencias';
-export type { AcessoPortal, Contato, Fornecedor, FornecedorCadastro, FornecedorResumo, Pagina, SituacaoFornecedor, VinculoObra } from './fornecedor';
-export { aguardandoAcesso, forneceTipo, normalizarTipos } from './fornecedor';
+export type { Contato, Fornecedor, FornecedorCadastro, FornecedorResumo, SituacaoFornecedor, VinculoObra } from './fornecedor';
+export { aguardandoAcesso, forneceTipo, normalizarTipos, situacaoDe } from './fornecedor';
 export type {
   DecisaoRegistrada,
   DocumentoEmpresa,
-  EnvioAnterior,
   MotivoReprovacao,
-  Prioridade,
-  Renovacao,
   StatusDocumento,
-  StatusEnvio,
 } from './documento';
 export type { ArquivoFuncionario, EnvioArquivos } from './arquivo';
-export type { AcaoEvento, Analise, AutorEvento, EventoHistorico, PeriodoRelatorio, TempoAnalise } from './historico';
+export type { Analise, PeriodoRelatorio} from './historico';
 export type { Dataset } from './dataset';
 
-export { diasEntre, somarDias, JANELA_VENCIMENTO_DIAS } from './lib/dates';
-export { ehPendencia, estaEmDia, statusArquivo, statusDocumento, statusPorValidade } from './lib/status';
+export { diasEntre } from './lib/dates';
+export { ehPendencia, estaEmDia, statusArquivo, statusDocumento } from './lib/status';
 export {
   documentosExigidos,
   fornecedoresDaObra,
@@ -34,14 +30,10 @@ export {
 } from './lib/aplicabilidade';
 export { documentoDoFornecedor, resumoFornecedor, type ResumoFornecedor } from './lib/fornecedorResumo';
 export { arquivosDoItem, resumoArquivos, type ResumoArquivos } from './lib/arquivos';
-export { montarFila, type EntradaFila, type EntradaFilaDocumento, type EntradaFilaEnvio } from './lib/fila';
+export { montarFila, type EntradaFila} from './lib/fila';
 export {
   pendenciasDaObra,
-  totalPendenciasDaObra,
-  type GrupoPendencias,
-  type Pendencia,
-  type StatusPendencia,
 } from './lib/pendencias';
 export { vencidosRecentes, vencimentosProximos, type Vencimento } from './lib/vencimentos';
-export { alcanceDaLista, alcanceNaObra, composicaoLista, type ComposicaoLista } from './lib/listas';
-export { resolverEvento, type AcaoResolvida, type AutorResolvido, type EventoResolvido } from './lib/eventos';
+export { alcanceDaLista, composicaoLista, type ComposicaoLista } from './lib/listas';
+export { resolverEvento, type EventoResolvido } from './lib/eventos';

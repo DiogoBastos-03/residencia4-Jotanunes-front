@@ -15,15 +15,6 @@ export function formatCnpj(value: string): string {
     .replace(/(\d{4})(\d)/, '$1-$2');
 }
 
-/** 12345678900 → 123.456.789-00. Aceita valor parcial. */
-export function formatCpf(value: string): string {
-  const d = onlyDigits(value).slice(0, 11);
-  return d
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-}
-
 /** (81) 99876-1234 / (81) 3244-7788. Aceita valor parcial. */
 export function formatPhone(value: string): string {
   const d = onlyDigits(value).slice(0, 11);

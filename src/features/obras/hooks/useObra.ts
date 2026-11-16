@@ -1,80 +1,18 @@
-import {
-  forneceTipo,
-  alcanceNaObra,
-  composicaoLista,
-  fornecedoresDaObra,
-  listasAplicaveisNaObra,
-  listasDaObra,
-  pendenciasDaObra,
-  resolverEvento,
-  resumoFornecedor,
-  type Dataset,
-  type ListaExigencias,
-  type TipoFornecimento,
-} from '@/entities';
-import { useDatasetQuery } from '@/mocks';
+import { useFornecedoresDaObra } from '@/entities/fornecedor';
+import { useObrasApi } from '@/entities/obra';
+import { juntar, useResultado, type QueryResult } from '@/shared/lib';
 import type { FichaObra } from '../types';
 
-function documentosDoTipo(listas: ListaExigencias[], tipo: TipoFornecimento): string[] {
-  return [
-    ...new Set(
-      listas.filter((l) => l.tipo === tipo).flatMap((l) => l.itens.map((i) => i.tipoDocumentoId)),
-    ),
-  ];
-}
-
-function carregar(ds: Dataset, id: string): FichaObra | null {
-  const obra = ds.obras.find((o) => o.id === id);
-  if (!obra) return null;
-  const listas = listasDaObra(ds, id);
-  const fornecedores = fornecedoresDaObra(ds, id);
-  const pendencias = pendenciasDaObra(ds, id);
-
-  return {
-    obra,
-    listas: listas.map((lista) => {
-      const alcance = alcanceNaObra(ds, lista.id, id);
-      return {
-        lista,
-        composicao: composicaoLista(lista),
-        vinculadaEm: ds.obraListas.find((ol) => ol.obraId === id && ol.listaId === lista.id)?.vinculadaEm ?? obra.recebidaEm ?? ds.hoje,
-        aplicaA: alcance.aplica,
-        fornecedoresNaObra: alcance.total,
-      };
-    }),
-    fornecedores: fornecedores.flatMap((fornecedor) => {
-      const vinculo = ds.vinculos.find((v) => v.obraId === id && v.fornecedorId === fornecedor.id);
-      return vinculo
-        ? [
-            {
-              fornecedor,
-              vinculo,
-              listasAplicaveis: listasAplicaveisNaObra(ds, fornecedor.id, id).length,
-              listasNaObra: listas.length,
-              resumo: resumoFornecedor(ds, fornecedor.id),
-            },
-          ]
-        : [];
-    }),
-    pendencias,
-    totalPendencias: pendencias.reduce((t, g) => t + g.pendencias.length, 0),
-    historico: ds.eventos
-      .filter((e) => e.obraId === id)
-      .sort((a, b) => b.quando.localeCompare(a.quando))
-      .map((e) => resolverEvento(ds, e)),
-    listasDisponiveis: ds.listas
-      .filter((l) => l.situacao === 'ativo' && !listas.includes(l))
-      .map((lista) => ({ lista, composicao: composicaoLista(lista) })),
-    fornecedoresDisponiveis: ds.fornecedores.filter((f) => !fornecedores.includes(f)),
-    fornecedoresPorTipo: {
-      servico: fornecedores.filter((f) => forneceTipo(f, 'servico')).length,
-      material: fornecedores.filter((f) => forneceTipo(f, 'material')).length,
-    },
-    documentosExigidosPorTipo: { servico: documentosDoTipo(listas, 'servico'), material: documentosDoTipo(listas, 'material') },
-  };
-}
-
-/** Ficha completa de uma obra. `null` se não existe. */
-export function useObra(id: string) {
-  return useDatasetQuery(`obra-${id}`, (ds) => carregar(ds, id));
+/**
+ * Ficha da obra: o nome (da listagem GET /constructions — não há rota de detalhe) e os
+ * fornecedores vinculados (GET /enterprises?constructionIds=<obra>). `null` se a obra não está na listagem.
+ */
+export function useObra(id: string): QueryResult<FichaObra | null> {
+  const obras = useObrasApi();
+  const fornecedores = useFornecedoresDaObra(id);
+  const consulta = juntar(obras, fornecedores, (o, f): FichaObra | null => {
+    const obra = o.itens.find((x) => x.id === id);
+    return obra ? { obra, fornecedores: f.itens } : null;
+  });
+  return useResultado(consulta);
 }

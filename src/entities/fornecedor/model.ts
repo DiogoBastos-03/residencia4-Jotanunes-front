@@ -41,7 +41,12 @@ export type VinculoObra = {
   vinculadoEm: IsoDate;
 };
 
-export type SituacaoFornecedor = 'apto' | 'comPendencia' | 'bloqueado';
+/** Situação cadastral, como a API informa (`active`). */
+export type SituacaoFornecedor = 'ativo' | 'bloqueado';
+
+export function situacaoDe(fornecedor: Pick<Fornecedor, 'bloqueado'>): SituacaoFornecedor {
+  return fornecedor.bloqueado ? 'bloqueado' : 'ativo';
+}
 
 /** Convidado e ainda sem entrar no portal. */
 export function aguardandoAcesso(fornecedor: Pick<Fornecedor, 'acessoPortal'>): boolean {

@@ -1,7 +1,9 @@
 import type { MotivoReprovacao } from '@/entities';
-import { exemplosFormulario } from '@/mocks';
 
-/** Motivo e observação de exemplo que preenchem o formulário de reprovação. */
+/**
+ * Valores iniciais do formulário de reprovação (tela fora de uso até a Fase 3).
+ * Sem exemplo inventado: começa com o primeiro motivo e sem observação.
+ */
 export function useExemploReprovacao(): { motivo: MotivoReprovacao; observacao: string } {
-  return exemplosFormulario.reprovacao;
+  return { motivo: 'ilegivel', observacao: '' };
 }

@@ -3,7 +3,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { env } from '@/shared/config/env';
 import { ToastProvider } from '@/shared/ui';
 import { criarQueryClient } from './queryClient';
-import { SincronizarDemonstracao } from './SincronizarDemonstracao';
 
 /** Devtools só em desenvolvimento — o import dinâmico mantém a lib fora da build de produção. */
 const Devtools = env.dev
@@ -14,7 +13,6 @@ export function AppProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(criarQueryClient);
   return (
     <QueryClientProvider client={queryClient}>
-      <SincronizarDemonstracao />
       <ToastProvider>{children}</ToastProvider>
       {Devtools && (
         <Suspense fallback={null}>

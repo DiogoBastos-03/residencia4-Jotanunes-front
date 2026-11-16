@@ -89,6 +89,3 @@ export function pendenciasDaObra(ds: Dataset, obraId: string): GrupoPendencias[]
   return grupos;
 }
 
-export function totalPendenciasDaObra(ds: Dataset, obraId: string): number {
-  return pendenciasDaObra(ds, obraId).reduce((total, g) => total + g.pendencias.length, 0);
-}

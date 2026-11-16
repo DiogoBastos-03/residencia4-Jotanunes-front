@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { normalizarTipos, type Fornecedor } from '@/entities';
+import { normalizarTipos, type FornecedorCadastro } from '@/entities';
 import { fornecedorApi, type DadosEdicaoFornecedor } from '@/entities/fornecedor';
-import { datasetStore } from '@/mocks';
 import { queryKeys } from '@/shared/api';
 import type { EdicaoFornecedor, NovoFornecedor } from '../types';
 
@@ -14,10 +13,7 @@ function useInvalidarFornecedores() {
   return () => queryClient.invalidateQueries({ queryKey: queryKeys.fornecedores.todos });
 }
 
-/**
- * Cadastro: POST /enterprises com razão social, CNPJ, telefone, e-mail e tipos.
- * Contato, convite e obra não existem na API: ficam na demonstração, presos ao id que a API devolveu.
- */
+/** Cadastro: POST /enterprises com razão social, CNPJ, telefone, e-mail e tipos. */
 export function useCadastrarFornecedor() {
   const invalidar = useInvalidarFornecedores();
   return useMutation({
@@ -29,39 +25,8 @@ export function useCadastrarFornecedor() {
         email: novo.email,
         tipos: normalizarTipos(novo.tipos),
       }),
-    onSuccess: (id, novo) => {
-      datasetStore.set((ds) => {
-        const email = novo.contato.email.trim();
-        const fornecedor: Fornecedor = {
-          id,
-          razaoSocial: novo.razaoSocial.trim(),
-          nomeFantasia: novo.nomeFantasia.trim() || undefined,
-          cnpj: digitos(novo.cnpj),
-          tipos: normalizarTipos(novo.tipos),
-          telefone: digitos(novo.telefone),
-          email: novo.email.trim(),
-          desde: ds.hoje,
-          bloqueado: false,
-          acessoPortal: { convidadoEm: novo.enviarConvite ? ds.agora : null, emailConvite: email },
-          contatos: [{ papel: 'principal', nome: novo.contato.nome.trim(), cargo: novo.contato.cargo.trim(), email, telefone: novo.contato.telefone }],
-        };
-        const vinculo = novo.obraId
-          ? [
-              {
-                fornecedorId: id,
-                obraId: novo.obraId,
-                servicoContratado: novo.servicoContratado.trim(),
-                inicio: `${ds.hoje.slice(0, 7)}-01`,
-                fim: `${String(Number(ds.hoje.slice(0, 4)) + 1)}${ds.hoje.slice(4, 7)}-01`,
-                vinculadoEm: ds.agora,
-              },
-            ]
-          : [];
-        return { ...ds, fornecedores: [fornecedor, ...ds.fornecedores.filter((f) => f.id !== id)], vinculos: [...ds.vinculos, ...vinculo] };
-      });
-      // Devolver a promessa mantém o botão em "salvando" até a lista atualizada chegar.
-      return invalidar();
-    },
+    // Devolver a promessa mantém o botão em "Cadastrando…" até a lista atualizada chegar.
+    onSuccess: () => invalidar(),
   });
 }
 
@@ -72,7 +37,7 @@ export function useCadastrarFornecedor() {
 export function useEditarFornecedor() {
   const invalidar = useInvalidarFornecedores();
   return useMutation({
-    mutationFn: async ({ atual, dados }: { atual: Fornecedor; dados: EdicaoFornecedor }): Promise<boolean> => {
+    mutationFn: async ({ atual, dados }: { atual: FornecedorCadastro; dados: EdicaoFornecedor }): Promise<boolean> => {
       const telefone = digitos(dados.telefone);
       const tipos = normalizarTipos(dados.tipos);
       const edicao: DadosEdicaoFornecedor = {

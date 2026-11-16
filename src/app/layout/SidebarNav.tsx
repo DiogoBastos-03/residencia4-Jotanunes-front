@@ -5,14 +5,11 @@ import { Icon } from '@/shared/ui';
 import { NAV_ITEMS } from './navItems';
 
 type SidebarNavProps = {
-  /** Itens esperando na fila — aparece no item "Fila de análise". */
-  queueCount: number | undefined;
   /** Chamado ao escolher um destino (fecha o menu móvel). */
   onNavigate?: () => void;
 };
 
-export function SidebarNav({ queueCount, onNavigate }: SidebarNavProps) {
-
+export function SidebarNav({ onNavigate }: SidebarNavProps) {
   return (
     <nav aria-label={strings.layout.navLabel}>
       <ul className="flex flex-col gap-0.5">
@@ -33,12 +30,6 @@ export function SidebarNav({ queueCount, onNavigate }: SidebarNavProps) {
             >
               <Icon icon={item.icon} size={18} />
               <span className="flex-1">{item.label}</span>
-              {item.queueCount && queueCount !== undefined && queueCount > 0 && (
-                <span className="tabular rounded-badge bg-primary-soft px-1.5 py-0.5 text-label font-medium text-primary-hover">
-                  <span aria-hidden="true">{queueCount}</span>
-                  <span className="sr-only">{strings.layout.queueCount(queueCount)}</span>
-                </span>
-              )}
             </NavLink>
           </li>
         ))}

@@ -1,9 +1,7 @@
 import { BuildingStorefrontIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { useSearchParams } from 'react-router';
 import {
   FornecedoresFiltros,
   FornecedoresTabela,
-  ModalReenviarAcesso,
   filtrarFornecedores,
   useFiltrosFornecedores,
   useFornecedores,
@@ -11,7 +9,7 @@ import {
 } from '@/features/fornecedores';
 import { paths, useDocumentTitle } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import { AsyncContent, Button, ButtonLink, EmptyState, InfoNote, PageHeader, SearchInput, Skeleton, SkeletonTable, Stack, Text } from '@/shared/ui';
+import { AsyncContent, Button, ButtonLink, EmptyState, InfoNote, PageHeader, SearchInput, Skeleton, SkeletonTable, Stack } from '@/shared/ui';
 
 const t = strings.pages.fornecedores;
 
@@ -20,20 +18,6 @@ export function FornecedoresPage() {
   const query = useFornecedores();
   const { filtros, atualizar, limpar, ativo } = useFiltrosFornecedores();
   const listagem = useListagemParcial();
-  // Fornecedor com o modal de reenviar aberto (?reenviar=<id>).
-  const [params, setParams] = useSearchParams();
-  const reenviarId = params.get('reenviar');
-  const setReenviar = (id: string | null) =>
-    setParams(
-      (atual) => {
-        const p = new URLSearchParams(atual);
-        if (id) p.set('reenviar', id);
-        else p.delete('reenviar');
-        return p;
-      },
-      { replace: true },
-    );
-
   return (
     <Stack>
       <PageHeader
@@ -67,7 +51,7 @@ export function FornecedoresPage() {
         skeleton={
           <Stack>
             <Skeleton className="h-8.5 w-96 max-w-full" />
-            <SkeletonTable rows={10} columns={7} />
+            <SkeletonTable rows={10} columns={5} />
           </Stack>
         }
         isEmpty={(lista) => lista.linhas.length === 0}
@@ -91,12 +75,7 @@ export function FornecedoresPage() {
               {listagem.parcial && <InfoNote>{t.listaParcial(listagem.carregados, listagem.total)}</InfoNote>}
               <FornecedoresFiltros lista={lista} filtros={filtros} onChange={atualizar} />
               {linhas.length > 0 ? (
-                <>
-                  <FornecedoresTabela linhas={linhas} onReenviar={setReenviar} />
-                  <Text size="support" tone="faint">
-                    {t.nota}
-                  </Text>
-                </>
+                <FornecedoresTabela linhas={linhas} />
               ) : (
                 <EmptyState
                   icon={MagnifyingGlassIcon}
@@ -105,10 +84,6 @@ export function FornecedoresPage() {
                   action={ativo && <Button onClick={limpar}>{t.limparFiltros}</Button>}
                 />
               )}
-              <ModalReenviarAcesso
-                fornecedor={lista.linhas.find((l) => l.fornecedor.id === reenviarId)?.fornecedor ?? null}
-                onClose={() => setReenviar(null)}
-              />
             </Stack>
           );
         }}

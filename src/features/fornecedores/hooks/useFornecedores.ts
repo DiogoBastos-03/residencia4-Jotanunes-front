@@ -1,20 +1,20 @@
-import { aguardandoAcesso, forneceTipo, resumoFornecedor, type Dataset } from '@/entities';
-import { useDatasetQuery } from '@/mocks';
+import { forneceTipo, type FornecedorResumo } from '@/entities';
+import { useFornecedoresApi } from '@/entities/fornecedor';
+import { useObrasApi, useVinculosApi, type VinculoApi } from '@/entities/obra';
+import { juntar, useResultado } from '@/shared/lib';
 import type { ListaFornecedores } from '../types';
 
-export function carregarFornecedores(ds: Dataset): ListaFornecedores {
-  const linhas = ds.fornecedores.map((fornecedor) => ({
+export function montarLista(fornecedores: readonly FornecedorResumo[], vinculos: readonly VinculoApi[]): ListaFornecedores {
+  const linhas = fornecedores.map((fornecedor) => ({
     fornecedor,
-    resumo: resumoFornecedor(ds, fornecedor.id),
-    aguardandoAcesso: aguardandoAcesso(fornecedor),
+    obras: vinculos.filter((v) => v.fornecedorId === fornecedor.id).length,
   }));
   return {
     linhas,
     porSituacao: {
       todos: linhas.length,
-      apto: linhas.filter((l) => l.resumo.situacao === 'apto').length,
-      comPendencia: linhas.filter((l) => l.resumo.situacao === 'comPendencia').length,
-      bloqueado: linhas.filter((l) => l.resumo.situacao === 'bloqueado').length,
+      ativo: linhas.filter((l) => !l.fornecedor.bloqueado).length,
+      bloqueado: linhas.filter((l) => l.fornecedor.bloqueado).length,
     },
     porTipo: {
       // Fornecedor dos dois tipos conta nos dois.
@@ -26,10 +26,21 @@ export function carregarFornecedores(ds: Dataset): ListaFornecedores {
 
 const VAZIO: ListaFornecedores = {
   linhas: [],
-  porSituacao: { todos: 0, apto: 0, comPendencia: 0, bloqueado: 0 },
+  porSituacao: { todos: 0, ativo: 0, bloqueado: 0 },
   porTipo: { servico: 0, material: 0 },
 };
 
+/** Fornecedores da API, com quantas obras cada um tem (a partir do filtro por obra da API). */
 export function useFornecedores() {
-  return useDatasetQuery('fornecedores', (ds) => carregarFornecedores(ds), { empty: VAZIO });
+  const fornecedores = useFornecedoresApi();
+  const obras = useObrasApi();
+  const vinculos = useVinculosApi(obras.data?.itens);
+  const consulta = juntar(fornecedores, juntar(obras, vinculos, (_o, v) => v), (f, v) => montarLista(f.itens, v));
+  return useResultado(consulta, { empty: VAZIO });
+}
+
+/** A API tem mais de 200 fornecedores e a busca parou no teto: a lista é parcial. */
+export function useListagemParcial(): { parcial: boolean; total: number; carregados: number } {
+  const { data } = useFornecedoresApi();
+  return { parcial: data?.parcial ?? false, total: data?.total ?? 0, carregados: data?.itens.length ?? 0 };
 }

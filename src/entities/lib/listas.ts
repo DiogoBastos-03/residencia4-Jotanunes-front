@@ -33,10 +33,3 @@ export function alcanceDaLista(ds: Dataset, listaId: string): number {
   }
   return ids.size;
 }
-
-/** Na obra, quantos fornecedores recebem as exigências da lista. */
-export function alcanceNaObra(ds: Dataset, listaId: string, obraId: string): { aplica: number; total: number } {
-  const lista = ds.listas.find((l) => l.id === listaId);
-  const fornecedores = fornecedoresDaObra(ds, obraId);
-  return { aplica: fornecedores.filter((f) => lista !== undefined && forneceTipo(f, lista.tipo)).length, total: fornecedores.length };
-}

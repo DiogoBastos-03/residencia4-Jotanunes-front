@@ -1,29 +1,16 @@
-export { useFornecedores } from './hooks/useFornecedores';
+export { useFornecedores, useListagemParcial } from './hooks/useFornecedores';
 export { useFornecedor } from './hooks/useFornecedor';
-export { useFornecedoresApi, useFornecedorDetalhe, useListagemParcial } from './hooks/useFornecedoresApi';
-export { useVencimentos } from './hooks/useVencimentos';
-export { useCnpjCadastrado } from './hooks/useCnpjCadastrado';
 export type * from './types';
-export { MetricaAptos } from './components/MetricaAptos';
-export { MetricaVencendo } from './components/MetricaVencendo';
-export { VencimentosProximosBlock, ALERTA_VENCIMENTO_DIAS } from './components/VencimentosProximosBlock';
-export { DataBox } from './components/DataBox';
-export { useAcoesFornecedor } from './hooks/useAcoesFornecedor';
-export { useCadastrarFornecedor, useEditarFornecedor, useDefinirBloqueio } from './hooks/useMutacoesFornecedor';
-export { useFiltrosFornecedores, filtrarFornecedores, type FiltrosFornecedores } from './hooks/useFiltrosFornecedores';
-export { useObrasParaCadastro, useExemploNovoFornecedor, NOVO_FORNECEDOR_VAZIO } from './hooks/useObrasParaCadastro';
+export { useDefinirBloqueio } from './hooks/useMutacoesFornecedor';
+export { useFiltrosFornecedores, filtrarFornecedores } from './hooks/useFiltrosFornecedores';
 export { useParametrosFornecedor, type AbaFornecedor } from './hooks/useParametrosFornecedor';
 export { FornecedoresFiltros } from './components/FornecedoresFiltros';
 export { FornecedoresTabela } from './components/FornecedoresTabela';
-export { SituacaoFornecedor } from './components/SituacaoFornecedor';
-export { ModalReenviarAcesso } from './components/ModalReenviarAcesso';
 export { ModalBloquear } from './components/ModalBloquear';
 export { ModalEditarFornecedor } from './components/ModalEditarFornecedor';
-export { ModalEditarContato } from './components/ModalEditarContato';
-export { AbaDocumentos } from './components/AbaDocumentos';
-export { AbaExigenciasFornecedor } from './components/AbaExigenciasFornecedor';
-export { AbaObrasFornecedor } from './components/AbaObrasFornecedor';
-export { AbaHistoricoFornecedor } from './components/AbaHistoricoFornecedor';
-export { AbaContatos } from './components/AbaContatos';
 export { AbaDadosFornecedor } from './components/AbaDadosFornecedor';
+export { AbaObrasFornecedor } from './components/AbaObrasFornecedor';
 export { NovoFornecedorForm } from './components/novo/NovoFornecedorForm';
+// Fora da interface até a API ter os endpoints (importados direto pelo caminho quando voltarem):
+// AbaDocumentos, AbaExigenciasFornecedor, AbaHistoricoFornecedor, AbaContatos, ModalEditarContato,
+// ModalReenviarAcesso e hooks/useFichaDocumental. Ver src/pages/fornecedor/FornecedorPage.tsx.

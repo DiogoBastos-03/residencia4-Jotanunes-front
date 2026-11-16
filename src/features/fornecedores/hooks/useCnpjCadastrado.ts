@@ -1,13 +1,8 @@
-import { useMemo } from 'react';
-import { datasetStore } from '@/mocks';
-import { useStore } from '@/shared/lib';
+import { useFornecedoresApi } from '@/entities/fornecedor';
 
-/** Verifica, enquanto o usuário digita, se o CNPJ já pertence a um fornecedor. */
+/** Verifica, enquanto o usuário digita, se o CNPJ já está na listagem da API. */
 export function useCnpjCadastrado(cnpj: string) {
-  const ds = useStore(datasetStore);
+  const { data } = useFornecedoresApi();
   const digitos = cnpj.replace(/\D/g, '');
-  return useMemo(
-    () => (digitos.length === 14 ? (ds.fornecedores.find((f) => f.cnpj === digitos) ?? null) : null),
-    [digitos, ds],
-  );
+  return digitos.length === 14 ? (data?.itens.find((f) => f.cnpj === digitos) ?? null) : null;
 }

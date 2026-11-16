@@ -5,41 +5,30 @@ import { strings } from '@/shared/strings';
 import { AlertBox, Button, ButtonLink, PageHeader, Stack, useToast } from '@/shared/ui';
 import { useCnpjCadastrado } from '../../hooks/useCnpjCadastrado';
 import { useCadastrarFornecedor } from '../../hooks/useMutacoesFornecedor';
-import { NOVO_FORNECEDOR_VAZIO, useExemploNovoFornecedor, useObrasParaCadastro } from '../../hooks/useObrasParaCadastro';
-import { emailValido, errosDaApi, limparErrosDaApi, SEM_ERROS_DA_API, validarCnpj, validarDados, type ErrosDaApi } from '../../lib';
+import { errosDaApi, limparErrosDaApi, SEM_ERROS_DA_API, validarCnpj, validarDados, type ErrosDaApi } from '../../lib';
 import type { ErrosFormFornecedor, NovoFornecedor } from '../../types';
-import { BlocoContato } from './BlocoContato';
 import { BlocoIdentificacao } from './BlocoIdentificacao';
-import { BlocoObra } from './BlocoObra';
 import { SeletorTipos } from './SeletorTipos';
 
 const t = strings.pages.fornecedorNovo;
 
+const VAZIO: NovoFornecedor = { cnpj: '', razaoSocial: '', telefone: '', email: '', tipos: [] };
+
 function validar(d: NovoFornecedor): ErrosFormFornecedor {
-  return {
-    cnpj: validarCnpj(d.cnpj),
-    ...validarDados(d),
-    contatoNome: d.contato.nome.trim() ? undefined : t.contato.nomeErro,
-    contatoEmail: emailValido(d.contato.email) ? undefined : t.contato.emailErro,
-    servico: d.obraId && !d.servicoContratado.trim() ? t.obra.servicoErro : undefined,
-  };
+  return { cnpj: validarCnpj(d.cnpj), ...validarDados(d) };
 }
 
 /**
- * Cadastro em quatro blocos. Abre preenchido com o exemplo; "Limpar" esvazia.
- * A URL aceita ?form=vazio e ?cnpj=<14 dígitos> — usados pela /_estados.
- * Identificação e tipos vão para a API (POST /enterprises); contato, convite e obra são demonstração.
+ * Cadastro com exatamente o que o POST /enterprises aceita: razão social, CNPJ, telefone,
+ * e-mail e tipos. Abre vazio. A URL aceita ?cnpj=<14 dígitos> (usado pela /_estados).
  */
 export function NovoFornecedorForm() {
   const [params] = useSearchParams();
-  const exemplo = useExemploNovoFornecedor();
-  const obras = useObrasParaCadastro();
   const cadastro = useCadastrarFornecedor();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  const inicial = params.get('form') === 'vazio' ? NOVO_FORNECEDOR_VAZIO : exemplo;
-  const [dados, setDados] = useState<NovoFornecedor>({ ...inicial, cnpj: params.get('cnpj') ?? inicial.cnpj });
+  const [dados, setDados] = useState<NovoFornecedor>({ ...VAZIO, cnpj: params.get('cnpj') ?? '' });
   const [erros, setErros] = useState<ErrosFormFornecedor>({});
   const [tentou, setTentou] = useState(false);
   const [daApi, setDaApi] = useState<ErrosDaApi>(SEM_ERROS_DA_API);
@@ -76,11 +65,7 @@ export function NovoFornecedorForm() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    showToast(
-      dados.enviarConvite
-        ? strings.pages.fornecedores.novoToastConvite(dados.contato.email.trim())
-        : strings.pages.fornecedores.novoToast(dados.razaoSocial.trim()),
-    );
+    showToast(strings.pages.fornecedores.novoToast(dados.razaoSocial.trim()));
     navigate(paths.fornecedores);
   }
 
@@ -96,7 +81,7 @@ export function NovoFornecedorForm() {
             <Button
               variant="tertiary"
               onClick={() => {
-                setDados(NOVO_FORNECEDOR_VAZIO);
+                setDados(VAZIO);
                 setErros({});
                 setDaApi(SEM_ERROS_DA_API);
                 setTentou(false);
@@ -131,8 +116,6 @@ export function NovoFornecedorForm() {
       )}
       <BlocoIdentificacao dados={dados} erros={errosVisiveis} onChange={mudar} />
       <SeletorTipos tipos={dados.tipos} onChange={(tipos) => mudar({ tipos })} erro={errosVisiveis.tipos} />
-      <BlocoContato dados={dados} erros={errosVisiveis} onChange={mudar} />
-      <BlocoObra dados={dados} erros={errosVisiveis} onChange={mudar} obras={obras} />
     </Stack>
   );
 }

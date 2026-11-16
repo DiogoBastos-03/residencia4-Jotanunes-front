@@ -8,11 +8,10 @@ import { Sidebar } from './Sidebar';
 type MobileSidebarProps = {
   open: boolean;
   onClose: () => void;
-  queueCount: number | undefined;
 };
 
 /** Sidebar off-canvas (até 1024px): véu, Esc e clique fora fecham; foco preso enquanto aberta. */
-export function MobileSidebar({ open, onClose, queueCount }: MobileSidebarProps) {
+export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const { mounted, exiting } = useExitTransition(open, EXIT_MS.drawer);
   useEscapeKey(open, onClose);
@@ -38,7 +37,7 @@ export function MobileSidebar({ open, onClose, queueCount }: MobileSidebarProps)
           aria-label={strings.layout.menuDialog}
           className="absolute inset-y-3 left-3 flex items-start gap-2"
         >
-          <Sidebar queueCount={queueCount} onNavigate={onClose} className="h-full overflow-y-auto" />
+          <Sidebar onNavigate={onClose} className="h-full overflow-y-auto" />
           <IconButton icon={XMarkIcon} label={strings.layout.closeMenu} onClick={onClose} />
         </div>
       </div>

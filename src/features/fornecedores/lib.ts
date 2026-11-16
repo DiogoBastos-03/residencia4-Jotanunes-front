@@ -24,7 +24,7 @@ export function validarCnpj(cnpj: string): string | undefined {
   return cnpjValido(cnpj) ? undefined : t.identificacao.cnpjErro;
 }
 
-type CampoApi = Extract<CampoFormFornecedor, 'razaoSocial' | 'cnpj' | 'telefone' | 'email' | 'tipos'>;
+type CampoApi = CampoFormFornecedor;
 
 /** Campo do corpo da API (já normalizado pelo ApiError) → campo do formulário. */
 const CAMPO_DA_API: Readonly<Record<string, CampoApi>> = {

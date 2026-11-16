@@ -20,16 +20,3 @@ export function isoToBr(iso: string | undefined, pattern: DatePattern = 'date'):
   return iso ? formatDate(iso, pattern) : '';
 }
 
-/** "10/2026" → "2026-10-01"; null se inválido. */
-export function parseMonthBr(texto: string): string | null {
-  const m = /^(\d{2})\/(\d{4})$/.exec(texto.trim());
-  if (!m) return null;
-  const mes = Number(m[1]);
-  return mes >= 1 && mes <= 12 ? `${m[2]}-${m[1]}-01` : null;
-}
-
-/** Máscara de digitação mm/aaaa. */
-export function maskMonthBr(texto: string): string {
-  const d = texto.replace(/\D/g, '').slice(0, 6);
-  return d.replace(/^(\d{2})(\d)/, '$1/$2');
-}
