@@ -22,6 +22,13 @@ export const CODIGOS_CONTRATO = [
   'REQUIREMENT_ALREADY_POSTPONED',
   'POSTPONEMENT_DEADLINE_IN_PAST',
   'REQUIREMENT_NOT_POSTPONED',
+  // Vínculo empresa ↔ obra (lido do código do back: AddEnterpriseToConstructionUseCase,
+  // RemoveEnterpriseFromConstructionUseCase e WorkflowAssignmentServiceImpl).
+  'CONSTRUCTION_NOT_FOUND',
+  'ENTERPRISE_ALREADY_IN_CONSTRUCTION',
+  'ENTERPRISE_INACTIVE',
+  'ENTERPRISE_NOT_IN_CONSTRUCTION',
+  'INVALID_LIMIT_EXPIRES_DAYS',
   'INTERNAL_ERROR',
 ] as const;
 

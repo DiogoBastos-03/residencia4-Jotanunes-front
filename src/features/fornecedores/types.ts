@@ -42,6 +42,9 @@ export type NovoFornecedor = {
   telefone: string;
   email: string;
   tipos: TipoFornecimento[];
+  /** Vínculo opcional, feito depois do cadastro (POST …/constructions/{obraId}/enterprises). Vazio: sem vínculo. */
+  obraId: string;
+  prazoDias: string;
 };
 
 /** Edição dos dados da empresa e dos tipos. */
@@ -53,7 +56,7 @@ export type EdicaoFornecedor = {
 };
 
 /** Campos dos formulários de fornecedor que podem ter erro. */
-export type CampoFormFornecedor = 'cnpj' | 'razaoSocial' | 'telefone' | 'email' | 'tipos';
+export type CampoFormFornecedor = 'cnpj' | 'razaoSocial' | 'telefone' | 'email' | 'tipos' | 'prazo';
 
 export type ErrosFormFornecedor = Partial<Record<CampoFormFornecedor, string>>;
 

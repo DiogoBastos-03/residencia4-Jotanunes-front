@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
+import { useObrasApi, useVincularFornecedor } from '@/entities/obra';
+import { mensagemDoErro } from '@/shared/api';
 import { paths } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { AlertBox, Button, ButtonLink, PageHeader, Stack, useToast } from '@/shared/ui';
@@ -8,23 +10,34 @@ import { useCadastrarFornecedor } from '../../hooks/useMutacoesFornecedor';
 import { errosDaApi, limparErrosDaApi, SEM_ERROS_DA_API, validarCnpj, validarDados, type ErrosDaApi } from '../../lib';
 import type { ErrosFormFornecedor, NovoFornecedor } from '../../types';
 import { BlocoIdentificacao } from './BlocoIdentificacao';
+import { BlocoObra } from './BlocoObra';
 import { SeletorTipos } from './SeletorTipos';
 
 const t = strings.pages.fornecedorNovo;
 
-const VAZIO: NovoFornecedor = { cnpj: '', razaoSocial: '', telefone: '', email: '', tipos: [] };
+const VAZIO: NovoFornecedor = { cnpj: '', razaoSocial: '', telefone: '', email: '', tipos: [], obraId: '', prazoDias: '' };
 
 function validar(d: NovoFornecedor): ErrosFormFornecedor {
-  return { cnpj: validarCnpj(d.cnpj), ...validarDados(d) };
+  const prazo = Number(d.prazoDias);
+  const prazoOk = !d.obraId || (Number.isInteger(prazo) && prazo >= 1 && prazo <= 9999);
+  return { cnpj: validarCnpj(d.cnpj), ...validarDados(d), prazo: prazoOk ? undefined : strings.errosApi.porCampo.prazo };
 }
 
 /**
- * Cadastro com exatamente o que o POST /enterprises aceita: razão social, CNPJ, telefone,
- * e-mail e tipos. Abre vazio. A URL aceita ?cnpj=<14 dígitos> (usado pela /_estados).
+ * Cadastro com exatamente o que o POST /enterprises aceita (razão social, CNPJ, telefone, e-mail
+ * e tipos) e, opcionalmente, a obra: depois do cadastro, POST …/constructions/{obraId}/enterprises.
+ *
+ * São duas chamadas, sem transação entre elas (no back também não há: são dois módulos).
+ * Se o vínculo falhar, o fornecedor já existe: a tela não diz "pronto" — abre a ficha dele na
+ * aba Obras (que lê a API e mostra a verdade) com um aviso de erro dizendo o que faltou.
+ * Abre vazio. A URL aceita ?cnpj=<14 dígitos> (usado pela /_estados).
  */
 export function NovoFornecedorForm() {
   const [params] = useSearchParams();
   const cadastro = useCadastrarFornecedor();
+  const vinculo = useVincularFornecedor();
+  const obras = useObrasApi();
+  const enviando = cadastro.isPending || vinculo.isPending;
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -35,6 +48,7 @@ export function NovoFornecedorForm() {
   const jaCadastrado = useCnpjCadastrado(dados.cnpj);
   // Depois do POST, a empresa recém-criada entra na lista: não é duplicado dela mesma.
   const duplicado = cadastro.isPending || cadastro.isSuccess ? null : jaCadastrado;
+  const nomeObra = (obraId: string) => obras.data?.itens.find((o) => o.id === obraId)?.nome ?? '';
 
   const errosVisiveis: ErrosFormFornecedor = {
     ...erros,
@@ -58,14 +72,30 @@ export function NovoFornecedorForm() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
+    let id: string;
     try {
-      await cadastro.mutateAsync(dados);
+      id = await cadastro.mutateAsync(dados);
     } catch (e) {
       setDaApi(errosDaApi(e));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    showToast(strings.pages.fornecedores.novoToast(dados.razaoSocial.trim()));
+    const razao = dados.razaoSocial.trim();
+    if (!dados.obraId) {
+      showToast(strings.pages.fornecedores.novoToast(razao));
+      navigate(paths.fornecedores);
+      return;
+    }
+    const obra = nomeObra(dados.obraId);
+    try {
+      await vinculo.mutateAsync({ obraId: dados.obraId, fornecedorId: id, prazoDias: Number(dados.prazoDias) });
+    } catch (e) {
+      // Falha parcial: o fornecedor existe, o vínculo não. A ficha mostra o estado real.
+      showToast(t.toastVinculoFalhou(razao, obra, mensagemDoErro(e)), 'error');
+      navigate(`${paths.fornecedor(id)}?aba=obras`);
+      return;
+    }
+    showToast(t.toastVinculado(razao, obra));
     navigate(paths.fornecedores);
   }
 
@@ -90,8 +120,8 @@ export function NovoFornecedorForm() {
               {t.limpar}
             </Button>
             <ButtonLink to={paths.fornecedores}>{t.cancelar}</ButtonLink>
-            <Button variant="primary" disabled={cadastro.isPending} aria-busy={cadastro.isPending} onClick={() => void salvar()}>
-              {cadastro.isPending ? t.salvando : t.salvar}
+            <Button variant="primary" disabled={enviando} aria-busy={enviando} onClick={() => void salvar()}>
+              {enviando ? t.salvando : t.salvar}
             </Button>
           </>
         }
@@ -116,6 +146,7 @@ export function NovoFornecedorForm() {
       )}
       <BlocoIdentificacao dados={dados} erros={errosVisiveis} onChange={mudar} />
       <SeletorTipos tipos={dados.tipos} onChange={(tipos) => mudar({ tipos })} erro={errosVisiveis.tipos} />
+      <BlocoObra dados={dados} erros={errosVisiveis} onChange={mudar} obras={obras.data?.itens ?? []} />
     </Stack>
   );
 }

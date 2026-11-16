@@ -37,6 +37,11 @@ const STATUS_DO_CODIGO: Readonly<Record<CodigoContrato, number>> = {
   REQUIREMENT_ALREADY_POSTPONED: 422,
   POSTPONEMENT_DEADLINE_IN_PAST: 422,
   REQUIREMENT_NOT_POSTPONED: 422,
+  CONSTRUCTION_NOT_FOUND: 404,
+  ENTERPRISE_ALREADY_IN_CONSTRUCTION: 409,
+  ENTERPRISE_INACTIVE: 422,
+  ENTERPRISE_NOT_IN_CONSTRUCTION: 404,
+  INVALID_LIMIT_EXPIRES_DAYS: 422,
   INTERNAL_ERROR: 500,
 };
 
@@ -61,6 +66,11 @@ const TITULO: Readonly<Record<CodigoContrato, string>> = {
   REQUIREMENT_ALREADY_POSTPONED: 'A exigência já possui postergação ativa.',
   POSTPONEMENT_DEADLINE_IN_PAST: 'O prazo precisa ser posterior a hoje.',
   REQUIREMENT_NOT_POSTPONED: 'A exigência não possui postergação ativa.',
+  CONSTRUCTION_NOT_FOUND: 'Obra não encontrada.',
+  ENTERPRISE_ALREADY_IN_CONSTRUCTION: 'Esta empresa já está nesta obra.',
+  ENTERPRISE_INACTIVE: 'Empresa inativa.',
+  ENTERPRISE_NOT_IN_CONSTRUCTION: 'Esta empresa não está nesta obra.',
+  INVALID_LIMIT_EXPIRES_DAYS: 'Prazo de entrega deve estar entre 1 e 9999 dias.',
   INTERNAL_ERROR: 'Erro interno no servidor.',
 };
 
@@ -368,6 +378,54 @@ export const handlers = [
       const daEmpresa = new Set(db.vinculos.filter((v) => v.enterpriseId === enterpriseId).map((v) => v.constructionId));
       const lista = db.obras.filter((o) => enterpriseId === null || daEmpresa.has(o.constructionId)).sort((a, b) => porNome(a.constructionName, b.constructionName));
       return HttpResponse.json(paginar(lista, p.page, p.pageSize));
+    }),
+  ),
+
+  // Vínculo empresa ↔ obra — mesmas regras e mesma ordem de verificação do back
+  // (AddEnterpriseToConstructionUseCase e WorkflowAssignmentServiceImpl):
+  // 400 de validação → 404 obra → 409 já vinculada → 404 empresa → 422 empresa inativa → 201.
+  rest.post(
+    `${API}/construction/constructions/:constructionId/enterprises`,
+    comCenario(async ({ request, params }) => {
+      const obraId = param(params, 'constructionId');
+      if (!ehGuid(obraId)) return naoEncontradoSemCorpo();
+      const corpo = await lerCorpo(request);
+      if (!corpo.ok) return corpo.resposta;
+      const b = objeto(corpo.valor) ?? {};
+      const erros: Record<string, string[]> = {};
+      if (b.enterpriseId === undefined || b.enterpriseId === null) erros.EnterpriseId = ['A empresa é obrigatória.'];
+      else if (!ehGuid(b.enterpriseId)) erros['$.enterpriseId'] = ['The JSON value could not be converted to System.Nullable`1[System.Guid].'];
+      if (b.limitExpiresDays === undefined || b.limitExpiresDays === null) erros.LimitExpiresDays = ['O prazo de entrega é obrigatório.'];
+      else if (typeof b.limitExpiresDays !== 'number' || !Number.isInteger(b.limitExpiresDays)) erros['$.limitExpiresDays'] = ['The JSON value could not be converted to System.Nullable`1[System.Int32].'];
+      else if (b.limitExpiresDays < 1 || b.limitExpiresDays > 9999) erros.LimitExpiresDays = ['O prazo de entrega deve estar entre 1 e 9999 dias.'];
+      if (Object.keys(erros).length) return validacao(erros);
+
+      const empresaId = typeof b.enterpriseId === 'string' ? b.enterpriseId : '';
+      if (!db.obras.some((o) => o.constructionId === obraId)) return problema('CONSTRUCTION_NOT_FOUND');
+      if (db.vinculos.some((v) => v.constructionId === obraId && v.enterpriseId === empresaId)) return problema('ENTERPRISE_ALREADY_IN_CONSTRUCTION');
+      const empresa = empresaPorId(empresaId);
+      if (!empresa) return problema('ENTERPRISE_NOT_FOUND');
+      if (!empresa.active) return problema('ENTERPRISE_INACTIVE');
+
+      db.vinculos.push({ enterpriseId: empresaId, constructionId: obraId });
+      // O mock não tem workflows: nenhum é atribuído e todos os tipos da empresa ficam sem workflow (1 = Material, 2 = Servico).
+      return HttpResponse.json(
+        { assignedWorkFlowIds: [], typesWithoutWorkflow: empresa.types.map((t) => (t === 'Material' ? 1 : 2)) },
+        { status: 201, headers: { Location: `${API}/constructions?enterpriseId=${empresaId}` } },
+      );
+    }),
+  ),
+  rest.delete(
+    `${API}/construction/constructions/:constructionId/enterprises/:enterpriseId`,
+    comCenario(({ params }) => {
+      const obraId = param(params, 'constructionId');
+      const empresaId = param(params, 'enterpriseId');
+      if (!ehGuid(obraId) || !ehGuid(empresaId)) return naoEncontradoSemCorpo();
+      // Como no back: só confere o vínculo (obra inexistente também dá ENTERPRISE_NOT_IN_CONSTRUCTION).
+      const i = db.vinculos.findIndex((v) => v.constructionId === obraId && v.enterpriseId === empresaId);
+      if (i < 0) return problema('ENTERPRISE_NOT_IN_CONSTRUCTION');
+      db.vinculos.splice(i, 1);
+      return new HttpResponse(null, { status: 204 });
     }),
   ),
 

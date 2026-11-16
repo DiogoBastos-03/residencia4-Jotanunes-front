@@ -59,12 +59,14 @@ export const fornecedorPage = {
   },
   obras: {
     caption: 'Obras do fornecedor',
-    colunas: { obra: 'Obra', codigo: 'Código', servico: 'Serviço contratado', periodo: 'Período', listas: 'Listas aplicáveis', situacao: 'Situação da obra' },
-    abrir: 'Abrir obra',
+    colunas: { obra: 'Obra' },
+    vincular: 'Vincular a uma obra',
+    desvincular: 'Desvincular',
     vazioTitle: 'Ainda não está em nenhuma obra',
-    vazioDescription: 'Nenhuma obra da integração tem este fornecedor vinculado.',
-    verObras: 'Ver obras',
+    vazioDescription: 'Vincule o fornecedor às obras em que ele trabalha.',
+    vazioBloqueado: 'Nenhuma obra vinculada a este fornecedor.',
   },
+
   historico: {
     vazioTitle: 'Nada registrado ainda',
     vazioDescription: 'Envios, decisões e vínculos com obras aparecem aqui.',

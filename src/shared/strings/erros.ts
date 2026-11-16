@@ -24,6 +24,11 @@ export const errosApi = {
     REQUIREMENT_ALREADY_POSTPONED: 'Esta exigência já tem uma postergação ativa.',
     POSTPONEMENT_DEADLINE_IN_PAST: 'O novo prazo precisa ser depois de hoje.',
     REQUIREMENT_NOT_POSTPONED: 'Esta exigência não tem postergação ativa para cancelar.',
+    CONSTRUCTION_NOT_FOUND: 'Obra não encontrada.',
+    ENTERPRISE_ALREADY_IN_CONSTRUCTION: 'Este fornecedor já está nesta obra.',
+    ENTERPRISE_INACTIVE: 'Fornecedor bloqueado não pode ser vinculado a uma obra. Desbloqueie antes.',
+    ENTERPRISE_NOT_IN_CONSTRUCTION: 'Este fornecedor não está mais nesta obra.',
+    INVALID_LIMIT_EXPIRES_DAYS: 'O prazo de entrega deve estar entre 1 e 9999 dias.',
     INTERNAL_ERROR: 'Algo deu errado do nosso lado. Tente de novo em instantes.',
     // — Internos do front —
     VALIDATION_ERROR: 'Alguns campos foram recusados. Revise os campos marcados.',
@@ -40,6 +45,9 @@ export const errosApi = {
     telefone: 'Telefone recusado. Informe DDD e número.',
     email: 'E-mail recusado. Confira o endereço.',
     tipos: 'Escolha pelo menos um tipo de fornecimento.',
+    fornecedor: 'Escolha o fornecedor.',
+    obra: 'Escolha a obra.',
+    prazo: 'O prazo de entrega deve estar entre 1 e 9999 dias.',
   },
   /** Código desconhecido ou erro sem código (ex.: 404 sem corpo). */
   generico: (status: number) => (status === 404 ? 'Não encontrado.' : `Não foi possível concluir a operação (erro ${status}).`),

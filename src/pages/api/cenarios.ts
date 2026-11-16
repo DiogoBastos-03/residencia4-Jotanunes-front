@@ -78,6 +78,33 @@ const E = `${PREFIXO}/enterprises`;
 
 // ——— Catálogo ———
 
+// ——— Vínculo empresa ↔ obra: pares buscados na própria API ———
+
+async function primeiraObra(): Promise<string> {
+  const id = (await obraApi.listar({ porPagina: 50 })).itens[0]?.id;
+  if (!id) throw new SemDado(t.semDado('obra'));
+  return id;
+}
+
+/** Uma empresa já vinculada à primeira obra (para o 409 e para escolher quem não está). */
+async function vinculoExistente(): Promise<{ obraId: string; fornecedorId: string }> {
+  const obraId = await primeiraObra();
+  const fornecedorId = (await fornecedorApi.listar({ obraIds: [obraId], porPagina: 50 })).itens[0]?.id;
+  if (!fornecedorId) throw new SemDado(t.semDado('empresa vinculada a uma obra'));
+  return { obraId, fornecedorId };
+}
+
+/** Uma empresa ativa que ainda não está na primeira obra. */
+async function vinculoLivre(): Promise<{ obraId: string; fornecedorId: string }> {
+  const obraId = await primeiraObra();
+  const naObra = new Set((await fornecedorApi.listar({ obraIds: [obraId], porPagina: 50 })).itens.map((f) => f.id));
+  const livre = (await fornecedorApi.listar({ bloqueado: false, porPagina: 50 })).itens.find((f) => !naObra.has(f.id));
+  if (!livre) throw new SemDado(t.semDado('empresa ativa fora da obra'));
+  return { obraId, fornecedorId: livre.id };
+}
+
+const VINCULO = (obraId: string) => `${PREFIXO}/construction/constructions/${obraId}/enterprises`;
+
 export const ROTAS: readonly Rota[] = [
   { chave: 'health', metodo: 'GET', caminho: '/health', cenarios: [{ chave: 'ok', executar: () => verificarSaude() }] },
   {
@@ -177,6 +204,67 @@ export const ROTAS: readonly Rota[] = [
       { chave: 'filtros', executar: async () => obraApi.listar({ fornecedorId: await primeiraEmpresa() }) },
       { chave: 'v400', executar: () => http.json('GET', `${PREFIXO}/constructions`, qualquer, { query: { enterpriseId: 'abc' } }) },
       { chave: 'pageSize', executar: () => obraApi.listar({ porPagina: 100 }) },
+    ],
+  },
+  {
+    chave: 'vincular',
+    metodo: 'POST',
+    caminho: `${PREFIXO}/construction/constructions/{constructionId}/enterprises`,
+    cenarios: [
+      {
+        // Deixa o banco como estava: vincula, guarda a resposta e remove o vínculo criado.
+        chave: 'vinculoCriado',
+        executar: async () => {
+          const v = await vinculoLivre();
+          const r = await obraApi.vincularFornecedor(v.obraId, { fornecedorId: v.fornecedorId, prazoDias: 30 });
+          await obraApi.desvincularFornecedor(v.obraId, v.fornecedorId);
+          return r;
+        },
+      },
+      { chave: 'v400', executar: async () => http.json('POST', VINCULO(await primeiraObra()), qualquer, { body: {} }) },
+      { chave: 'obraInexistente', executar: async () => obraApi.vincularFornecedor(GUID_INEXISTENTE, { fornecedorId: (await vinculoLivre()).fornecedorId, prazoDias: 30 }) },
+      { chave: 'empresaInexistente', executar: async () => obraApi.vincularFornecedor(await primeiraObra(), { fornecedorId: GUID_INEXISTENTE, prazoDias: 30 }) },
+      {
+        chave: 'jaNaObra',
+        executar: async () => {
+          const v = await vinculoExistente();
+          return obraApi.vincularFornecedor(v.obraId, { fornecedorId: v.fornecedorId, prazoDias: 30 });
+        },
+      },
+      {
+        chave: 'empresaInativa',
+        executar: async () => {
+          const obraId = await primeiraObra();
+          const bloqueada = (await fornecedorApi.listar({ bloqueado: true, porPagina: 50 })).itens[0];
+          if (!bloqueada) throw new SemDado(t.semDado('empresa bloqueada'));
+          return obraApi.vincularFornecedor(obraId, { fornecedorId: bloqueada.id, prazoDias: 30 });
+        },
+      },
+      // O [Range(1, 9999)] do request dá 400 antes; o 422 do domínio só sai forçado no mock.
+      { chave: 'prazoInvalido', forcar: 'INVALID_LIMIT_EXPIRES_DAYS', executar: async () => obraApi.vincularFornecedor(await primeiraObra(), { fornecedorId: GUID_INEXISTENTE, prazoDias: 30 }) },
+      { chave: 'v404SemCorpo', executar: () => http.json('POST', VINCULO('abc'), qualquer, { body: {} }) },
+    ],
+  },
+  {
+    chave: 'desvincular',
+    metodo: 'DELETE',
+    caminho: `${PREFIXO}/construction/constructions/{constructionId}/enterprises/{enterpriseId}`,
+    cenarios: [
+      {
+        chave: 'vinculoRemovido',
+        executar: async () => {
+          const v = await vinculoLivre();
+          await obraApi.vincularFornecedor(v.obraId, { fornecedorId: v.fornecedorId, prazoDias: 30 });
+          return obraApi.desvincularFornecedor(v.obraId, v.fornecedorId);
+        },
+      },
+      {
+        chave: 'naoEstaNaObra',
+        executar: async () => {
+          const v = await vinculoLivre();
+          return obraApi.desvincularFornecedor(v.obraId, v.fornecedorId);
+        },
+      },
     ],
   },
   {

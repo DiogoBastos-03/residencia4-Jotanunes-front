@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { buscarTodasAsPaginas, queryKeys } from '@/shared/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ApiError, buscarTodasAsPaginas, queryKeys } from '@/shared/api';
 import { fornecedorApi } from '../fornecedor/api';
 import { obraApi } from './api';
 import type { ObraResumo } from './model';
@@ -42,5 +42,51 @@ export function useVinculosApi(obras: readonly ObraResumo[] | undefined) {
       );
       return porObra.flat();
     },
+  });
+}
+
+/**
+ * Vínculo e desvínculo mudam: os fornecedores da obra, as obras do fornecedor e as contagens
+ * (filtro por obra da listagem de empresas). Invalida as duas famílias; nada é editado no cache à mão.
+ */
+function useInvalidarVinculos() {
+  const queryClient = useQueryClient();
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.fornecedores.todos }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.obras.todos }),
+    ]);
+}
+
+/**
+ * Erro que mostra que a tela estava desatualizada (outra pessoa vinculou, desvinculou, bloqueou ou
+ * apagou): busca de novo, para a lista não continuar mentindo.
+ */
+const estadoMudou = (e: unknown) =>
+  e instanceof ApiError &&
+  (e.code === 'ENTERPRISE_ALREADY_IN_CONSTRUCTION' ||
+    e.code === 'ENTERPRISE_NOT_IN_CONSTRUCTION' ||
+    e.code === 'ENTERPRISE_INACTIVE' ||
+    e.code === 'ENTERPRISE_NOT_FOUND' ||
+    e.code === 'CONSTRUCTION_NOT_FOUND');
+
+/** POST …/construction/constructions/{obraId}/enterprises { enterpriseId, limitExpiresDays }. */
+export function useVincularFornecedor() {
+  const invalidar = useInvalidarVinculos();
+  return useMutation({
+    mutationFn: ({ obraId, fornecedorId, prazoDias }: { obraId: string; fornecedorId: string; prazoDias: number }) =>
+      obraApi.vincularFornecedor(obraId, { fornecedorId, prazoDias }),
+    onSuccess: () => invalidar(),
+    onError: (e) => (estadoMudou(e) ? invalidar() : undefined),
+  });
+}
+
+/** DELETE …/construction/constructions/{obraId}/enterprises/{fornecedorId}. */
+export function useDesvincularFornecedor() {
+  const invalidar = useInvalidarVinculos();
+  return useMutation({
+    mutationFn: ({ obraId, fornecedorId }: { obraId: string; fornecedorId: string }) => obraApi.desvincularFornecedor(obraId, fornecedorId),
+    onSuccess: () => invalidar(),
+    onError: (e) => (estadoMudou(e) ? invalidar() : undefined),
   });
 }

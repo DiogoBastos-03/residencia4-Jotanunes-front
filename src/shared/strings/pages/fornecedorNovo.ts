@@ -36,4 +36,15 @@ export const fornecedorNovoPage = {
     nota: 'Marque um ou os dois.',
     erro: 'Escolha pelo menos um tipo.',
   },
+  obra: {
+    title: '3. Obra (opcional)',
+    description: 'Se já souber a obra, o fornecedor é vinculado logo depois de cadastrado.',
+    obra: 'Obra',
+    nenhuma: 'Nenhuma agora',
+    prazo: 'Prazo de entrega dos documentos (dias)',
+    prazoHint: 'De 1 a 9999 dias, contados a partir do vínculo.',
+  },
+  toastVinculado: (razao: string, obra: string) => `${razao} cadastrado e vinculado a ${obra}`,
+  toastVinculoFalhou: (razao: string, obra: string, motivo: string) =>
+    `${razao} foi cadastrado, mas o vínculo com ${obra} não foi feito: ${motivo} Vincule pela aba Obras.`,
 } as const;

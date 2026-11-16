@@ -11,6 +11,7 @@ import { estadosPage } from './pages/estados';
 import { obrasPage } from './pages/obras';
 import { obraPage } from './pages/obra';
 import { fornecedoresPage, modalBloquear, modalEditarContato, modalEditarFornecedor, modalReenviarAcesso } from './pages/fornecedores';
+import { modalDesvincular, modalVincular } from './pages/vinculo';
 import { fornecedorNovoPage } from './pages/fornecedorNovo';
 import { fornecedorPage } from './pages/fornecedor';
 import {
@@ -38,7 +39,7 @@ export const strings = {
   ui,
   errosApi,
   layout,
-  modais: { reenviarAcesso: modalReenviarAcesso, bloquear: modalBloquear, editarFornecedor: modalEditarFornecedor, editarContato: modalEditarContato },
+  modais: { reenviarAcesso: modalReenviarAcesso, bloquear: modalBloquear, editarFornecedor: modalEditarFornecedor, editarContato: modalEditarContato, vincular: modalVincular, desvincular: modalDesvincular },
   drawers: { documento: drawerDocumento, vincularObras: drawerVincularObras },
   dominio,
   eventos,

@@ -13,8 +13,8 @@ const COLUNAS: readonly TableColumn<FornecedorResumo>[] = [
   { key: 'situacao', header: t.colunas.situacao, mobile: 'badge', cell: (f) => (f.bloqueado ? <Badge status="bloqueado" /> : null) },
 ];
 
-/** Fornecedores vinculados à obra, como a listagem da API devolve. */
-export function FornecedoresDaObra({ fornecedores }: { fornecedores: readonly FornecedorResumo[] }) {
+/** Fornecedores vinculados à obra, como a listagem da API devolve. A linha abre a ficha; o botão desvincula. */
+export function FornecedoresDaObra({ fornecedores, onDesvincular }: { fornecedores: readonly FornecedorResumo[]; onDesvincular: (f: FornecedorResumo) => void }) {
   if (fornecedores.length === 0) return <EmptyState icon={BuildingStorefrontIcon} title={t.vazioTitle} description={t.vazioDescription} />;
   return (
     <Table
@@ -23,7 +23,7 @@ export function FornecedoresDaObra({ fornecedores }: { fornecedores: readonly Fo
       rows={fornecedores}
       rowKey={(f) => f.id}
       rowTo={(f) => paths.fornecedor(f.id)}
-      action={{ label: () => t.abrir, describe: (f) => f.razaoSocial, to: (f) => paths.fornecedor(f.id) }}
+      action={{ label: () => t.desvincular, describe: (f) => f.razaoSocial, onClick: onDesvincular }}
     />
   );
 }

@@ -4,6 +4,72 @@
 
 A especificação é `../contrato-api-interna.md`, gerado da branch `dev` do back (commit `47cf912`). Ele fica na pasta acima do projeto, não na raiz de `Jnunes-front-interno`.
 
+## Parte A — vínculo fornecedor ↔ obra (16/11/2026)
+
+Fonte da verdade: o código do back (`../residenciaIV-api-interna`, branch `main`, commit `c242815`). O `contrato-api-interna.md` está desatualizado e não descreve estas rotas.
+
+### Rotas, como estão no código
+
+| Método e caminho | Corpo | Respostas |
+|---|---|---|
+| `POST /api/v1/internal/construction/constructions/{constructionId}/enterprises` (`ConstructionEnterpriseController.Add`) | `{ enterpriseId: Guid, limitExpiresDays: int }`, os dois obrigatórios; `limitExpiresDays` com `[Range(1, 9999)]` | **201** `{ assignedWorkFlowIds: int[], typesWithoutWorkflow: int[] }` (tipos: 1 = Material, 2 = Servico), com `Location` para `/constructions?enterpriseId=`. **400** `errors` por campo (`EnterpriseId`, `LimitExpiresDays`; mensagens já em português). **404** `CONSTRUCTION_NOT_FOUND`. **409** `ENTERPRISE_ALREADY_IN_CONSTRUCTION`. **404** `ENTERPRISE_NOT_FOUND`. **422** `ENTERPRISE_INACTIVE`. **422** `INVALID_LIMIT_EXPIRES_DAYS` (domínio; na prática o 400 vem antes). **404 sem corpo** se o id da URL não é GUID |
+| `DELETE /api/v1/internal/construction/constructions/{constructionId}/enterprises/{enterpriseId}` (`.Remove`) | — | **204**. **404** `ENTERPRISE_NOT_IN_CONSTRUCTION`. **404 sem corpo** se algum id não é GUID |
+| `GET /api/v1/internal/constructions?enterpriseId=&page=&pageSize=` (`ConstructionController.List`) | — | **200** página de `{ constructionId, constructionName }` (sem mudança) |
+
+Ordem das verificações no POST (`AddEnterpriseToConstructionUseCase` → `WorkflowAssignmentServiceImpl`): validação 400 → obra existe → já vinculada (409) → empresa existe (404) → empresa ativa (422) → prazo (422) → grava os vínculos com os workflows atuais da obra que tenham um dos tipos da empresa (quem já segue o workflow por outra obra não ganha outro) → grava a linha em `tb_construction_enterprise`. São dois módulos **sem transação** entre eles (comentado no próprio código, "item 31 das pendências").
+
+No DELETE: confere só o vínculo; encerra (com data de fim) os vínculos da empresa com os workflows da obra, menos os que outra obra dela também usa; apaga a linha da obra. Os vínculos com workflow ficam como histórico — **não são apagados**.
+
+Erros: `AppException` e `DomainException` viram ProblemDetails com `code` no `GlobalExceptionHandler` (o de domínio sempre 422). Estas rotas não exigem o cabeçalho `X-Internal-User-Id`.
+
+### Conferência com a API publicada
+
+Todas as respostas acima foram provocadas na API do Render e batem com o código (status, `code` e title). Única observação, coerente com o código mas fácil de estranhar: **DELETE com obra inexistente responde `ENTERPRISE_NOT_IN_CONSTRUCTION`**, não `CONSTRUCTION_NOT_FOUND`, porque o caso de uso só confere o vínculo. Nenhuma divergência entre código e API publicada.
+
+### O que mudou na interface
+
+- **Ficha da obra:** lista os fornecedores vinculados (razão social, CNPJ, tipos, bloqueado) com **"Vincular fornecedor"** no topo e **"Desvincular"** em cada linha (a linha abre a ficha do fornecedor).
+  - O modal de vincular pede o fornecedor e o **prazo de entrega dos documentos em dias** (1–9999), campo obrigatório da API.
+  - Só oferece fornecedores **ativos** que ainda não estão na obra: o back recusa inativo (422) e repetido (409).
+  - O desvincular pede confirmação no modal destrutivo do projeto (mesmo padrão do "Bloquear").
+  - Depois de vincular, o toast diz o que a API devolveu: quantos workflows da obra o fornecedor passou a seguir e, se for o caso, para qual tipo dele a obra não tem workflow.
+- **Ficha do fornecedor, aba Obras:** o endpoint opera pelos dois lados (obra no caminho, empresa no corpo), então a aba ganhou **"Vincular a uma obra"** e **"Desvincular"** por linha. Fornecedor bloqueado não tem o botão de vincular (o back recusaria); desvincular continua, porque o DELETE não confere se a empresa está ativa.
+- **Cadastro de fornecedor:** voltou o bloco **"3. Obra (opcional)"** com obra e prazo. Fluxo: `POST /enterprises` e, se escolheu obra, o `POST` do vínculo.
+  - **Decisão:** fazer no mesmo fluxo, com a falha parcial tratada. Se o vínculo falhar, o fornecedor já existe: a tela **não** diz "pronto". Ela abre a ficha dele na aba Obras (que lê a API e mostra que não há obra) com um aviso de erro dizendo que o vínculo não foi feito e por quê.
+  - Achei seguro porque nada fica escondido: o estado mostrado é sempre o da API, e o vínculo pode ser refeito na própria aba.
+- **Invalidação:** depois de vincular ou desvincular, invalida `['fornecedores']` (fornecedores da obra, contagens por obra da lista e da visão geral, detalhe) e `['obras']` (obras do fornecedor). Também invalida quando a API responde que o estado mudou por fora (409 já vinculada, 404 não está na obra, 422 inativa, 404 obra ou empresa): o modal mostra o erro e a lista atrás já se corrige.
+- **Erros:** os 5 códigos novos estão em `src/shared/strings/erros.ts`. No modal, prazo vai ao lado do campo; o resto vai no alerta do topo.
+- **Removido por falta de suporte:** nada desta área estava na tela sem suporte. O "Vincular fornecedor" antigo (com serviço contratado e período) já tinha saído na etapa anterior; o novo só tem o que o POST aceita.
+
+### O que o back oferece nesta área e não foi implementado
+
+- **`assignedWorkFlowIds` (ids):** a tela mostra só a quantidade. Os ids não têm nome sem os endpoints de workflow, e workflows/listas de exigências estão fora do escopo desta parte.
+- **`limitExpiresDays` por vínculo não é lido de volta:** não há rota que devolva o prazo de um vínculo existente, então a tela não o mostra depois.
+
+### Verificação
+
+| # | Passo | Resultado |
+|---|---|---|
+| 1 | `typecheck` e `build` | ✅ limpos |
+| 2 | Mock (`VITE_API_MOCK=true`) | ✅ Vincular e desvincular nas duas fichas; cadastro com obra (sucesso e falha parcial forçada); 10 cenários novos na `/_api` rodados contra os handlers, todos com o status e o `code` do back |
+| 3 | API real: obra bate com a API | ✅ Residencial Jardim das Flores: Alfa, Beta, Gama — igual a `GET /enterprises?constructionIds=` |
+| 4 | API real: vincular e persistir | ✅ Delta Elétrica vinculada pela ficha da obra (prazo 30); a API respondeu 1 workflow atribuído; após recarregar, continua lá |
+| 5 | API real: desvincular o mesmo | ✅ Delta desvinculada pela ficha do fornecedor (aba Obras); sumiu da obra |
+| 6 | API real: erros na tela | ✅ 409 `ENTERPRISE_ALREADY_IN_CONSTRUCTION`, 404 `ENTERPRISE_NOT_FOUND` e 404 `ENTERPRISE_NOT_IN_CONSTRUCTION`, cada um com a mensagem da tabela no modal |
+| 7 | 390 px | ✅ Sem rolagem horizontal na ficha da obra, na aba Obras, no cadastro, na `/_api` e com o modal aberto |
+
+Detalhe dos erros do passo 6:
+- O 409 e o 404 de empresa foram provocados injetando no select do modal um id que a tela não ofereceria. O back recusa antes de gravar, então não houve escrita.
+- O 404 do desvínculo veio de um modal deixado aberto numa aba enquanto o mesmo vínculo era removido em outra.
+
+**Estado do banco real:**
+- Os vínculos fornecedor ↔ obra estão iguais aos de antes do teste: conferi as 4 obras antes e depois.
+- **Criado e removido:** o vínculo Delta Elétrica ↔ Residencial Jardim das Flores.
+- **O que fica:** pelo desenho do back, o vínculo da Delta com o workflow da obra criado no POST **não é apagado** pelo DELETE, só encerrado com data de fim (histórico). Não há rota para apagá-lo.
+- **Fora desta parte:** a empresa "Revest Nordeste Revestimentos Ltda." criada na Fase 2 continua no banco.
+
+**Fora do escopo, notado na `/_api`:** o cenário de pendências "REQUIREMENT_NOT_POSTPONABLE" não acha dado no fixture atual do MSW.
+
 ## Como rodar
 
 ```bash

@@ -64,6 +64,20 @@ Alguns códigos não são alcançáveis por nenhuma entrada JSON (o 400 do ASP.N
 |---|---|
 | `enterpriseId=abc` | 400 |
 
+### Vínculo empresa ↔ obra
+
+Mesma ordem do back: 400 → `CONSTRUCTION_NOT_FOUND` → `ENTERPRISE_ALREADY_IN_CONSTRUCTION` → `ENTERPRISE_NOT_FOUND` → `ENTERPRISE_INACTIVE`. O mock não tem workflows: devolve `assignedWorkFlowIds: []` e todos os tipos da empresa em `typesWithoutWorkflow`.
+
+| Rota | Entrada | Resposta |
+|---|---|---|
+| POST `/construction/constructions/{id}/enterprises` | `{}`; `limitExpiresDays` fora de 1–9999 | 400 (`EnterpriseId`, `LimitExpiresDays`) |
+| POST | obra que não existe | 404 `CONSTRUCTION_NOT_FOUND` |
+| POST | empresa já na obra | 409 `ENTERPRISE_ALREADY_IN_CONSTRUCTION` |
+| POST | empresa que não existe | 404 `ENTERPRISE_NOT_FOUND` |
+| POST | empresa bloqueada | 422 `ENTERPRISE_INACTIVE` |
+| POST | `X-Mock-Code: INVALID_LIMIT_EXPIRES_DAYS` | 422 (o 400 vem antes em qualquer entrada JSON) |
+| DELETE `/construction/constructions/{id}/enterprises/{empresa}` | vínculo que não existe (inclusive obra inexistente) | 404 `ENTERPRISE_NOT_IN_CONSTRUCTION` |
+
 ### Acervo
 
 | Rota | Entrada | Resposta |
