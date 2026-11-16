@@ -5,6 +5,7 @@ import { DataSection } from './DataSection';
 import { FeedbackSection } from './FeedbackSection';
 import { FiltersSection } from './FiltersSection';
 import { FormsSection } from './FormsSection';
+import { SelectSection } from './SelectSection';
 import { OverlaysSection } from './OverlaysSection';
 import { StatesSection } from './StatesSection';
 
@@ -19,6 +20,7 @@ export function ComponentesPage() {
           <PageHeader title={t.title} subtitle={t.subtitle} />
           <ButtonsSection />
           <FormsSection />
+          <SelectSection />
           <FiltersSection />
           <DataSection />
           <OverlaysSection />

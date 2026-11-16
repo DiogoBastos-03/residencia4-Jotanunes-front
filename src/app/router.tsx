@@ -13,6 +13,7 @@ import { ExigenciasPage } from '@/pages/exigencias/ExigenciasPage';
 import { NovaListaPage } from '@/pages/nova-lista/NovaListaPage';
 import { ListaPage } from '@/pages/lista/ListaPage';
 import { TiposDocumentoPage } from '@/pages/tipos-documento/TiposDocumentoPage';
+import { PendenciasPage } from '@/pages/pendencias/PendenciasPage';
 import { paths } from '@/shared/lib';
 import { AppLayout } from './layout/AppLayout';
 
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
       { path: 'exigencias/nova', element: <NovaListaPage /> },
       { path: 'exigencias/:id', element: <ListaPage /> },
       { path: 'tipos-de-documento', element: <TiposDocumentoPage /> },
+      { path: 'pendencias', element: <PendenciasPage /> },
       // Ferramenta de revisão — disponível também no build durante a fase de revisão.
       { path: '_estados', element: <EstadosPage /> },
       { path: '_api', element: <ApiPage /> },

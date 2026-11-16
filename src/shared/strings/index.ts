@@ -24,6 +24,7 @@ import {
   novaListaPage,
 } from './pages/exigencias';
 import { drawerTipoDocumento, tiposDocumentoPage } from './pages/tiposDocumento';
+import { pendenciasPage } from './pages/pendencias';
 import { relatoriosPage } from './pages/relatorios';
 import { filaPage } from './pages/fila';
 import { envioPage } from './pages/envio';
@@ -65,6 +66,7 @@ export const strings = {
     novaLista: novaListaPage,
     lista: listaPage,
     tiposDocumento: tiposDocumentoPage,
+    pendencias: pendenciasPage,
     relatorios: relatoriosPage,
   },
 } as const;

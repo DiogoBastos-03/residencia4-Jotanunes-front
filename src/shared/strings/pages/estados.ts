@@ -16,6 +16,7 @@ export const estadosPage = {
     novaLista: 'Nova lista de exigências',
     lista: 'Ficha da lista',
     tiposDocumento: 'Tipos de documento',
+    pendencias: 'Pendências',
   },
   estados: {
     componentes: ['Componentes base', 'Todos os componentes do design system e seus estados.', 'só por este link (ferramenta de revisão).'],
@@ -67,6 +68,10 @@ export const estadosPage = {
     clNaoEncontrada: ['Lista não encontrada', 'Id que não existe (a API responde 404).', 'só pela URL.'],
     clCarregando: ['Carregando', 'Esqueleto do topo e da tabela.', 'aparece ao abrir a página, até a API responder.'],
     clErro: ['Erro', 'Falha ao carregar, com "Tentar de novo".', 'só pela URL (simulação de falha da API).'],
+    pnLista: ['Painel', 'Uma linha por fornecedor com pendentes, a vencer, vencidas e postergadas, e os totais.', 'menu "Pendências".'],
+    pnVazio: ['Vazio', 'Nenhuma exigência em aberto.', 'só pela URL (simulação de base vazia).'],
+    pnCarregando: ['Carregando', 'Esqueleto das métricas e da tabela.', 'aparece ao abrir a página, até a API responder.'],
+    pnErro: ['Erro', 'Falha ao carregar, com "Tentar de novo".', 'só pela URL (simulação de falha da API).'],
     tdLista: ['Tipos de documento', 'Validade, tamanho máximo, formatos aceitos e se pode ser reaproveitado.', 'menu "Tipos de documento".'],
     tdVazia: ['Vazia', 'Nenhum tipo cadastrado.', 'só pela URL (simulação de base vazia).'],
     tdCarregando: ['Carregando', 'Esqueleto da tabela.', 'aparece ao abrir a página, até a API responder.'],

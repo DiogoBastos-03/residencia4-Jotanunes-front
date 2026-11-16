@@ -1,7 +1,10 @@
 import { z } from 'zod';
 import { dataSimples, guid } from '@/shared/api';
 
-/** Módulo `expiration` do contrato (seção 7). */
+/**
+ * Módulo `expiration` do back (lido do código, branch main: PendingPanelController,
+ * GetPendingPanelUseCase, PostponeRequirementUseCase, CancelPostponementUseCase).
+ */
 
 // 7.1 GET /pending-panel — não é paginado.
 export const pendingPanelRowSchema = z.object({
@@ -19,6 +22,7 @@ export const pendingPanelResponseSchema = z.array(pendingPanelRowSchema);
 // 7.2 POST /pending-panel/requirements/{id}/postpone — deadlineAt é SÓ DATA (YYYY-MM-DD).
 export const postponeRequestSchema = z.object({
   deadlineAt: dataSimples,
-  reason: z.string().max(500).optional(),
+  /** [Required, StringLength(500)] no back: obrigatório, vai para o fornecedor. */
+  reason: z.string().min(1).max(500),
 });
 export type PostponeRequest = z.infer<typeof postponeRequestSchema>;

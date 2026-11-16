@@ -15,6 +15,6 @@ export type LinhaPendencias = {
 export type Postergacao = {
   /** Dia (yyyy-MM-dd), posterior a hoje. O prazo vale até o fim desse dia. */
   prazo: IsoDate;
-  /** Até 500 caracteres. Vai para o fornecedor. */
-  motivo?: string;
+  /** Obrigatório, até 500 caracteres. Vai para o fornecedor. */
+  motivo: string;
 };

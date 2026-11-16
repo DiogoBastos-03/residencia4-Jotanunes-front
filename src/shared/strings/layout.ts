@@ -8,6 +8,7 @@ export const layout = {
     fornecedores: 'Fornecedores',
     exigencias: 'Exigências',
     tiposDocumento: 'Tipos de documento',
+    pendencias: 'Pendências',
   },
   footerTitle: 'Acesso interno',
   footerText: 'Uso restrito à equipe de Suprimentos',

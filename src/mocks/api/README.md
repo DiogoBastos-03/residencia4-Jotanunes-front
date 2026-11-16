@@ -127,15 +127,15 @@ Empresa sem nada nessas situações não aparece.
 
 | Rota | Entrada | Resposta |
 |---|---|---|
-| POST `/postpone` | `deadlineAt` ausente ou fora de `YYYY-MM-DD`; `reason` > 500 caracteres | 400 |
-| POST `/postpone` | envio que não existe, ou de funcionário | 404 `REQUIREMENT_NOT_FOUND` |
-| POST `/postpone` | `deadlineAt` ≤ 16/09/2026 | 422 `POSTPONEMENT_DEADLINE_IN_PAST` |
+| POST `/postpone` | `deadlineAt` ausente ou fora de `YYYY-MM-DD`; `reason` ausente, vazio ou > 500 caracteres | 400 |
+| POST `/postpone` | envio que não existe, ou que não é o mais recente do tipo | 404 `REQUIREMENT_NOT_FOUND` |
 | POST `/postpone` | envio já postergado | 422 `REQUIREMENT_ALREADY_POSTPONED` |
-| POST `/postpone` | envio aprovado e não vencido | 422 `REQUIREMENT_NOT_POSTPONABLE` |
+| POST `/postpone` | envio aprovado e não vencido, ou em análise | 422 `REQUIREMENT_NOT_POSTPONABLE` |
+| POST `/postpone` | `deadlineAt` ≤ 16/09/2026 | 422 `POSTPONEMENT_DEADLINE_IN_PAST` |
 | POST `/cancel-postponement` | envio que não existe | 404 `REQUIREMENT_NOT_FOUND` |
 | POST `/cancel-postponement` | envio sem postergação ativa | 422 `REQUIREMENT_NOT_POSTPONED` |
 
-A ordem das verificações na postergação é: 404 → prazo no passado → já postergada → não postergável. O contrato não define essa ordem.
+A ordem das verificações na postergação é a do `PostponeRequirementUseCase`: 404 (envio inexistente ou não é o mais recente do tipo) → já postergada → não postergável → prazo no passado. `reason` é obrigatório (400 sem ele). Qualquer escopo de envio vale; `RevisionRequired` não é postergável.
 
 ## Navegador sem service worker
 

@@ -950,17 +950,26 @@ export const handlers = [
       if (typeof deadline !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(deadline) || Number.isNaN(Date.parse(`${deadline}T00:00:00Z`))) {
         erros.DeadlineAt = ['The DeadlineAt field must be a date in the format YYYY-MM-DD.'];
       }
-      if (b.reason !== undefined && b.reason !== null && (typeof b.reason !== 'string' || b.reason.length > 500)) {
-        erros.Reason = ['The field Reason must be a string with a maximum length of 500.'];
-      }
+      // [Required, StringLength(500)]: ausente, vazio ou só espaços dá 400.
+      if (typeof b.reason !== 'string' || b.reason.trim() === '') erros.Reason = ['The Reason field is required.'];
+      else if (b.reason.length > 500) erros.Reason = ['The field Reason must be a string with a maximum length of 500.'];
       if (Object.keys(erros).length || typeof deadline !== 'string') return validacao(erros);
-      const envio = db.envios.find((e) => e.documentSubmissionId === docId && e.scope === 'Enterprise');
-      if (!envio) return problema('REQUIREMENT_NOT_FOUND');
-      if (deadline <= HOJE_MOCK) return problema('POSTPONEMENT_DEADLINE_IN_PAST');
-      if (db.postergacoes.has(docId)) return problema('REQUIREMENT_ALREADY_POSTPONED');
+      // PostponeRequirementUseCase: envio existe e é o mais recente do tipo (404) → já postergada →
+      // só pendente ou vencida → prazo posterior a hoje (Postponement.Create). Qualquer escopo vale.
+      const envio = db.envios.find((e) => e.documentSubmissionId === docId);
+      const maisRecente =
+        envio !== undefined &&
+        !db.envios.some(
+          (o) => o.enterpriseId === envio.enterpriseId && o.documentDefinitionId === envio.documentDefinitionId && o.employeeName === envio.employeeName && o.lastSendAt > envio.lastSendAt,
+        );
+      if (!envio || !maisRecente) return problema('REQUIREMENT_NOT_FOUND');
+      const postergada = db.postergacoes.get(docId);
+      if (postergada && postergada.deadlineAt >= HOJE_MOCK) return problema('REQUIREMENT_ALREADY_POSTPONED');
       const vencida = envio.expiresAt !== null && envio.expiresAt.slice(0, 10) < HOJE_MOCK;
-      if (envio.status === 'Approved' && !vencida) return problema('REQUIREMENT_NOT_POSTPONABLE');
-      db.postergacoes.set(docId, { deadlineAt: deadline, reason: typeof b.reason === 'string' ? b.reason : undefined });
+      const pendente = envio.status === 'Pending' || envio.status === 'Rejected' || envio.status === 'Cancelled';
+      if (!pendente && !(envio.status === 'Approved' && vencida)) return problema('REQUIREMENT_NOT_POSTPONABLE');
+      if (deadline <= HOJE_MOCK) return problema('POSTPONEMENT_DEADLINE_IN_PAST');
+      db.postergacoes.set(docId, { deadlineAt: deadline, reason: typeof b.reason === 'string' ? b.reason.trim() : undefined });
       return new HttpResponse(null, { status: 204 });
     }),
   ),
@@ -971,7 +980,7 @@ export const handlers = [
     comCenario(({ params }) => {
       const docId = param(params, 'documentSubmissionId');
       if (!ehGuid(docId)) return naoEncontradoSemCorpo();
-      if (!db.envios.some((e) => e.documentSubmissionId === docId && e.scope === 'Enterprise')) return problema('REQUIREMENT_NOT_FOUND');
+      if (!db.envios.some((e) => e.documentSubmissionId === docId)) return problema('REQUIREMENT_NOT_FOUND');
       if (!db.postergacoes.delete(docId)) return problema('REQUIREMENT_NOT_POSTPONED');
       return new HttpResponse(null, { status: 204 });
     }),

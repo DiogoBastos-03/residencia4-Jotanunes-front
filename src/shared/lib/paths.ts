@@ -21,6 +21,7 @@ export const paths = {
   novaLista: '/exigencias/nova',
   lista: (id: string | number) => `/exigencias/${id}`,
   tiposDocumento: '/tipos-de-documento',
+  pendencias: '/pendencias',
   relatorios: '/relatorios',
   estados: '/_estados',
   componentes: '/_componentes',

@@ -15,6 +15,5 @@ export function linhaDaApi(r: PendingPanelRow): LinhaPendencias {
 
 /** `deadlineAt` é só data: nunca mandar hora nem fuso. */
 export function postergacaoParaApi(p: Postergacao): PostponeRequest {
-  const motivo = p.motivo?.trim();
-  return { deadlineAt: paraDataSimples(p.prazo), reason: motivo ? motivo : undefined };
+  return { deadlineAt: paraDataSimples(p.prazo), reason: p.motivo.trim() };
 }

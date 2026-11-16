@@ -58,9 +58,12 @@ const docQualquer = () => acharDocumento(() => true, 'documento');
 const docNaoExpurgado = () => acharDocumento((d) => d.ultimoEnvio >= '2024-06', 'documento disponível');
 const docExpurgado = () => acharDocumento((d) => d.ultimoEnvio < '2024-06', 'documento expurgado');
 /** Exigência de empresa pendente (último envio não aprovado). */
-const docPendente = () => acharDocumento((d, e) => e === 'empresa' && (d.status === 'emAnalise' || d.status === 'reprovado'), 'exigência pendente');
-/** Exigência atendida: aprovada e sem validade (não vence). */
-const docAtendido = () => acharDocumento((d, e) => e === 'empresa' && d.status === 'aprovado' && d.validade === null, 'exigência atendida');
+const docPendente = () => acharDocumento((d, e) => e === 'empresa' && d.status === 'emAnalise', 'exigência pendente');
+/** Outra pendente (reprovada), para o cenário do prazo no passado não esbarrar na que já foi postergada. */
+const docReprovado = () => acharDocumento((d, e) => e === 'empresa' && d.status === 'reprovado', 'exigência reprovada');
+/** Exigência atendida: aprovada e ainda válida. */
+const docAtendido = () =>
+  acharDocumento((d, e) => e === 'empresa' && d.status === 'aprovado' && (d.validade === null || d.validade > new Date().toISOString().slice(0, 10)), 'exigência atendida');
 
 /** CNPJ válido e novo a cada clique. */
 function cnpjNovo(): string {
@@ -596,11 +599,11 @@ export const ROTAS: readonly Rota[] = [
     caminho: `${PREFIXO}/pending-panel/requirements/{documentSubmissionId}/postpone`,
     cenarios: [
       { chave: 'semCorpo204', executar: async () => pendenciasApi.postergar((await docPendente()).doc.id, { prazo: '2099-12-31', motivo: 'Aguardando emissão pelo órgão.' }) },
-      { chave: 'jaPostergada', executar: async () => pendenciasApi.postergar((await docPendente()).doc.id, { prazo: '2099-12-31' }) },
+      { chave: 'jaPostergada', executar: async () => pendenciasApi.postergar((await docPendente()).doc.id, { prazo: '2099-12-31', motivo: 'Aguardando emissão pelo órgão.' }) },
       { chave: 'v400', executar: async () => http.json('POST', `${PREFIXO}/pending-panel/requirements/${(await docPendente()).doc.id}/postpone`, qualquer, { body: { deadlineAt: '30/11/2026' } }) },
-      { chave: 'v404', executar: () => pendenciasApi.postergar(GUID_INEXISTENTE, { prazo: '2099-12-31' }) },
-      { chave: 'naoPostergavel', executar: async () => pendenciasApi.postergar((await docAtendido()).doc.id, { prazo: '2099-12-31' }) },
-      { chave: 'prazoPassado', executar: async () => pendenciasApi.postergar((await docPendente()).doc.id, { prazo: '2020-01-01' }) },
+      { chave: 'v404', executar: () => pendenciasApi.postergar(GUID_INEXISTENTE, { prazo: '2099-12-31', motivo: 'Aguardando emissão pelo órgão.' }) },
+      { chave: 'naoPostergavel', executar: async () => pendenciasApi.postergar((await docAtendido()).doc.id, { prazo: '2099-12-31', motivo: 'Aguardando emissão pelo órgão.' }) },
+      { chave: 'prazoPassado', executar: async () => pendenciasApi.postergar((await docReprovado()).doc.id, { prazo: '2020-01-01', motivo: 'Aguardando emissão pelo órgão.' }) },
     ],
   },
   {

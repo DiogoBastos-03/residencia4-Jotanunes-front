@@ -10,6 +10,7 @@
 
 | Tela | Endpoints | O que mostra / oferece |
 |---|---|---|
+| Pendências | `GET /pending-panel` | Uma linha por fornecedor: pendentes, a vencer, vencidas, postergadas; totais; leva à ficha |
 | Visão geral | `GET /enterprises`, `GET /constructions`, `GET /enterprises?constructionIds=` | Empresas (total, ativas, bloqueadas, por tipo), obras, empresas por obra |
 | Fornecedores | `GET /enterprises` (+ filtro por obra para contar obras) | Razão social, CNPJ, tipos, nº de obras, bloqueado. Filtros tipo e ativo/bloqueado, busca no cliente |
 | Ficha do fornecedor | `GET /enterprises/{id}`, `GET /constructions?enterpriseId=`, `PATCH`, `PUT /types`, `PATCH /status`, vínculo com obra | Abas **Dados** e **Obras**; editar, bloquear, desbloquear, vincular e desvincular obra |
@@ -31,8 +32,125 @@
 | Aba **Contatos** e "Reenviar acesso" | `AbaContatos.tsx`, `ModalEditarContato.tsx`, `ModalReenviarAcesso.tsx` | Endpoints de contatos e de convite ao portal |
 | Fila de análise, Análise do documento, Remessa | `pages/fila`, `pages/analise`, `pages/envio`, `features/analise` | Endpoints de fila e de decisão de análise |
 | Relatórios | `pages/relatorios`, `features/relatorios` | Endpoints de relatórios |
-| Painel de pendências e postergação | `entities/pendencias` (camada pronta, sem tela) | Fase 3, quando o painel devolver dados |
+| **Postergar e cancelar postergação** | `entities/pendencias/api.ts` (camada pronta, sem tela) | Quando alguma rota devolver o id do envio mais recente de cada exigência (acervo funcionando ou a fila de análise com envios) |
+| ~~Painel de pendências~~ | — | **Voltou** (este documento, seção "Painel de pendências") |
 | ~~Exigências (listas) e tipos de documento~~ | — | **Voltaram nas Partes B e C** |
+
+## Componente de seleção (Select) — 16/11/2026
+
+`src/shared/ui/Select.tsx` deixou de usar o `<select>` nativo.
+
+**Como funciona:**
+- **Campo:** é um `<button role="combobox">`.
+- **Lista:** fica num portal, com `role="listbox"` e opções `role="option"`/`aria-selected`. O foco fica no campo e a opção ativa vai por `aria-activedescendant`.
+- **Tokens:** os mesmos dos outros componentes (`bg-surface`, `border-border`, `rounded-control`, `shadow-modal`, opção ativa em `surface-2`, escolhida com peso médio e ✓, o fade `animate-tab-in`). Nenhuma cor nova.
+- **Posição:**
+  - ancorada ao campo;
+  - inverte para cima quando não cabe embaixo e em cima cabe mais;
+  - altura máxima de 288 px, com rolagem interna;
+  - acompanha rolagem de qualquer contêiner e redimensionamento;
+  - nunca sai da tela (margem de 16 px);
+  - `z-40`, acima de drawer (`z-20`) e modal (`z-30`), então não é cortada por eles.
+- **Teclado:**
+  - Enter, Espaço, ↓ ou ↑ abrem;
+  - ↑↓ movem, Home e End vão para o começo e o fim;
+  - letras pulam para a opção que começa com elas;
+  - Enter escolhe;
+  - Esc fecha e devolve o foco ao campo, **sem fechar o modal ou o drawer** (`stopPropagation`);
+  - Tab fecha e segue a navegação.
+- **Busca:** com mais de 8 opções, um campo de busca no topo. O foco vai para ele ao abrir e as setas seguem funcionando dali.
+- **Clique fora** fecha a lista sem roubar o foco.
+
+**API do componente:**
+- A assinatura continua a mesma: `options`, `value`, `onChange(e) => e.target.value`, `size`, `invalid`, `wrapperClassName`, `disabled`, `id`, `aria-label`, `aria-describedby`.
+- As 12 chamadas compilam sem mudança.
+- O único acréscimo é `abertoInicial`, usado só pela vitrine.
+- A vitrine `/_componentes` tem a seção **Seleção** com os 7 estados.
+
+**Decisão: sem folha inferior em 390 px.**
+- A lista ancorada já cabe: largura limitada à tela menos 16 px de cada lado, opções com 44 px de altura e busca quando a lista é grande.
+- Uma folha inferior mudaria o comportamento só no celular e esconderia o campo. No modal, ficaria por cima dele.
+
+**Verificação, só por teclado** (JS usado apenas para pôr o foco no botão inicial):
+- **ModalVincular:** 34 opções, com busca; filtrar "cim", ↓, Home, Enter; Esc fechou só a lista; Tab foi para "Prazo".
+- **ModalVincularLista:** a letra "s" abriu e pulou para "Serviço padrão".
+- **EditorExigencias, no drawer:** ↓↓ Enter. Com a janela em 480 px de altura, a lista **abriu para cima**, com rolagem interna e sem corte.
+- **NovaListaForm:** abriu para cima perto do rodapé; End e Enter.
+- **BlocoObra:** abriu para cima, ↓↓↓ Enter, Tab foi para "Prazo".
+- **390 px com a lista aberta:** sem rolagem horizontal, opções de 44 px, lista do modal passando por cima do modal sem corte.
+
+**Bug achado e corrigido no teste:**
+- **Sintoma:** com busca, o foco não ia para o campo de busca.
+- **Causa:** a lista nasce invisível até ter posição, e `visibility: hidden` não aceita foco.
+- **Correção:** agora ela nasce com `opacity-0` e só recebe o foco depois de posicionada.
+
+## Painel de pendências — 16/11/2026
+
+### O que li no módulo `expiration` (branch `main`, commit `4a82a99`)
+
+**Rotas:**
+- **`GET /api/v1/internal/pending-panel`:** 200 com `[{ enterpriseId, enterpriseName, pendingCount, upcomingCount, expiredCount, postponedCount }]`. Não é paginado e vem ordenado por nome.
+- **`POST /pending-panel/requirements/{documentSubmissionId}/postpone`:**
+  - corpo `{ deadlineAt: "YYYY-MM-DD", reason }`;
+  - **`reason` agora é obrigatório** (`[Required, StringLength(500)]`);
+  - cabeçalho opcional `X-User-Id`, gravado como autor; sem ele, o back usa o usuário 1;
+  - respostas: 204, 400, 404 `REQUIREMENT_NOT_FOUND`, 422 `REQUIREMENT_ALREADY_POSTPONED`, 422 `REQUIREMENT_NOT_POSTPONABLE`, 422 `POSTPONEMENT_DEADLINE_IN_PAST`.
+- **`POST …/cancel-postponement`:** 204, 404 `REQUIREMENT_NOT_FOUND`, 422 `REQUIREMENT_NOT_POSTPONED`.
+
+**Domínio:**
+- **Exigência:** é o tipo de documento pedido por um vínculo vigente da empresa com uma versão de lista, um por empresa e tipo. Vale o **envio mais recente** daquele tipo.
+- **Situação:** derivada na hora, nunca gravada (`RequirementSituationResolver`, mesma ordem do SQL do painel):
+  - aprovado e vencendo em até 30 dias → a vencer;
+  - aprovado e válido → atendida (não conta);
+  - postergação ativa → postergada (esconde pendente e vencida);
+  - aprovado vencido → vencida;
+  - o resto → pendente, **inclusive a exigência sem nenhum envio** (`LEFT JOIN`).
+- **Postergar:**
+  - precisa do `documentSubmissionId`, e ele tem de ser o envio mais recente do tipo;
+  - só exigência pendente ou vencida;
+  - prazo posterior a hoje, valendo até o fim desse dia;
+  - grava a decisão "Postergado" no histórico da versão;
+  - ordem das verificações: 404 → já postergada → não postergável → prazo no passado.
+- **Cancelar:** a exigência volta a pendente ou vencida, conforme o vencimento.
+
+### Conclusão sobre postergar: sem botão
+
+- **Precisa de um envio que exista.** Postergar e cancelar exigem o id de uma linha de `tb_document_submission`. Exigência nunca enviada conta como pendente no painel, mas **não tem id**, então não pode ser postergada.
+- **Nenhuma rota da API publicada devolve um id de envio hoje:**
+  - o painel não traz ids;
+  - `GET /enterprises/{id}/archive` dá 500;
+  - `GET /analysis/pending` (rota nova) volta vazio;
+  - `GET /analysis/decisions` dá 500.
+- **O seed do repositório do back** (`docker/sqlserver/init/seed.sql`) **tem** envios (`a9…`). Mas eles usam outros tipos de documento (`a6…`), não os da API publicada (`a4…`): é o banco local do Docker. Não testei postergar com esses ids porque seria uma escrita.
+- **Por isso a tela não tem botão de postergar** e as rotas ficam só na camada de API (`entities/pendencias`: schema, mapper, `pendenciasApi.postergar` e `cancelarPostergacao`).
+- **Ajustes da camada ao código atual:**
+  - `reason` passou a ser obrigatório no schema e no modelo;
+  - o handler do MSW segue a ordem real das verificações;
+  - o MSW aceita envio de qualquer escopo e recusa `RevisionRequired`.
+- **Quando voltar:** quando o acervo ou a fila de análise devolverem os envios de cada exigência, a mutação entra em `entities/pendencias/consultas.ts`, invalidando `['pendencias']`.
+
+### Tela
+
+- **`/pendencias`** (de volta ao menu, entre Visão geral e Obras).
+- **Totais:** pendentes, a vencer, vencidas e postergadas, cada um com o número de fornecedores, somados das linhas da API.
+- **Tabela:** uma linha por fornecedor com as quatro contagens, levando à ficha.
+- **Estados:** vazio, carregando e erro (também na `/_estados`).
+
+### Verificação
+
+- **API real:** 8 fornecedores e 32 pendentes, igual ao `curl` feito no mesmo momento. Mais cedo o painel tinha 4 linhas; o banco mudou durante a sessão por ações de fora (ver abaixo).
+- **Mock:** o painel e os 10 cenários de pendências da `/_api` passam com o status e o `code` do back.
+- **Nada foi criado no banco real nesta tarefa.**
+- **De onde vêm parte das pendências reais:**
+  - **Theta (3):** vem da lista de teste das Partes B e C, vinculada à obra Edifício Comercial Centro.
+  - **Delta (3):** provavelmente do vínculo de teste da Parte A. O vínculo com o workflow foi encerrado com data de hoje, e o painel considera vigente até o fim do dia de encerramento (`end_dt >= hoje`).
+
+### O que mudou no back publicado durante a sessão (não fui eu)
+
+- **`GET /workflow/workflows` passou a responder 500**, com e sem filtros. O detalhe (`/workflows/{id}`), as versões e os tipos de documento seguem funcionando. Na tela Exigências, contra a API real, aparece o estado de erro com "Tentar de novo".
+- **Listas novas no banco:** "teste documentos" (id 4) e "Serviço em altura" (id 7, versão 2.00), além de tipos de documento novos (ex.: "Alvará de funcionamento").
+- **Obra Condomínio Parque das Águas com duas listas de Serviço** (ids 4 e 7) e uma de Material. Isso fere a regra "uma lista por tipo por obra" (`EnsureConstructionCanUseTypeAsync`), então esse dado não entrou pela API.
+- **Datas com milissegundos e sem `Z`** (`2026-11-16T20:36:20.217`). O schema aceita.
 
 ## Partes B e C — parametrização documental (16/11/2026)
 
@@ -442,4 +560,5 @@ Como os dados mudam entre a API e o domínio:
 - Limpeza (16/11/2026): só dados da API; gerador de demonstração removido.
 - Parte A (16/11/2026): vínculo fornecedor ↔ obra.
 - Partes B e C (16/11/2026): tipos de documento, formatos, listas de exigências com versões, lista na obra.
-- Fase 3 (próxima): acervo, visualização, download em lote, painel de pendências e postergação.
+- Select próprio e painel de pendências (16/11/2026).
+- Próximo: acervo (hoje 500), postergação (precisa de envios), fila de análise.

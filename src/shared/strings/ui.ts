@@ -13,6 +13,11 @@ export const ui = {
   table: {
     actions: 'Ações',
   },
+  select: {
+    buscar: 'Filtrar opções',
+    buscarPlaceholder: 'Filtrar…',
+    semResultado: 'Nenhuma opção encontrada.',
+  },
   skeleton: {
     loading: 'Carregando conteúdo',
     acordando: 'Acordando o serviço, isso pode levar alguns segundos.',

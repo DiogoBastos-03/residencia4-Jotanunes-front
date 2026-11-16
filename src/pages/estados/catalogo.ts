@@ -132,5 +132,14 @@ export function montarCatalogo(base: BaseCatalogo): readonly GrupoCatalogo[] {
         { chave: 'tdErro', para: `${paths.tiposDocumento}?estado=erro` },
       ],
     },
+    {
+      chave: 'pendencias',
+      entradas: [
+        { chave: 'pnLista', para: paths.pendencias },
+        { chave: 'pnVazio', para: `${paths.pendencias}?estado=vazio` },
+        { chave: 'pnCarregando', para: `${paths.pendencias}?estado=carregando` },
+        { chave: 'pnErro', para: `${paths.pendencias}?estado=erro` },
+      ],
+    },
   ];
 }
