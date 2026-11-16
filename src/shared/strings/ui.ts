@@ -15,6 +15,7 @@ export const ui = {
   },
   skeleton: {
     loading: 'Carregando conteúdo',
+    acordando: 'Acordando o serviço, isso pode levar alguns segundos.',
   },
   errorState: {
     title: 'Não foi possível carregar estas informações',

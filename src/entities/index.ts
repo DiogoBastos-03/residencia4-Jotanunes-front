@@ -1,7 +1,7 @@
 export type { IsoDate, TipoFornecimento, Obrigatoriedade } from './common';
-export type { Obra, ObraLista, SituacaoObra } from './obra';
+export type { Obra, ObraLista, ObraResumo, SituacaoObra } from './obra';
 export type { EscopoItem, ExigenciaValidade, ItemExigido, ListaExigencias, SituacaoLista, TipoDocumento } from './listaExigencias';
-export type { AcessoPortal, Contato, Fornecedor, SituacaoFornecedor, VinculoObra } from './fornecedor';
+export type { AcessoPortal, Contato, Fornecedor, FornecedorCadastro, FornecedorResumo, Pagina, SituacaoFornecedor, VinculoObra } from './fornecedor';
 export { aguardandoAcesso, forneceTipo, normalizarTipos } from './fornecedor';
 export type {
   DecisaoRegistrada,

@@ -6,6 +6,7 @@ import { FilaPage } from '@/pages/fila/FilaPage';
 import { AnalisePage } from '@/pages/analise/AnalisePage';
 import { EnvioPage } from '@/pages/envio/EnvioPage';
 import { EstadosPage } from '@/pages/estados/EstadosPage';
+import { ApiPage } from '@/pages/api/ApiPage';
 import { ObrasPage } from '@/pages/obras/ObrasPage';
 import { ObraPage } from '@/pages/obra/ObraPage';
 import { FornecedoresPage } from '@/pages/fornecedores/FornecedoresPage';
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
       { path: 'relatorios', element: <RelatoriosPage /> },
       // Ferramenta de revisão — disponível também no build durante a fase de revisão.
       { path: '_estados', element: <EstadosPage /> },
+      { path: '_api', element: <ApiPage /> },
       { path: '*', element: <NaoEncontradaPage /> },
     ],
   },

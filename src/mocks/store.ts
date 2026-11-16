@@ -1,38 +1,36 @@
-import { documentosExigidos, type Dataset } from '@/entities';
+import type { Dataset } from '@/entities';
 import { createStore } from '@/shared/lib';
-import { montarDocumentos } from './documentos';
 import { listas, tiposDocumento } from './exigencias';
-import { fornecedores, vinculos } from './fornecedores';
-import { montarArquivos } from './arquivos';
-import { analises, montarEventos, temposAnalise } from './historico';
-import { obraListas, obras } from './obras';
-import { AGORA, HOJE } from './tempo';
+import { temposAnalise } from './historico';
+import { relogioDoDia } from './tempo';
 
 /**
- * Conjunto único de dados de demonstração: fornecedores e obras fictícios.
- * Os documentos são montados a partir do que cada fornecedor deve, para que contagens
- * e situações batam entre as telas.
+ * Dados vivos da sessão. Começa só com o que não depende de fornecedor nem de obra
+ * (listas de exigências, tipos de documento, tempos de análise). Fornecedores, obras e
+ * vínculos chegam da API (src/app/SincronizarDemonstracao.tsx); documentos, envios,
+ * análises e histórico são gerados sobre eles (./gerar.ts). As ações de demonstração
+ * (análise, listas, contatos) alteram esta store e somem no F5.
  */
-function datasetDemonstracao(): Dataset {
-  const base: Dataset = {
-    hoje: HOJE,
-    agora: AGORA,
-    obras,
-    obraListas,
-    listas,
-    tiposDocumento,
-    fornecedores,
-    vinculos,
-    documentos: [],
-    envios: [],
-    arquivos: [],
-    analises,
-    eventos: montarEventos(obras, obraListas, vinculos),
-    temposAnalise,
-  };
-  const exigidosDe = (id: string) => documentosExigidos(base, id);
-  return { ...base, documentos: montarDocumentos(fornecedores, exigidosDe), ...montarArquivos(fornecedores, exigidosDe) };
-}
+export const datasetStore = createStore<Dataset>({
+  ...relogioDoDia(),
+  obras: [],
+  obraListas: [],
+  listas,
+  tiposDocumento,
+  fornecedores: [],
+  vinculos: [],
+  documentos: [],
+  envios: [],
+  arquivos: [],
+  analises: [],
+  eventos: [],
+  temposAnalise,
+});
 
-/** Dados vivos da sessão: as ações da interface alteram esta store. Some no F5. */
-export const datasetStore = createStore<Dataset>(datasetDemonstracao());
+/** Situação da carga da base (fornecedores, obras e vínculos da API), lida por useDatasetQuery. */
+export type EstadoBase =
+  | { status: 'carregando' }
+  | { status: 'erro'; erro: Error; tentarDeNovo: () => void }
+  | { status: 'pronto'; parcial: boolean };
+
+export const estadoBaseStore = createStore<EstadoBase>({ status: 'carregando' });

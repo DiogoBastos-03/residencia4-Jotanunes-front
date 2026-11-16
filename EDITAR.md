@@ -5,11 +5,13 @@
 - `eventos.ts`: as frases do histórico das fichas ("vinculou a lista de exigências…").
 - `pages/*.ts`: textos de cada página. `layout.ts`: menu e sidebar. `ui.ts`: componentes base. `status.ts`: rótulos dos badges e tags.
 
-**Dados de exemplo** — `src/mocks/`
-- Um arquivo por domínio: `obras.ts`, `fornecedores.ts`, `exigencias.ts`, `documentos.ts`, `arquivos.ts` (documentos de funcionário: envios e arquivos), `historico.ts`.
-- `exemplos.ts`: o conteúdo que preenche os formulários e drawers ao abrir (cadastro de fornecedor, nova lista, novo documento, vínculos).
-- `historico.ts` também guarda o tempo médio de análise por período (Relatórios).
-- `tempo.ts`: o "hoje" da demonstração (16/09/2026). Esperas e vencimentos são calculados a partir dele.
+**Dados** — fornecedores e obras vêm da API (ou do MSW, com `VITE_API_MOCK=true`); o resto é demonstração.
+- `src/mocks/gerar.ts`: gera, de forma determinística (hash do id, sem `Math.random`), documentos, arquivos, análises, histórico, contatos, acesso ao portal, código/cidade/situação da obra e período do contrato, sobre os fornecedores e obras que a API devolveu. Para mudar a distribuição de situações, mexa nos perfis `situacaoEmDia` / `situacaoMista` e nas proporções de lá.
+- `src/app/SincronizarDemonstracao.tsx`: lê a API (TanStack Query) e aplica no `datasetStore` com `sincronizar`.
+- `src/mocks/ficticio.ts` e os arquivos por domínio (`obras.ts`, `fornecedores.ts`, `documentos.ts`, `arquivos.ts`, `historico.ts`): o conjunto fictício que alimenta o **MSW** (`src/mocks/api/dados.ts`), não mais as telas.
+- `exigencias.ts`: listas de exigências e tipos de documento (ainda sem API).
+- `exemplos.ts`: o conteúdo que preenche os formulários e drawers ao abrir. Ids de obra do exemplo que não existem na base são trocados pelas primeiras obras disponíveis.
+- `tempo.ts`: `relogioDoDia()` — o "hoje" é o do navegador, com hora fixa (08:00) para a tela não mudar a cada recarga.
 - Contagens (fila, "5 de 9", aptos, pendências, vencimentos) não são digitadas: saem dos dados, por `src/entities/lib/`.
 
 **Cor, raio, sombra, tipografia, espaçamento fixo** — `src/app/styles/theme.css`, bloco `@theme`.
@@ -24,9 +26,11 @@
 
 **Logo** — `src/app/brand/`. Um arquivo com "simbolo" ou "symbol" no nome é a versão só do símbolo; qualquer outro é a versão com o nome. Lido por `src/shared/ui/Logo.tsx`.
 
-**Ações em memória** — `src/mocks/store.ts` (`datasetStore`). Cada feature tem um hook de ações (`useDecisoes`, `useVinculosObra`, `useAcoesFornecedor`, `useAcoesLista`…) que altera a store; o F5 volta tudo ao exemplo.
+**Ações** — cadastro, edição, tipos e bloqueio de fornecedor vão para a API (`src/features/fornecedores/hooks/useMutacoesFornecedor.ts`, com invalidação das queries). As demais (`useDecisoes`, `useVinculosObra`, `useAcoesFornecedor` para convite e contatos, `useAcoesLista`…) alteram o `datasetStore` em memória; o F5 desfaz.
 
-**Publicação** — o painel é 100% demonstração e não depende de nenhuma variável de ambiente. `vercel.json` reescreve todas as rotas para `/index.html` (recarregar numa rota interna funciona). `/_componentes` e `/_estados` existem também na build de produção. A integração com a API foi removida; o registro do que foi feito está em `INTEGRACAO.md`.
+**API** — `.env.local` (modelo em `.env.example`) com `VITE_API_URL` e `VITE_API_MOCK`, validadas em `src/shared/config/env.ts` (na Vercel, cadastre as duas). Cliente e erros em `src/shared/api/`; mensagens de erro por `code` em `src/shared/strings/erros.ts`; contratos por módulo em `src/entities/<módulo>/{schema,api,mapper,model}.ts`; mock de rede em `src/mocks/api/` (gatilhos de erro no README de lá). Para testar cada rota: `/_api`. Estado completo (o que é API e o que é demonstração) em `INTEGRACAO.md`.
+
+**Publicação** — `vercel.json` reescreve todas as rotas para `/index.html`. `/_componentes`, `/_estados` e `/_api` existem também na build de produção.
 
 **Navegação da análise** — a origem (fila, fornecedor ou obra) viaja na URL (`?de=`); helpers em `src/shared/lib/origem.ts` e `paths.ts`. A sequência "3 de 7" e o avanço depois de decidir estão em `src/features/analise/hooks/useSequencia.ts` e `useAvancar.ts`.
 

@@ -74,3 +74,13 @@ export const exemploNovoDocumentoFuncionario = {
   formatos: 'pdf',
   instrucoes: 'Envie um arquivo por funcionário, com o nome da pessoa no nome do arquivo.',
 } as const;
+
+/**
+ * Os exemplos citam obras do conjunto fictício ('ob-2401'…). Com as obras vindas da API,
+ * esses ids não existem: usa as mesmas posições na lista de obras disponíveis.
+ */
+export function obrasDoExemplo(ids: readonly string[], disponiveis: readonly string[], ponta: 'inicio' | 'fim' = 'inicio'): string[] {
+  const existentes = ids.filter((id) => disponiveis.includes(id));
+  if (existentes.length > 0) return existentes;
+  return ponta === 'inicio' ? disponiveis.slice(0, ids.length) : disponiveis.slice(-ids.length);
+}

@@ -57,3 +57,12 @@ export function forneceTipo(fornecedor: Pick<Fornecedor, 'tipos'>, tipo: TipoFor
 export function normalizarTipos(tipos: readonly TipoFornecimento[]): TipoFornecimento[] {
   return (['servico', 'material'] as const).filter((t) => tipos.includes(t));
 }
+
+/** Fornecedor como a listagem da API devolve (sem telefone, e-mail nem datas). */
+export type FornecedorResumo = Pick<Fornecedor, 'id' | 'razaoSocial' | 'cnpj' | 'tipos' | 'bloqueado'>;
+
+/** Fornecedor como o detalhe da API devolve. Contatos, nome fantasia e acesso ao portal não existem na API. */
+export type FornecedorCadastro = FornecedorResumo & Pick<Fornecedor, 'telefone' | 'email' | 'desde'> & { atualizadoEm: IsoDate };
+
+/** Uma página de resultados. */
+export type Pagina<T> = { itens: T[]; total: number; pagina: number; porPagina: number };

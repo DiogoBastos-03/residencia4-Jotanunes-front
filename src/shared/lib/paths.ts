@@ -23,6 +23,7 @@ export const paths = {
   relatorios: '/relatorios',
   estados: '/_estados',
   componentes: '/_componentes',
+  api: '/_api',
   /** Endereço da origem, na aba em que estava. */
   origem: (origem: Origem): string =>
     origem.tipo === 'fila' ? '/fila' : origem.tipo === 'fornecedor' ? paths.fornecedor(origem.id, origem.aba) : paths.obra(origem.id, origem.aba),

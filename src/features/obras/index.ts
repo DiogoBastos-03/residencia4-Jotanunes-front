@@ -1,5 +1,6 @@
 export { useObras } from './hooks/useObras';
 export { useObra } from './hooks/useObra';
+export { useObrasApi, useVinculosApi, type VinculoApi } from './hooks/useObrasApi';
 export type * from './types';
 export { ObrasEmExecucao } from './components/ObrasEmExecucao';
 export { useParametrosObra, type AbaObra, type DrawerObra } from './hooks/useParametrosObra';

@@ -4,6 +4,7 @@ import { useParams } from 'react-router';
 import type { Contato } from '@/entities';
 import {
   AbaContatos,
+  AbaDadosFornecedor,
   AbaDocumentos,
   AbaExigenciasFornecedor,
   AbaHistoricoFornecedor,
@@ -13,11 +14,12 @@ import {
   ModalEditarFornecedor,
   ModalReenviarAcesso,
   SituacaoFornecedor,
-  useAcoesFornecedor,
+  useDefinirBloqueio,
   useFornecedor,
   useParametrosFornecedor,
   type AbaFornecedor,
 } from '@/features/fornecedores';
+import { mensagemDoErro } from '@/shared/api';
 import { formatCnpj, formatDate, formatPhone, paths, useDocumentTitle } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import {
@@ -44,14 +46,25 @@ const ABAS: ReadonlyArray<{ value: AbaFornecedor; label: string }> = [
   { value: 'obras', label: t.abas.obras },
   { value: 'historico', label: t.abas.historico },
   { value: 'contatos', label: t.abas.contatos },
+  { value: 'dados', label: t.abas.dados },
 ];
 
 export function FornecedorPage() {
   const { id = '' } = useParams();
   const query = useFornecedor(id);
   const p = useParametrosFornecedor();
-  const { desbloquear } = useAcoesFornecedor();
+  const bloqueio = useDefinirBloqueio();
   const { showToast } = useToast();
+
+  async function desbloquear(id: string) {
+    try {
+      await bloqueio.mutateAsync({ id, bloqueado: false });
+    } catch (e) {
+      showToast(strings.modais.bloquear.erroDesbloquear(mensagemDoErro(e)), 'error');
+      return;
+    }
+    showToast(strings.modais.bloquear.desbloqueadoToast);
+  }
   const [contatoAberto, setContatoAberto] = useState<Contato['papel'] | null>(null);
   useDocumentTitle(query.data?.fornecedor.razaoSocial ?? strings.pages.fornecedores.title);
 
@@ -113,12 +126,11 @@ export function FornecedorPage() {
                   {ficha.fornecedor.bloqueado ? (
                     <Button
                       icon={LockOpenIcon}
-                      onClick={() => {
-                        desbloquear(ficha.fornecedor.id);
-                        showToast(strings.modais.bloquear.desbloqueadoToast);
-                      }}
+                      disabled={bloqueio.isPending}
+                      aria-busy={bloqueio.isPending}
+                      onClick={() => void desbloquear(ficha.fornecedor.id)}
                     >
-                      {t.desbloquear}
+                      {bloqueio.isPending ? strings.modais.bloquear.desbloqueando : t.desbloquear}
                     </Button>
                   ) : (
                     <Button icon={NoSymbolIcon} onClick={() => p.setModal('bloquear')}>
@@ -137,6 +149,7 @@ export function FornecedorPage() {
                 {p.aba === 'exigencias' && <AbaExigenciasFornecedor ficha={ficha} />}
                 {p.aba === 'obras' && <AbaObrasFornecedor ficha={ficha} />}
                 {p.aba === 'historico' && <AbaHistoricoFornecedor ficha={ficha} />}
+                {p.aba === 'dados' && <AbaDadosFornecedor ficha={ficha} />}
                 {p.aba === 'contatos' && <AbaContatos ficha={ficha} onReenviar={() => p.setModal('reenviar')} onEditar={setContatoAberto} />}
               </div>
             </Tabs>

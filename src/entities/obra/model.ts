@@ -19,3 +19,6 @@ export type ObraLista = {
   listaId: string;
   vinculadaEm: IsoDate;
 };
+
+/** Obra como a API devolve: só id e nome. */
+export type ObraResumo = Pick<Obra, 'id' | 'nome'>;

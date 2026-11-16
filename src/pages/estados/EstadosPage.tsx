@@ -1,19 +1,23 @@
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
-import { useDocumentTitle } from '@/shared/lib';
+import { useMemo } from 'react';
+import { datasetStore } from '@/mocks';
+import { useDocumentTitle, useStore } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { Block, BlockRowLink, Icon, Mono, PageHeader, Stack, Text } from '@/shared/ui';
-import { CATALOGO } from './catalogo';
+import { montarCatalogo } from './catalogo';
 
 const t = strings.pages.estados;
-const TOTAL = CATALOGO.reduce((n, g) => n + g.entradas.length, 0);
 
 /** Lista de revisão: todo estado da aplicação, com link direto. */
 export function EstadosPage() {
   useDocumentTitle(t.title);
+  const ds = useStore(datasetStore);
+  const catalogo = useMemo(() => montarCatalogo(ds), [ds]);
+  const total = catalogo.reduce((n, g) => n + g.entradas.length, 0);
   return (
     <Stack>
-      <PageHeader title={t.title} subtitle={t.subtitle(TOTAL)} />
-      {CATALOGO.map((grupo) => (
+      <PageHeader title={t.title} subtitle={t.subtitle(total)} />
+      {catalogo.map((grupo) => (
         <Block key={grupo.chave} title={t.grupos[grupo.chave]}>
           <ul>
             {grupo.entradas.map((entrada) => {

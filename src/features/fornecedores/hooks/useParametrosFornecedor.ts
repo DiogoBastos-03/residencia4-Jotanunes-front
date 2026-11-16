@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 
-export type AbaFornecedor = 'documentos' | 'exigencias' | 'obras' | 'historico' | 'contatos';
+export type AbaFornecedor = 'documentos' | 'exigencias' | 'obras' | 'historico' | 'contatos' | 'dados';
 type ModalFornecedor = 'bloquear' | 'reenviar' | 'editar';
 
-const ABAS: readonly AbaFornecedor[] = ['documentos', 'exigencias', 'obras', 'historico', 'contatos'];
+const ABAS: readonly AbaFornecedor[] = ['documentos', 'exigencias', 'obras', 'historico', 'contatos', 'dados'];
 
 /** Estado da ficha do fornecedor na URL: ?aba=, ?modal=bloquear|reenviar|editar. */
 export function useParametrosFornecedor() {

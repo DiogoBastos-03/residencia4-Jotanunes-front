@@ -1,5 +1,5 @@
 import { listasDaObra } from '@/entities';
-import { datasetStore, exemploNovoFornecedor } from '@/mocks';
+import { datasetStore, exemploNovoFornecedor, obrasDoExemplo } from '@/mocks';
 import { useStore } from '@/shared/lib';
 import type { NovoFornecedor, ObraParaCadastro } from '../types';
 
@@ -12,7 +12,9 @@ export function useObrasParaCadastro(): ObraParaCadastro[] {
 /** Exemplo que preenche o cadastro ao abrir. */
 export function useExemploNovoFornecedor(): NovoFornecedor {
   const e = exemploNovoFornecedor;
-  return { ...e, tipos: [...e.tipos], contato: { ...e.contato } };
+  const obras = useObrasParaCadastro();
+  const [obraId = ''] = obrasDoExemplo([e.obraId], obras.map((o) => o.obra.id));
+  return { ...e, tipos: [...e.tipos], contato: { ...e.contato }, obraId, servicoContratado: obraId ? e.servicoContratado : '' };
 }
 
 export const NOVO_FORNECEDOR_VAZIO: NovoFornecedor = {

@@ -24,6 +24,8 @@ export const fornecedoresPage = {
   obras: (n: number) => dominio.obras(n),
   abrir: 'Abrir ficha',
   reenviar: 'Reenviar acesso',
+  listaParcial: (carregados: number, total: number) =>
+    `Mostrando os primeiros ${carregados} de ${total} fornecedores. A busca e os filtros valem só para estes.`,
   nota: 'Documentos conta só os obrigatórios da empresa, nas listas de exigências que se aplicam a ela. Fornecedor apto tem todos aprovados e dentro da validade.',
   novoToast: (razao: string) => `${razao} cadastrado`,
   novoToastConvite: (email: string) => `Fornecedor cadastrado e convite enviado para ${email}`,
@@ -54,8 +56,12 @@ export const modalBloquear = {
   alerta: 'O fornecedor continua acessando o portal para enviar documentos.',
   cancelar: 'Cancelar',
   confirmar: 'Bloquear',
+  confirmando: 'Bloqueando…',
+  erroTitle: 'Não foi possível bloquear',
   toast: 'Fornecedor bloqueado para novas contratações',
   desbloqueadoToast: 'Fornecedor desbloqueado',
+  desbloqueando: 'Desbloqueando…',
+  erroDesbloquear: (mensagem: string) => `Não foi possível desbloquear. ${mensagem}`,
 } as const;
 
 /** Modal de editar os dados do fornecedor (razão social, telefone, e-mail e tipos). */
@@ -65,6 +71,8 @@ export const modalEditarFornecedor = {
   tipos: 'Tipo de fornecimento',
   cancelar: 'Cancelar',
   salvar: 'Salvar',
+  salvando: 'Salvando…',
+  erroTitle: 'Não foi possível salvar',
   toast: 'Dados do fornecedor atualizados',
   semMudanca: 'Nada foi alterado',
 } as const;

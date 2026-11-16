@@ -9,6 +9,7 @@ import type {
   ResumoFornecedor,
   ResumoArquivos,
   EnvioArquivos,
+  FornecedorCadastro,
   StatusDocumento,
   SituacaoFornecedor,
   TipoFornecimento,
@@ -56,6 +57,8 @@ export type ObraDoFornecedor = { obra: Obra; vinculo: VinculoObra; listasAplicav
 
 export type FichaFornecedor = {
   fornecedor: Fornecedor;
+  /** Dados cadastrais como a API devolve (aba Dados). */
+  cadastro: FornecedorCadastro;
   resumo: ResumoFornecedor;
   aguardandoAcesso: boolean;
   grupos: GrupoDocumentos[];

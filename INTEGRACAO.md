@@ -1,180 +1,242 @@
-> **Nota (09/11/2026): a integração foi removida nesta etapa.** O painel interno voltou a ser 100% demonstração, para ir para a Vercel antes de o back existir. A camada de API (`http`, `apiError`, `dto`/`mapper`/`api` de fornecedor e obra, hidratação, proxy do Vite, `.env`) foi apagada. Este documento fica como registro do que foi feito e do que o back precisa, para ser retomado quando a API subir. Continuam no código, por serem melhorias de modelo: fornecedor com `tipos` (um ou dois), `telefone`, o modal "Editar dados", `BadgeGroup` e a opção `multiple` do `ChoiceCard`.
+# Integração com a API interna — estado atual
 
-# Integração com a API interna
+**Fase 2 concluída (16/11/2026): fornecedores e obras vêm da API.** O resto das telas continua em demonstração, agora gerada a partir do que a API devolveu.
 
-O front agora usa a API real (`../residenciaIV-api-interna-dev`) **no que ela já tem**: fornecedores, obras e o vínculo entre eles (só leitura). O resto continua sendo demonstração, mas gerado **sobre os fornecedores e obras reais**.
+A especificação é `../contrato-api-interna.md`, gerado da branch `dev` do back (commit `47cf912`). Ele fica na pasta acima do projeto, não na raiz de `Jnunes-front-interno`.
 
-Nenhum arquivo do back foi alterado. Conferi isso comparando o checksum de todos os arquivos-fonte antes e depois: os 92 são idênticos. O `docker compose up` gerou `bin/` e `obj/` dentro de `src/` do back. São artefatos de build, o `.gitignore` do back já os ignora e não são arquivos-fonte.
-
-## Como ligar
+## Como rodar
 
 ```bash
-# no back (precisa do Docker; em Mac com Apple Silicon, com o Rosetta ligado no Docker Desktop)
-cd ../residenciaIV-api-interna-dev
-docker compose up --build
-
-# no front
-cp .env.example .env.local   # VITE_API_URL=http://localhost:5057 e VITE_USE_API=true
+cp .env.example .env.local
+npm install
 npm run dev
 ```
 
-- `VITE_USE_API=true`: fornecedores, obras e vínculos vêm do banco.
-- `VITE_USE_API=false` (ou sem `.env.local`): tudo volta à demonstração de antes, com os 41 fornecedores fictícios e as contagens do protótipo.
-- O back não tem CORS. O Vite repassa `/api` para `VITE_API_URL` (proxy em `vite.config.ts`), então a chamada é same-origin. Isso vale para `npm run dev`. Um build estático (`npm run build`) servido sem proxy não alcança a API.
-
----
-
-## 1. O que vem do banco e o que é demonstração, tela por tela
-
-| Tela | Do banco | Demonstração (gerada sobre os dados reais) |
+| Variável | Valor | Para quê |
 |---|---|---|
-| **Visão geral** | contagem de fornecedores cadastrados; nomes de fornecedores e obras | fila prioritária, analisados hoje, aptos (dependem de documentos), vencimentos |
-| **Fila de análise** | nomes de fornecedores e obras; quem está em qual obra | todos os itens da fila (documentos e envios) |
-| **Análise / Remessa** | fornecedor e obra | documento, arquivos, decisões, envios anteriores. Aprovar e reprovar alteram só a memória. |
-| **Obras** | lista de obras (nome), quantos fornecedores cada uma tem | listas de exigências da obra, pendências. Código, cidade e data de recebimento não existem no back e aparecem como "—". |
-| **Ficha da obra** | nome, fornecedores vinculados | listas, pendências, histórico. **Vincular fornecedor fica indisponível.** Serviço contratado e período aparecem como "—". |
-| **Fornecedores** | lista inteira: razão social, CNPJ, tipos, bloqueado, nº de obras. Filtros de situação "bloqueado" e de tipo usam dado real. | "apto / com pendência" e "x de y documentos" |
-| **Ficha do fornecedor** | cabeçalho (razão social, CNPJ, tipos, telefone, e-mail, desde, bloqueado); aba Obras (quais obras) | abas Documentos, Exigências e Histórico. Aba Contatos fica vazia (o back não tem contatos). |
-| **Cadastrar fornecedor** | grava no banco (POST) | — (o bloco Obra fica desabilitado) |
-| **Editar dados / Bloquear / Desbloquear** | gravam no banco (PATCH dados, PUT tipos, PATCH status) | — |
-| **Exigências, Nova lista, Configurar lista** | alcance (quantos fornecedores de cada tipo em cada obra) | as listas em si e o vínculo lista ↔ obra |
-| **Relatórios** | nomes de obras e fornecedores | pendências, tempos de análise, vencimentos |
+| `VITE_API_URL` | `https://residenciaiv-api-interna-latest.onrender.com` | URL base da API (sem `/api/v1/internal`) |
+| `VITE_API_MOCK` | `true` / `false` | `true`: o MSW responde na rede, com os dados fictícios (é o que a Vercel roda hoje); `false`: as chamadas vão para a URL real |
+| `API_PROXY_ALVO` | opcional, só no `npm run dev` | Repassa `/api` e `/health` do dev server para a API (ver abaixo). Não começa com `VITE_`, nunca vai para o bundle |
 
-A demonstração vem de um gerador determinístico (`src/mocks/gerar.ts`). Ele usa um hash do id, sem `Math.random`, então o mesmo fornecedor gera sempre os mesmos documentos e recarregar a página não muda a tela. As datas acompanham o "hoje" do navegador, para validades e esperas fazerem sentido. Há sempre pelo menos um documento de funcionário com arquivos em estados diferentes (aprovado, em análise, reprovado, vencido).
+- As duas `VITE_` são validadas com Zod no boot, em `src/shared/config/env.ts`. Esse é o único arquivo que lê `import.meta.env`.
+- A escolha mock × real acontece só no boot (`src/main.tsx`). O código das telas é o mesmo nos dois modos: sempre chama a API pelo `fetch`; com o mock, quem responde é o MSW.
+- **Na Vercel, as duas `VITE_` precisam estar cadastradas.**
 
-## 2. Arquivos, por camada
+### Rodar local contra a API real
 
-### Configuração
-- **Criados:** `.env.example`, `.env.local` (ignorado pelo git), `src/vite-env.d.ts` (tipos de `VITE_API_URL` e `VITE_USE_API`).
-- **Alterados:** `vite.config.ts` (`loadEnv` + proxy `/api`), `.gitignore` (`.env.local`, `.env.*.local`).
+A API do Render não manda cabeçalho CORS para `http://localhost`. O navegador barra a chamada direta. Para desenvolver contra a API real, use o proxy do Vite (no `.env.local`):
 
-### shared
-- **Criados:**
-  - `shared/lib/http.ts`: fetch com base `/api`, JSON, `AbortSignal`, 204 sem corpo; erro vira `ApiError`.
-  - `shared/lib/apiError.ts`: lê ProblemDetails (`code`) e ValidationProblemDetails (`errors` → `fieldErrors`) e normaliza as chaves do back (`EnterpriseName`, `$.enterpriseTypes[0]` → `enterpriseName`, `enterpriseTypes`).
-  - `shared/lib/json.ts`: leitores que validam a resposta, sem asserção de tipo.
-  - `shared/lib/paginacao.ts`: `PagedResult` e `buscarTodas`.
-  - `shared/lib/useQuery.ts`: mesmo contrato do `useMockQuery`, para dado assíncrono, e honra `?estado=`.
-  - `shared/lib/config.ts`: `USAR_API`.
-  - `shared/strings/api.ts`: tradução de cada `code`.
-- **Alterados:**
-  - `shared/lib/format.ts`: `telefoneValido`, com as mesmas regras do back.
-  - `shared/lib/index.ts`.
-  - `shared/strings/*`: textos novos (telefone, tipos, motivos de indisponível, modal de edição).
-  - `shared/ui/Badge.tsx`: `BadgeGroup`, para os dois chips de tipo.
-  - `shared/ui/ChoiceCard.tsx`: prop `multiple`, que troca o rádio por checkbox no seletor de tipos.
+```
+VITE_API_MOCK=false
+VITE_API_URL=http://localhost:5173
+API_PROXY_ALVO=https://residenciaiv-api-interna-latest.onrender.com
+```
 
-### entities
-- **Criados:**
-  - `entities/fornecedor/{dto,mapper,api,index}.ts`: as 6 chamadas de fornecedor.
-  - `entities/obra/{dto,mapper,api,index}.ts`: a chamada de obra.
-  - O total são as 7 chamadas.
-- **Movidos:** `entities/fornecedor.ts` → `entities/fornecedor/model.ts`; `entities/obra.ts` → `entities/obra/model.ts`.
-- **Alterados:**
-  - `entities/lib/dates.ts`: `lerDataApi` acrescenta `Z` quando a data vem sem fuso; também `diaDaApi`, `momentoDaApi` e `hojeLocal`.
-  - `entities/lib/aplicabilidade.ts` e `entities/lib/listas.ts`: a lista se aplica se o fornecedor *fornece* o tipo dela.
-  - `entities/index.ts`.
-- Nenhum componente ou página importa `http.ts` ou `dto.ts`. Só `entities/*/api.ts` e `entities/*/mapper.ts` usam esses arquivos.
+Conferir: **`/_api`** lista as 14 rotas do contrato, com 55 cenários; **`/_estados`** lista os estados de cada tela, com link direto.
 
-### mocks (fonte de dados)
-- **Criados:**
-  - `mocks/store.ts`: `datasetStore`. Começa com a demonstração completa, ou só com listas e tipos de documento quando a API está ligada.
-  - `mocks/hidratacao.ts`: carga do banco no boot (`garantirDataset`) e `recarregarFornecedor` depois de mutação.
-  - `mocks/gerar.ts`: gerador de demonstração.
-  - `mocks/useDatasetQuery.ts`: escolhe `useQuery` (API) ou `useMockQuery` (demonstração) no build.
-- **Alterados:**
-  - `mocks/index.ts` e `mocks/fornecedores.ts` (`tipos`, `telefone`).
-  - `mocks/exemplos.ts`: exemplo de cadastro sem contato.
-  - `mocks/historico.ts`: ignora vínculo e obra sem data.
-  - `mocks/arquivos.ts`: exporta `PESSOAS`.
+## O que vem da API e o que é demonstração (Fase 2)
 
-### features
-- **fornecedores:**
-  - **Criados:** `lib.ts` (validação e `errosDaApi`, que define onde cada erro aparece) e `components/ModalEditarFornecedor.tsx`.
-  - **Removido:** `novo/BlocoContato.tsx`.
-  - **Renomeado:** `novo/BlocoTipo.tsx` → `novo/SeletorTipos.tsx` (múltipla escolha, usado no cadastro e na edição).
-  - **Alterados:** `useAcoesFornecedor` (chama a API e recarrega), formulário e blocos do cadastro, `ModalBloquear` (estado "enviando" e erro), `AbaContatos` (estado vazio e acesso indisponível), `ModalReenviarAcesso`, tabela, filtros, hooks de leitura e `types.ts`.
-- **analise, exigencias, obras, relatorios:** os hooks de leitura passaram para `useDatasetQuery`. Também mudou o que mostra campo opcional ("—" ou some), a contagem por tipo ("contém") e, em `obras/AbaFornecedores` e `DrawerVincularFornecedor`, os chips de tipo e o botão desabilitado.
+### Como funciona
 
-### app e pages
-- **Alterados:**
-  - `app/providers.tsx`: hidratação começa no boot.
-  - `pages/fornecedor/FornecedorPage.tsx`: telefone, chips, "Editar dados", desbloquear assíncrono.
-  - `pages/obra/ObraPage.tsx`: cabeçalho sem os campos que faltam e vínculo indisponível.
-  - `pages/estados/*`: entrada nova "Modal: editar dados" e aviso no modo API. Agora são 116 estados.
+```
+API (ou MSW) ──TanStack Query──► SincronizarDemonstracao ──sincronizar()──► datasetStore ──► telas
+                 │                                                                   ▲
+                 └── detalhe e mutações de fornecedor ──────────────────────────────┘ (ficha e formulários)
+```
 
-### Documentação
-- `INTEGRACAO.md` (este arquivo) e `EDITAR.md` (seção "API").
+- **Leitura** (`src/features/*/hooks`):
+  - `useFornecedoresApi` busca todas as páginas de `GET /enterprises`, com `pageSize` 50, até o `totalCount`.
+  - `useObrasApi` faz o mesmo em `GET /constructions`.
+  - `useVinculosApi` busca `GET /enterprises?constructionIds=<obra>`, uma vez por obra. A API não tem rota de vínculo; é ela que diz quem está em qual obra.
+  - `useFornecedorDetalhe` lê `GET /enterprises/{id}`.
+  - Tudo fica no cache do Query (`queryKeys` da Fase 1).
+- **Base → telas** (`src/app/SincronizarDemonstracao.tsx`): a cada resposta nova, aplica a base sobre o dataset em memória com `sincronizar` (`src/mocks/gerar.ts`, função pura e idempotente).
+  - Antes da primeira carga, toda tela que usa o dataset fica em "carregando".
+  - Se a carga falha, mostram o estado de erro com "Tentar de novo", que refaz as queries (`useDatasetQuery`).
+- **Demonstração determinística**:
+  - A "sorte" vem de um hash FNV-1a do id. Não usa `Math.random`.
+  - O "hoje" é o do navegador, com hora fixa (08:00). Recarregar a página não muda a tela.
+  - O que já foi gerado ou decidido na sessão não é refeito: só o que falta é gerado (fornecedor novo, tipo trocado).
+- **Busca e filtros**: são feitos no front sobre a lista inteira.
+  - A busca para em 200 itens.
+  - Acima disso, a tela de fornecedores mostra um aviso discreto de lista parcial.
+  - A busca vai para o servidor quando o back tiver o parâmetro (comentário em `src/shared/api/paginas.ts`).
+- **Mutações** (`src/features/fornecedores/hooks/useMutacoesFornecedor.ts`, `useMutation`):
+  - **Cadastro:** `POST /enterprises`.
+  - **Edição:** `PATCH /enterprises/{id}` só com os campos que mudaram, e `PUT /types` se os tipos mudaram.
+  - **Bloqueio:** `PATCH /status` com `{active:false}` para bloquear e `{active:true}` para desbloquear.
+  - Depois de cada uma, `invalidateQueries(['fornecedores'])`: a listagem, o detalhe e os vínculos buscam de novo. Nada é editado no cache à mão e não há atualização otimista.
+  - Os botões mostram "Cadastrando…", "Salvando…" ou "Bloqueando…" e voltam ao normal em qualquer saída, inclusive em erro.
+- **Erros** (`errosDaApi` em `src/features/fornecedores/lib.ts`):
+  - **400 com `errors`:** cada campo recusado ganha a mensagem dele ao lado. O texto do ASP.NET vem em inglês, então a mensagem sai de `errosApi.porCampo`.
+  - **409 `CNPJ_ALREADY_REGISTERED`** e **422 `INVALID_CNPJ`:** erro no campo CNPJ.
+  - **422 `INVALID_PHONE`, `INVALID_EMAIL`, `INVALID_ENTERPRISE_NAME`, `ENTERPRISE_TYPE_REQUIRED` e `INVALID_ENTERPRISE_TYPE`:** erro no campo correspondente.
+  - **404 na ficha** (`ENTERPRISE_NOT_FOUND`, ou 404 sem corpo quando o id não é GUID): tela "Fornecedor não encontrado".
+  - **Rede e 5xx:** estado de erro com "Tentar de novo" e a mensagem do `code`.
+  - Todas as mensagens vêm de `src/shared/strings/erros.ts`.
+- **Cold start do Render**:
+  - O timeout é de 65 s.
+  - Requisição que passa de 4 s mostra, acima do esqueleto, a linha "Acordando o serviço, isso pode levar alguns segundos.", que some quando a resposta chega (`src/shared/api/lentidao.ts` e `SkeletonRegion`).
+  - Lentidão não vira erro.
 
-## 3. O que mudou no modelo do front por causa do back
+### Tela por tela
 
-| Mudança | Por quê | O que afetou |
+| Tela | Da API | Demonstração |
 |---|---|---|
-| `tipo` → `tipos: readonly TipoFornecimento[]` (1 ou 2, sem repetição, ordem fixa) | No back a empresa pode ser de material **e** de serviço | Aplicabilidade: a lista vale se o tipo dela está em `tipos`. Filtro por tipo passou a "contém". Contadores por tipo contam o fornecedor dos dois tipos nos dois. Tabela, ficha e drawer mostram dois chips. Cadastro e edição usam múltipla escolha (mínimo 1). Os textos "é fornecedor de serviço e material" juntam os tipos. |
-| `telefone: string` (só dígitos, 10 ou 11) em `Fornecedor` | No back o telefone é da empresa e obrigatório | Campo no cadastro, no bloco Identificação, e na edição. Aparece no cabeçalho da ficha. A validação local repete a do back. |
-| `bloqueado` continua; vem de `!active` | Fronteira, não modelo | `active` só existe em `entities/fornecedor/{dto,mapper,api}.ts` |
-| `nomeFantasia?`, `acessoPortal?` opcionais; `contatos` vazio | Não existem na API | Aba Contatos com estado vazio. Acesso ao portal indisponível com motivo. "Aguardando 1º acesso" só existe na demonstração. |
-| `desde` vem de `createdAt` (só a data, no fuso local) | — | — |
-| `VinculoObra`: `servicoContratado`, `inicio`, `fim`, `vinculadoEm` opcionais | O vínculo no back só tem as duas pontas | Colunas "Serviço contratado" e "Período" mostram "—". Vínculo sem data não gera evento no histórico. |
-| `Obra`: `codigo`, `cidade`, `uf`, `recebidaEm` opcionais | A obra no back só tem id e nome | "—" nas tabelas. Nas linhas de texto e no cabeçalho da ficha o campo some. A exportação CSV fica com código vazio. |
-| Cadastro sem contatos, sem nome fantasia e sem convite | O POST só aceita `enterpriseName`, `cnpj`, `phone`, `email`, `enterpriseTypes` | O bloco "Contato e primeiro acesso" saiu. Os blocos agora são Identificação, Tipo e Obra. |
-| Datas da API com `Z` quando vêm sem fuso | O back grava em UTC e devolve sem fuso | Só em `entities/lib/dates.ts` (`lerDataApi`). Nada faz `new Date(s)` direto em dado da API. |
-| `Material`/`Servico` ↔ `material`/`servico` | Enum do back | Mapa explícito único em `entities/fornecedor/mapper.ts` |
+| **Fornecedores** (lista) | Quais fornecedores existem, razão social, CNPJ, tipos e bloqueio | Situação (apto/pendência), contagem de documentos, listas aplicáveis, "Aguardando 1º acesso" |
+| **Ficha do fornecedor** | Cabeçalho (razão social, CNPJ, tipos, situação bloqueado, telefone, e-mail, "fornecedor desde") e a **aba Dados** (nova), toda do `GET /enterprises/{id}` | Abas Documentos, Exigências, Obras, Histórico e Contatos; "Reenviar acesso"; "Cobrar pendências" |
+| **Cadastrar fornecedor** | CNPJ, razão social, telefone, e-mail e tipos (POST) | Nome fantasia, contato, convite e obra. Ficam em memória, presos ao id que a API devolveu, e somem no F5 |
+| **Editar dados / Bloquear / Desbloquear** | Tudo (PATCH, PUT, PATCH status) | — |
+| **Obras** (lista) | Quais obras existem, nome e fornecedores de cada uma | Código, cidade, situação, listas de exigências, pendências |
+| **Ficha da obra** | Nome e fornecedores vinculados | O resto. "Vincular fornecedor" continua só em memória (não há rota) |
+| **Visão geral, Fila, Análise, Envio, Exigências, Relatórios** | Indiretamente: são calculadas sobre os fornecedores e obras da API | Todo o conteúdo |
+| **`/_estados`** | — | O catálogo agora é montado a partir dos dados carregados (procura um exemplo de cada caso em vez de fixar ids). As descrições deixaram de citar empresas fictícias |
+| **`/_api`** | Inalterada. Com o service worker indisponível, avisa que o mock está no plano B | — |
 
-## 4. O que ficou indisponível por falta de endpoint, e onde o usuário vê o motivo
+### O que ainda é demonstração (sem rota no contrato)
 
-| Ação | Onde | Como aparece |
-|---|---|---|
-| Vincular fornecedor a uma obra (no cadastro) | Cadastrar fornecedor → bloco "3. Obra" | Bloco desabilitado, com a nota "Indisponível: a API ainda não tem endpoint para vincular fornecedor a obra…" |
-| Vincular fornecedor a uma obra (na obra) | Ficha da obra | Botão "Vincular fornecedor" desabilitado (no topo e no estado vazio da aba), com nota logo abaixo do cabeçalho |
-| Convite e reenvio de primeiro acesso | Ficha do fornecedor → aba Contatos → "Acesso ao portal" | Botão "Reenviar acesso" desabilitado e a nota "Sem endpoint de convite na API…" |
-| Contatos da empresa | Ficha do fornecedor → aba Contatos | Estado vazio "Nenhum contato cadastrado", explicando que a API não guarda contatos |
-| Código, cidade, situação e data de recebimento da obra | Obras, ficha da obra, Relatórios | "—" nas tabelas; somem do cabeçalho e das linhas de texto |
-| Serviço contratado e período do vínculo | Ficha da obra (aba Fornecedores) e ficha do fornecedor (aba Obras) | "—" |
+- Documentos, envios, arquivos de funcionário, análise (aprovar/reprovar), fila, histórico e relatórios.
+- Listas de exigências e o vínculo lista ↔ obra.
+- Contatos, convite e acesso ao portal; nome fantasia.
+- Código, cidade e situação da obra; serviço contratado e período do vínculo.
+- Vincular fornecedor a uma obra (o drawer da obra e a obra escolhida no cadastro).
+- Fase 3 (fora desta fase): acervo, visualização, download em lote, painel de pendências, postergação.
 
-Continuam funcionando **só em memória**, como antes: decisões de análise, listas de exigências (criar, editar, vincular à obra), "Cobrar pendências".
+### Mock de rede nesta fase
 
-## 5. O que o back precisaria para a próxima etapa, por ordem de impacto
+- O MSW serve os 41 fornecedores e as 10 obras fictícias, com GUIDs. As telas leem esses dados pela rede, como na API real.
+- Cadastro, edição e bloqueio passam pelos handlers e somem no F5.
+- **Navegador sem service worker** (ex.: o navegador embutido do Claude): o boot troca o `fetch` por um que consulta os mesmos handlers (`getResponse` do MSW). Antes da Fase 2 a tela ficava sem resposta; agora funciona igual.
 
-1. **CORS** (`AddCors` com a origem do front e `UseCors` antes de `MapControllers`). Hoje o front só funciona pelo proxy do Vite. Sem CORS não há deploy do front separado.
-2. **Busca por texto e filtros na listagem de fornecedores** (`?q=` em nome e CNPJ, `?situacao=`), mais telefone, e-mail e `createdAt` no item da lista. Hoje o front baixa todas as páginas e ainda faz um GET por fornecedor para ter telefone e e-mail: com 10 empresas são 15 chamadas no boot, mas com 1.000 não escala.
-3. **Endpoint de vínculo obra ↔ fornecedor**: criar e remover, de preferência com serviço contratado e período, e um GET que devolva os vínculos de uma vez. Hoje o vínculo sai de um `?constructionIds=` por obra.
-4. **Detalhe da obra** (`GET /constructions/{id}`) com código, cidade/UF e situação.
-5. **Listas de exigências**: CRUD de `workflow` e `workflow_version`, itens e vínculo com obras, e a decisão de modelo do API.md (versionamento, escopo por lista × por item, validade no tipo × no item).
-6. **Envios**: documentos, versões, arquivos e envio de documento de funcionário. Inclui decidir entre funcionário com CPF (back) ou arquivo sem dono (front).
-7. **Decisão do analista**: aprovar ou reprovar com quem, quando, motivo e observação. Pede um usuário interno, que o back não tem. Com isso vêm a fila, o histórico e os relatórios.
-8. Menores: duplicidade de nome, telefone ou e-mail volta 500 (deveria ser 409 com `code`); datas sem fuso; `Api.http` desatualizado; `EXPOSE 5001` no Dockerfile.
+## Camada de API (Fase 1)
 
-## 6. O que decidi por conta própria, e por quê
+### Configuração e cliente — `src/shared/`
 
-- **"Editar dados" virou um modal na ficha do fornecedor** (razão social, telefone, e-mail, tipos; CNPJ fixo). As mutações "editar dados" e "trocar tipos" não tinham nenhuma tela. Não é tela nova: é um modal com os componentes que já existiam.
-- **Nome fantasia saiu do cadastro.** Não é campo de contato, mas o back também não aceita esse campo, então seria perdido em silêncio.
-- **Com a API, o cadastro abre vazio.** Na demonstração continua preenchido com o exemplo. Com o banco de verdade, o exemplo vira registro real, e depois do primeiro uso o CNPJ dele já existe e a tela abriria com erro.
-- **Obra da API entra como "em execução".** O back não tem situação de obra, e sem uma situação as obras sumiriam da Visão geral e do cadastro. Está documentado no `mapper` da obra.
-- **"Hoje" no modo API é a data do navegador.** Na demonstração continua 16/09/2026. Com dados reais, criados hoje, uma data fixa no passado deixaria fornecedores "desde" o futuro.
-- **Decisões "de hoje" na demonstração ficam antes do horário atual.** Elas dependem da hora em que a página carregou, então a mesma recarga no mesmo dia pode deslocar alguns minutos nos horários de hoje. Os documentos e status não mudam.
-- **Telefone validado no front com as mesmas regras do back** (DDD sem zero, celular com 9). Assim o erro aparece no campo antes de chegar ao 422.
-- **Desbloquear não tem modal.** Um erro da API ali aparece como aviso (toast de erro).
-- **409 na edição vai para o topo do modal**, porque o CNPJ não é editável ali.
-- **Busca de detalhes em lotes de 6 em paralelo** no boot, para não serializar uma chamada por fornecedor.
-- **`/_estados` continua sendo o catálogo da demonstração.** Com a API, os ids fictícios (ex.: `construtora-exemplo`) não existem no banco e a página mostra um aviso dizendo isso. Os estados `?estado=carregando|erro|vazio` funcionam nos dois modos.
-- **Gerador:** um envio de funcionário com arquivos já decididos nunca é de hoje. Isso evitava decisões com data de amanhã, que encontrei na verificação e corrigi.
+| Arquivo | O que faz |
+|---|---|
+| `config/env.ts` | Valida `VITE_API_URL` e `VITE_API_MOCK` |
+| `api/client.ts` | `fetch` com base URL, JSON e `AbortSignal`. Timeout de 65 s (o Render Free acorda em até ~1 min). 204 sem corpo, texto (`/health`) e binário com o nome lido do `Content-Disposition`. Valida toda resposta JSON com o schema Zod |
+| `api/problem.ts` | `ApiError { status, code, title, errors, traceId }`, mais `mensagem`, `errosDoCampo(campo)` e `camposComErro` |
+| `api/schemas.ts` | GUID, data/hora UTC, data simples e o envelope de paginação (até 50 por página) |
+| `api/keys.ts` | Fábrica das query keys (`queryKeys.fornecedores.lista(filtros)`, …) |
+| `api/health.ts` | `GET /health` |
+| `strings/erros.ts` | Mensagem em português para cada `code` |
 
-## 7. Verificação
+Regras do `ApiError`, conforme a seção 2.1 do contrato:
+- **Erro de negócio:** guarda o `code` do ProblemDetails.
+- **400 sem `code`:** vira `VALIDATION_ERROR` e guarda o `errors`. A chave chega como o ASP.NET manda (`Email`, `$.enterpriseTypes[0]`); `errosDoCampo('email')` normaliza.
+- **5xx sem `code`:** vira `INTERNAL_ERROR`.
+- **Rede ou timeout:** status 0 e `NETWORK_ERROR`.
+- **Resposta fora do contrato:** `INVALID_RESPONSE`, com o caminho do campo que falhou no `title`.
+- **404 sem corpo** (GUID inválido na URL): fica sem `code` e mostra a mensagem genérica.
+
+### Contratos por módulo — `src/entities/`
+
+Cada módulo tem `schema.ts` (Zod; os tipos vêm de `z.infer`), `api.ts` (chama e valida), `mapper.ts` (API → domínio em português) e `model.ts`.
+
+| Módulo do contrato | Pasta | Rotas | Funções |
+|---|---|---|---|
+| enterprise | `entities/fornecedor` | 6 | `fornecedorApi.cadastrar`, `listar`, `detalhar`, `editar`, `trocarTipos`, `definirBloqueio` |
+| construction | `entities/obra` | 1 | `obraApi.listar` |
+| archive | `entities/acervo` (novo) | 3 | `acervoApi.listar`, `linkVisualizacao` (nunca em cache), `baixarEmLote` (binário) |
+| expiration | `entities/pendencias` (novo) | 3 | `pendenciasApi.painel`, `postergar`, `cancelarPostergacao` |
+
+Como os dados mudam entre a API e o domínio:
+- **Enums:** `Material`/`Servico` ↔ `material`/`servico`; `active` ↔ `bloqueado` (invertido).
+- **Datas:** UTC com Z vira horário local. `deadlineAt` é tratado à parte, sempre como só data (`yyyy-MM-dd`), sem fuso.
+- **CNPJ e telefone:** chegam e ficam só com dígitos; a máscara é do front.
+- **`constructionIds`:** vai na query como parâmetro repetido.
+- **`model.ts` de fornecedor e obra:** ganharam tipos novos (`FornecedorResumo`, `FornecedorCadastro`, `Pagina<T>`, `ObraResumo`) para o recorte que a API devolve; os tipos de domínio que já existiam continuam.
+
+### TanStack Query — `src/app/`
+
+- `queryClient.ts` com estes padrões:
+  - sem refetch ao focar a janela;
+  - `staleTime` de 30 s;
+  - retry (até 2) **só** em `NETWORK_ERROR` e 5xx, nunca em 4xx nem em `INVALID_RESPONSE`;
+  - mutações sem retry.
+- Provider em `providers.tsx`. As devtools só carregam em desenvolvimento.
+
+### Mock de rede — `src/mocks/api/`
+
+- O MSW implementa todas as rotas, com as mesmas validações.
+- Os dados saem do conjunto fictício (`src/mocks/ficticio.ts`), convertido para o formato da API.
+- Todo código de erro do contrato é alcançável. Os que nenhuma entrada JSON alcança usam o cabeçalho de teste `X-Mock-Code`, que só existe no mock.
+- A tabela de gatilhos está em `src/mocks/api/README.md`.
+- O MSW, as devtools e o que eles puxam ficam fora do pedaço `vendor`: só carregam com `VITE_API_MOCK=true` ou em desenvolvimento.
+
+## Verificação da Fase 2
 
 | # | Passo | Resultado |
 |---|---|---|
-| 1 | `docker compose up --build` e os dois `curl` | ✅ 10 empresas e 4 obras do seed. Antes foi preciso ligar o Rosetta no Docker Desktop: a imagem do SQL Server é só amd64. |
-| 2 | `npm run typecheck` e `npm run build` | ✅ os dois limpos |
-| 3 | Todas as telas pela interface | ✅ Fornecedores (lista, filtros de situação e tipo, busca), ficha (5 abas), cadastro, bloquear/desbloquear, editar, Obras e ficha da obra (4 abas), Fila, Análise (documento e envio, com uma aprovação), Exigências, lista, nova lista, Relatórios. Nenhuma tela em branco e nenhum erro de JavaScript no console. Os únicos registros de erro foram as respostas 409, 500 e 502 provocadas nos passos 5 e 6. |
-| 4 | Cadastro real, depois recarregar | ✅ "Revest Nordeste" (serviço e material) aparece depois do F5 e existe no banco |
-| 5 | CNPJ repetido; CNPJ inválido | ✅ Repetido já conhecido: erro no campo e alerta com link. Repetido criado por fora depois do carregamento: o 409 da API vira erro no campo CNPJ. CNPJ inválido: "CNPJ inválido. Confira os 14 dígitos." Também testados: 500 (nome repetido) como mensagem no topo do cadastro e do modal; o botão sai de "Cadastrando…" em todos os casos. |
-| 6 | `docker compose stop api` e recarregar | ✅ Estado de erro com "Tentar de novo". Depois de `docker compose start api`, "Tentar de novo" carrega sem F5. |
-| 7 | `VITE_USE_API=false` | ✅ Demonstração intacta: fila 12, 41 fornecedores (34 aptos), 9 vencendo, "Dados: demonstração". Sem erros no console. |
-| 8 | 390 px | ✅ ficha do fornecedor, cadastro, modal de edição e ficha da obra, sem rolagem horizontal |
+| 1 | `typecheck` e `build` | ✅ limpos |
+| 2 | Mock: números coerentes | ✅ Ver detalhe abaixo da tabela |
+| 3 | Determinismo | ✅ `sincronizar` duas vezes sobre a mesma base dá dataset idêntico; aplicado de novo sobre o resultado, não muda nada |
+| 4 | API real: listagem | ✅ 11 empresas, começando por "Admin" e "Alfa Materiais de Construção"; 4 obras, 11 vínculos |
+| 5 | API real: ficha | ✅ Aba Dados e cabeçalho com dados reais (telefone, e-mail, datas); demais abas com demonstração |
+| 6 | API real: cadastro | ✅ "Revest Nordeste Revestimentos Ltda." (CNPJ 45.987.321/0001-60) criada pela tela; depois do reload, 12 empresas |
+| 7 | API real: editar, bloquear, desbloquear | ✅ Pela tela, em sequência: telefone para (81) 98765-4321 e e-mail para financeiro@revestnordeste.com.br, depois bloquear, depois desbloquear. Cada passo conferido com reload |
+| 8 | API real: erros | ✅ Ver detalhe abaixo da tabela |
+| 9 | "Acordando o serviço" | ✅ Com o `fetch` atrasado 9 s no navegador: o aviso não aparece em 1 s nem em 3 s, aparece em 5 s e 6,5 s, e some quando a ficha carrega. O Render estava acordado durante o teste, então o cold start real não foi observado |
+| 10 | Offline | ✅ Com `VITE_API_URL` apontando para uma porta fechada: estado de erro com a mensagem de `NETWORK_ERROR`; "Tentar de novo" volta a carregar e mostra o erro de novo |
+| 11 | `/_estados` e `/_api` | ✅ Todos os links da `/_estados` resolvem para dados existentes; amostra de 10 aberta, cada um no estado certo (inclusive "não encontrado"). `/_api` responde, inclusive com erro forçado |
+| 12 | 390 px | ✅ Sem rolagem horizontal em visão geral, fornecedores, ficha (Documentos e Dados), cadastro, obras, ficha da obra, fila, `/_estados` e `/_api` |
 
-**Dados de teste que ficaram no banco local:**
-- "Revest Nordeste Revestimentos Ltda." (CNPJ 45.987.321/0001-60). Foi editado durante o teste: telefone (81) 99988-7766, só serviço.
-- "Cadastro Paralelo Ltda." (CNPJ 55.667.788/0001-86), criado por `curl` para provocar o 409.
+**Detalhe do passo 2 (mock):**
+- 41 fornecedores: 24 aptos, 16 com pendência e 1 bloqueado.
+- Os mesmos 88 da fila aparecem no contador do menu, na visão geral e na fila; a soma por obra também dá 88.
+- 62 documentos vencendo em 30 dias na visão geral, iguais à contagem do dataset.
+- Documentos: 209 aprovados, 62 vencendo, 19 vencidos, 24 em análise, 21 reprovados e 27 pendentes.
+- 11 envios de funcionário com arquivos em estados diferentes.
 
-Para voltar ao seed: `docker compose down -v && docker compose up --build`.
+**Detalhe do passo 8 (API real):**
+- O 409 foi provocado com o CNPJ da Alfa (válido e já cadastrado). O erro foi para o campo CNPJ.
+- Dígito verificador errado deu 422 `INVALID_CNPJ`, no campo CNPJ.
+- Telefone inválido deu 422 `INVALID_PHONE`, no campo telefone.
+- Um 400 com 5 campos recusados pôs mensagem em cada campo.
+- O 404 da ficha foi testado de dois jeitos: GUID inexistente e id que não é GUID.
+- Todos estes foram executados chamando as funções da camada direto (Node), porque na tela a validação local pega antes (ver abaixo).
+
+**Na tela, a validação local pega antes da API:**
+- **CNPJ já cadastrado:** a checagem ao digitar já marca o campo (com link para a ficha) e não envia. O 409 da API continua mapeado para o mesmo campo, para o caso de o CNPJ ter sido cadastrado por outra pessoa depois da carga.
+- **Dígito do CNPJ errado e telefone/e-mail fora do formato:** também são barrados no front, com a mesma mensagem por campo.
+
+## Divergências e lacunas entre o contrato e o que o front precisa
+
+1. **Datas sem `Z`.**
+   - O contrato diz UTC com `Z`, mas a API publicada devolve `createdAt`/`updatedAt` sem fuso (`"2026-01-05T09:00:00"`).
+   - O schema aceita os dois formatos e trata o sem fuso como UTC.
+   - Antes da correção, o detalhe falhava com `INVALID_RESPONSE`.
+2. **400 em inglês.**
+   - As mensagens de validação do ASP.NET vêm em inglês.
+   - O front ignora o texto e usa a mensagem do campo (`errosApi.porCampo`).
+3. **Telefone vazio.**
+   - A API publicada dá 400 para `phone: ""` (`[Required]` do ASP.NET recusa string vazia).
+   - O mock aceitava. O handler foi corrigido.
+4. **Não há rota de vínculo empresa ↔ obra.**
+   - O vínculo é lido com uma chamada a `GET /enterprises?constructionIds=` por obra.
+   - Não dá para criar vínculo: a obra escolhida no cadastro e o "Vincular fornecedor" da obra ficam só em memória.
+5. **A listagem de empresas não traz telefone, e-mail nem datas.**
+   - A ficha faz uma chamada a mais (detalhe).
+   - A lista não mostra esses campos.
+6. **Não há busca por texto na listagem.**
+   - Filtro e busca são feitos no front sobre a lista inteira, até 200 itens.
+7. **CORS.**
+   - A API do Render não libera `http://localhost`. O proxy do Vite (`API_PROXY_ALVO`) resolve no desenvolvimento.
+   - Precisa estar liberada a origem da Vercel quando ela rodar com `VITE_API_MOCK=false`.
+8. **Fornecedor "Admin" na base.**
+   - É uma empresa de seed com os dois tipos e sem obra.
+   - Aparece como apto, com "0 de 0" documentos.
+9. **Da Fase 1, continuam valendo:**
+   - Não há lista de exigências por fornecedor nem `documentSubmissionId` para exigência nunca enviada.
+   - Os status do acervo não batem um a um com os do front.
+   - `ENTERPRISE_TYPE_REQUIRED` e `INVALID_ENTERPRISE_TYPE` são inalcançáveis por JSON (o 400 vem antes).
+   - O contrato não define a ordem das verificações.
+   - Os CNPJs dos 10 fornecedores do protótipo não têm dígito verificador válido.
+
+## Histórico
+
+- Out/2026: uma primeira integração (só fornecedores e obras, sem Zod nem Query) foi feita e depois removida, para o painel ir para a Vercel 100% em demonstração.
+- Fase 1 (16/11/2026): camada de API completa, mock na rede, rota `/_api`. Nenhuma tela mudou.
+- Fase 2 (16/11/2026): fornecedores e obras pela API com TanStack Query; cadastro, edição, tipos e bloqueio pela API; demonstração determinística gerada sobre a base; aba Dados; aviso de cold start; `/_estados` dinâmica.
+- Fase 3 (próxima): acervo, visualização, download em lote, painel de pendências e postergação.

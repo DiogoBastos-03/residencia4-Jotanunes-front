@@ -8,4 +8,7 @@ export {
   exemploNovoDocumento,
   exemploNovoDocumentoFuncionario,
   exemploVincularObras,
+  obrasDoExemplo,
 } from './exemplos';
+export { estadoBaseStore, type EstadoBase } from './store';
+export { sincronizar, type BaseApi } from './gerar';

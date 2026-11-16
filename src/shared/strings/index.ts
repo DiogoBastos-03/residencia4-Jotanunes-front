@@ -1,10 +1,12 @@
 import { common } from './common';
+import { errosApi } from './erros';
 import { statusLabels, tagLabels } from './status';
 import { ui } from './ui';
 import { dominio } from './dominio';
 import { eventos } from './eventos';
 import { layout } from './layout';
 import { analisePage } from './pages/analise';
+import { apiPage } from './pages/api';
 import { estadosPage } from './pages/estados';
 import { obrasPage } from './pages/obras';
 import { obraPage } from './pages/obra';
@@ -34,6 +36,7 @@ export const strings = {
   status: statusLabels,
   tags: tagLabels,
   ui,
+  errosApi,
   layout,
   modais: { reenviarAcesso: modalReenviarAcesso, bloquear: modalBloquear, editarFornecedor: modalEditarFornecedor, editarContato: modalEditarContato },
   drawers: { documento: drawerDocumento, vincularObras: drawerVincularObras },
@@ -47,6 +50,7 @@ export const strings = {
     analise: analisePage,
     envio: envioPage,
     estados: estadosPage,
+    api: apiPage,
     obras: obrasPage,
     obra: obraPage,
     fornecedores: fornecedoresPage,

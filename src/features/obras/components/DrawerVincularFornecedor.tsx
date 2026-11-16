@@ -37,7 +37,8 @@ export function DrawerVincularFornecedor({ ficha, open, vazio, onClose, onVincul
   // Ao abrir, preenche com o exemplo (ou deixa vazio).
   useEffect(() => {
     if (!open) return;
-    const comExemplo = !vazio && padrao?.id === exemplo.fornecedorId;
+    // Com fornecedores da API, o do exemplo não existe: o exemplo vale para o primeiro disponível.
+    const comExemplo = !vazio && padrao !== undefined;
     setFornecedorId(padrao?.id ?? '');
     setServico(comExemplo ? exemplo.servicoContratado : '');
     setInicio(comExemplo ? formatDate(exemplo.inicio, 'monthYear') : '');

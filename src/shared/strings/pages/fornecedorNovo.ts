@@ -6,6 +6,8 @@ export const fornecedorNovoPage = {
   limpar: 'Limpar',
   cancelar: 'Cancelar',
   salvar: 'Cadastrar fornecedor',
+  salvando: 'Cadastrando…',
+  alertaApiTitle: 'Não foi possível cadastrar',
   alertaCnpjTitle: 'Este CNPJ já está cadastrado',
   alertaCnpj: (razao: string) => `${razao} já usa este CNPJ. Abra a ficha dela em vez de cadastrar de novo.`,
   abrirFicha: 'Abrir ficha',

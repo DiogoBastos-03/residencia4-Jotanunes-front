@@ -7,10 +7,11 @@ import {
   filtrarFornecedores,
   useFiltrosFornecedores,
   useFornecedores,
+  useListagemParcial,
 } from '@/features/fornecedores';
 import { paths, useDocumentTitle } from '@/shared/lib';
 import { strings } from '@/shared/strings';
-import { AsyncContent, Button, ButtonLink, EmptyState, PageHeader, SearchInput, Skeleton, SkeletonTable, Stack, Text } from '@/shared/ui';
+import { AsyncContent, Button, ButtonLink, EmptyState, InfoNote, PageHeader, SearchInput, Skeleton, SkeletonTable, Stack, Text } from '@/shared/ui';
 
 const t = strings.pages.fornecedores;
 
@@ -18,6 +19,7 @@ export function FornecedoresPage() {
   useDocumentTitle(t.title);
   const query = useFornecedores();
   const { filtros, atualizar, limpar, ativo } = useFiltrosFornecedores();
+  const listagem = useListagemParcial();
   // Fornecedor com o modal de reenviar aberto (?reenviar=<id>).
   const [params, setParams] = useSearchParams();
   const reenviarId = params.get('reenviar');
@@ -86,6 +88,7 @@ export function FornecedoresPage() {
           const linhas = filtrarFornecedores(lista.linhas, filtros);
           return (
             <Stack>
+              {listagem.parcial && <InfoNote>{t.listaParcial(listagem.carregados, listagem.total)}</InfoNote>}
               <FornecedoresFiltros lista={lista} filtros={filtros} onChange={atualizar} />
               {linhas.length > 0 ? (
                 <>
