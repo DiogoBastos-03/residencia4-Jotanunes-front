@@ -1,8 +1,158 @@
 # Integração com a API interna — estado atual
 
-**Fase 2 concluída (16/11/2026): fornecedores e obras vêm da API.** O resto das telas continua em demonstração, agora gerada a partir do que a API devolveu.
+**16/11/2026.** O painel interno mostra **somente** o que vem da API. Telas sem endpoint saíram do menu e das rotas.
 
-A especificação é `../contrato-api-interna.md`, gerado da branch `dev` do back (commit `47cf912`). Ele fica na pasta acima do projeto, não na raiz de `Jnunes-front-interno`.
+**Fonte da verdade:**
+- O código do back, em `../residenciaIV-api-interna`, branch `main`, commit `c242815`.
+- O `contrato-api-interna.md` está desatualizado e não cobre o módulo `workflow` nem o vínculo empresa ↔ obra.
+
+## Telas e de onde vem cada dado
+
+| Tela | Endpoints | O que mostra / oferece |
+|---|---|---|
+| Visão geral | `GET /enterprises`, `GET /constructions`, `GET /enterprises?constructionIds=` | Empresas (total, ativas, bloqueadas, por tipo), obras, empresas por obra |
+| Fornecedores | `GET /enterprises` (+ filtro por obra para contar obras) | Razão social, CNPJ, tipos, nº de obras, bloqueado. Filtros tipo e ativo/bloqueado, busca no cliente |
+| Ficha do fornecedor | `GET /enterprises/{id}`, `GET /constructions?enterpriseId=`, `PATCH`, `PUT /types`, `PATCH /status`, vínculo com obra | Abas **Dados** e **Obras**; editar, bloquear, desbloquear, vincular e desvincular obra |
+| Cadastrar fornecedor | `POST /enterprises` (+ vínculo opcional) | Razão social, CNPJ, telefone, e-mail, tipos e obra opcional |
+| Obras | `GET /constructions` (+ filtro por obra) | Nome e nº de fornecedores |
+| Ficha da obra | `GET /constructions`, `GET /enterprises?constructionIds=`, `GET/POST /workflow/constructions/{id}/workflows`, vínculo com fornecedor | Nome, **listas de exigências** em uso (com versão), fornecedores; vincular lista, vincular/desvincular fornecedor |
+| Exigências | `GET /workflow/workflows?type=&name=` | Listas com filtro por tipo e busca por nome (no back) |
+| Nova lista | `POST /workflow/workflows` | Nome, tipo, documentos exigidos, obra e prazo opcionais |
+| Ficha da lista | `GET /workflow/workflows/{id}`, `…/versions`, `PATCH`, `PUT …/requirements` | Versão vigente, documentos, histórico de versões; renomear; editar exigências (gera versão) |
+| Tipos de documento | `GET /workflow/document-definitions`, `…/{id}`, `POST`, `PATCH`, `GET /workflow/document-formats` | Validade, tamanho, formatos, reaproveitável; criar e editar |
+
+## O que volta em qual fase
+
+| Fica fora até haver endpoint | Onde está o código | Volta quando |
+|---|---|---|
+| Aba **Documentos** da ficha do fornecedor | `features/fornecedores/components/AbaDocumentos.tsx`, `hooks/useFichaDocumental.ts` | Fase 3: acervo (`GET /enterprises/{id}/archive`) funcionando (hoje dá 500) |
+| Aba **Exigências** da ficha do fornecedor | `AbaExigenciasFornecedor.tsx` | Quando houver rota "exigências de um fornecedor" (hoje só o painel de pendências, que vem vazio) |
+| Aba **Histórico** | `AbaHistoricoFornecedor.tsx` | Endpoint de eventos/histórico |
+| Aba **Contatos** e "Reenviar acesso" | `AbaContatos.tsx`, `ModalEditarContato.tsx`, `ModalReenviarAcesso.tsx` | Endpoints de contatos e de convite ao portal |
+| Fila de análise, Análise do documento, Remessa | `pages/fila`, `pages/analise`, `pages/envio`, `features/analise` | Endpoints de fila e de decisão de análise |
+| Relatórios | `pages/relatorios`, `features/relatorios` | Endpoints de relatórios |
+| Painel de pendências e postergação | `entities/pendencias` (camada pronta, sem tela) | Fase 3, quando o painel devolver dados |
+| ~~Exigências (listas) e tipos de documento~~ | — | **Voltaram nas Partes B e C** |
+
+## Partes B e C — parametrização documental (16/11/2026)
+
+Módulo `workflow` do back, lido inteiro: 4 controllers, DTOs, 13 casos de uso, entidades, value objects e services de validação.
+
+### Rotas, como estão no código
+
+Prefixo `/api/v1/internal/workflow`. O id da lista ("workflow") é **inteiro**; o da versão é GUID. Enum de tipo como string (`"Material"`, `"Servico"`) no corpo; na query o back aceita também `1`/`2`.
+
+| Método e caminho | Corpo | Respostas |
+|---|---|---|
+| `GET /document-formats` | — | 200 `[{ documentFormatId, name, icon, type }]` (só ativos, por nome) |
+| `GET /document-definitions?name=&page=&pageSize=` | — | 200 página de `{ documentDefinitionId, name, description, maxSizeBytes, canReuse, expiresInDays\|null, acceptedFormatIds }` |
+| `GET /document-definitions/{id}` | — | 200 o mesmo + `createdAt`, `updatedAt`. 404 `DOCUMENT_DEFINITION_NOT_FOUND` |
+| `POST /document-definitions` | `name` (≤100), `description` (obrigatória, pode ser vazia, ≤255), `maxSizeBytes`, `canReuse`, `expiresInDays` (null = não vence), `acceptedFormatIds` (≥1) | 201 `{ documentDefinitionId }`. 400. 422 `INVALID_VALIDITY_DAYS`, `INVALID_DOCUMENT_DEFINITION_NAME`, `INVALID_DOCUMENT_DEFINITION_DESCRIPTION`, `INVALID_MAX_SIZE` (1 byte–20 MB), `FORMATS_REQUIRED`. 409 `DOCUMENT_DEFINITION_NAME_ALREADY_EXISTS`. 404 `DOCUMENT_FORMAT_NOT_FOUND` |
+| `PATCH /document-definitions/{id}` | parcial; `neverExpires: true` remove a validade | 204. 422 `INVALID_EXPIRATION_INPUT` (validade e `neverExpires` juntos), 404, 409, 422/404 como no POST. Corpo sem campos: 204 sem gravar |
+| `GET /workflows?type=&name=&page=&pageSize=` | — | 200 página de `{ workFlowId, name, type }` |
+| `GET /workflows/{id}` | — | 200 `{ workFlowId, name, type, createdAt, updatedAt, currentVersion: { workFlowVersionId, version, documents[{ documentDefinitionId, displayOrder, required }], createdAt } }`. 404 `WORKFLOW_NOT_FOUND`. 500 `WORKFLOW_WITHOUT_VERSION` |
+| `GET /workflows/{id}/versions` | — | 200 lista de versões. 404 |
+| `POST /workflows` | `name` (≤150), `type`, `documents` (≥1), `constructionId?`, `limitExpiresDays?` (obrigatório e 1–9999 **só com obra**; sem obra é ignorado) | 201 `{ workFlowId, workFlowVersionId, assignedEnterpriseIds }`. 400. 422 `INVALID_DOCUMENT_REQUIREMENT`, `INVALID_DISPLAY_ORDER`, `DUPLICATED_REQUIREMENT`, `INVALID_WORKFLOW_NAME`. 404 `DOCUMENT_DEFINITION_NOT_FOUND`, `CONSTRUCTION_NOT_FOUND`. 409 `CONSTRUCTION_ALREADY_HAS_WORKFLOW_FOR_TYPE` |
+| `PATCH /workflows/{id}` | `{ name }` | 204. 400. 404. Não cria versão |
+| `PUT /workflows/{id}/requirements` | `{ documents }` | 200 `{ workFlowId, workFlowVersionId, version }`. Exigências iguais às vigentes devolvem a vigente (não cria versão). 400, 404, 422 como no POST |
+| `GET /constructions/{obraId}/workflows` | — | 200 `[{ workFlowId, name, type, workFlowVersionId, version }]` (a versão em uso). 404 `CONSTRUCTION_NOT_FOUND` |
+| `POST /constructions/{obraId}/workflows` | `{ workFlowId, limitExpiresDays }` (1–9999) | 201 `{ workFlowVersionId, assignedEnterpriseIds }`. 400. 404 `WORKFLOW_NOT_FOUND`, `CONSTRUCTION_NOT_FOUND`. 409 `WORKFLOW_ALREADY_IN_CONSTRUCTION`, `CONSTRUCTION_ALREADY_HAS_WORKFLOW_FOR_TYPE` |
+
+### Regras do domínio e como a tela as respeita
+
+| Regra (onde está no back) | Na tela |
+|---|---|
+| **Versionamento** (`WorkFlowVersion.CreateNext`, `WorkflowVersionNumber.Next` = atual + 1,00): alterar as exigências cria versão nova; a anterior nunca muda | O drawer "Editar exigências" avisa antes de salvar ("cria a versão N+1; a N fica guardada") e o botão diz "Criar versão N+1". Depois, o toast mostra o número **que a API devolveu**. A ficha lista todas as versões |
+| Exigências iguais às vigentes não criam versão (`HasSameRequirements`) | O botão fica desabilitado enquanto nada mudou; se a API devolver a mesma versão, o toast diz "Nada mudou: continua na versão N" |
+| Mudar a versão **move as obras e os vínculos abertos** para a nova (`UpdateWorkflowRequirementsUseCase`) | O aviso diz isso; a ficha da obra passa a mostrar a versão nova (invalidação de `['listas']`) |
+| Renomear não cria versão (`RenameWorkflowUseCase`) | O modal diz isso |
+| **Tipo** (`WorkFlowEnterpriseType` Material = 1, Servico = 2): a lista se aplica às empresas da obra ativas e com o tipo dela (`ConstructionAssignmentBuilder`) | O tipo aparece em toda lista ("Vale para fornecedores de…"). O toast do vínculo diz quantos fornecedores passaram a segui-la (`assignedEnterpriseIds`) |
+| **Uma lista de cada tipo por obra** (`EnsureConstructionCanUseTypeAsync`) e a mesma lista não entra duas vezes | "Vincular lista" só oferece listas que a obra não usa e de tipo que ela ainda não tem; sem nenhuma, o botão não aparece. Na nova lista, só as obras livres para o tipo escolhido |
+| Documento repetido (`DUPLICATED_REQUIREMENT`) e ordem repetida ou negativa (`INVALID_DISPLAY_ORDER`) | O editor só oferece tipos que ainda não estão na lista; a ordem é a posição na tela (1, 2, 3…) |
+| Prazo só com obra (`CreateWorkflowRequest.Validate`) | O campo de prazo só aparece depois de escolher a obra; sem obra, o prazo nem é enviado |
+| Tipo de documento: nome único, tamanho 1 byte–20 MB, validade 1–9999 dias ou "não vence", ≥1 formato ativo | Validação local igual; validade é escolha "Vence (dias) / Não vence", e "Não vence" vira `neverExpires: true` no PATCH (nunca junto com os dias). O PATCH leva só os campos que mudaram |
+| Não existe excluir lista, excluir tipo nem desvincular lista de obra | Nenhum botão para isso |
+
+### Divergências entre o código e a API publicada
+
+- **Nenhuma** nas respostas: todas as rotas e os erros provocáveis sem gravar batem com o código (status, `code` e title).
+- **Busca por nome sem diferenciar maiúsculas.** Vale para listas e tipos (`name=Padr` acha "padrão"). O código usa `Contains`, então a diferença vem do collation do banco. O MSW imita.
+- **Não conferido:** se o nome único de tipo de documento diferencia maiúsculas no banco (`FindByNameAsync` usa `==`). Testar exigiria gravar. O MSW compara exato.
+- **Erros que nenhuma entrada JSON alcança**, porque o `[Required]` e o `[StringLength]` dão 400 antes: `INVALID_WORKFLOW_NAME`, `REQUIREMENTS_REQUIRED`, `INVALID_WORKFLOW_TYPE`, `INVALID_DOCUMENT_DEFINITION_NAME`, `INVALID_DOCUMENT_DEFINITION_DESCRIPTION`, `EXPIRATION_POLICY_REQUIRED`. Na `/_api` saem forçados no mock.
+
+### Telas
+
+| Tela | O que tem |
+|---|---|
+| **Exigências** (`/exigencias`) | Listas (nome e tipo); filtro por tipo e busca por nome **no back** (`type` e `name`), com 300 ms de espera na digitação |
+| **Nova lista** (`/exigencias/nova`) | Nome, tipo, documentos (escolher, obrigatório/opcional, ordenar, remover), obra e prazo opcionais |
+| **Ficha da lista** (`/exigencias/:id`) | Tipo, criada em, versão vigente com a data, documentos na ordem (com validade e formatos do tipo), todas as versões; Renomear e Editar exigências |
+| **Tipos de documento** (`/tipos-de-documento`, novo) | Nome e descrição, validade, tamanho máximo, formatos, reaproveitável; busca no cliente; Novo e Editar (drawer com criado/atualizado em) |
+| **Ficha da obra** | Bloco "Listas de exigências" (lista, tipo, versão em uso) e "Vincular lista" (lista + prazo) |
+
+**Criar lista já vinculada a uma obra:** ofereci, porque o back faz tudo numa chamada só (sem falha parcial). O prazo só aparece com obra escolhida e só vai no corpo nesse caso.
+
+**Componentes antigos de exigências:** o modelo antigo (escopo empresa/funcionário, validade por item, lembretes, prazo de envio, alcance) não bate com a API. A feature antiga e suas 3 páginas foram apagadas e refeitas sobre `entities/exigencias` e `entities/tipoDocumento`.
+
+### Camada de dados
+
+- **`entities/tipoDocumento`:** formatos e tipos de documento.
+- **`entities/exigencias`:** listas, versões e listas da obra.
+- **Cada entidade tem:** `schema.ts` (Zod), `mapper.ts`, `api.ts` e `consultas.ts`, com as queries e as mutações.
+- **Query keys:** `queryKeys.listas` (tudo sob `['listas']`), `queryKeys.tiposDocumento` e `queryKeys.formatos`.
+- **Invalidação:**
+  - Qualquer mudança em lista (criar, renomear, nova versão, vincular a obra) invalida `['listas']`: listagem, ficha, versões e as listas de todas as obras.
+  - Mudança em tipo de documento invalida `['tiposDocumento']`.
+  - Os erros que mostram estado velho (`WORKFLOW_NOT_FOUND`, 409 do vínculo) também invalidam.
+- **Mensagens:** os 20 códigos novos estão em `src/shared/strings/erros.ts`. Os erros vão para o campo certo (nome, tipo, documentos, obra/lista, prazo, tamanho, validade, formatos).
+
+### MSW e `/_api`
+
+**MSW:**
+- Todas as 13 rotas, com a mesma ordem de verificação dos casos de uso.
+- Dados: os 4 formatos, os tipos de documento (os mesmos ids do acervo), "Material padrão" e "Serviço padrão" e o uso delas nas obras.
+- O vínculo empresa ↔ obra da Parte A agora devolve os workflows reais da obra no `assignedWorkFlowIds`.
+
+**`/_api`:**
+- 13 rotas novas, com 48 cenários, rodados contra o MSW: todos com o status e o `code` do back.
+- Os de sucesso que gravam avisam no rótulo ("grava; a API não tem exclusão").
+- O de exigências usa as mesmas exigências da versão vigente: confere a regra sem criar versão.
+
+### Verificação
+
+| # | Passo | Resultado |
+|---|---|---|
+| 1 | `typecheck`, `build`, `knip` | ✅ limpos |
+| 2 | Mock | ✅ Listas, ficha, editar exigências (versão 2 criada e a obra passou a segui-la), tipos de documento, `/_api`, `/_estados` |
+| 3 | API real: listas | ✅ "Material padrão" e "Serviço padrão" |
+| 4 | API real: tipos de documento | ✅ ASO, CTPS, NF, RG, com validade, tamanho, formatos (nomes do `document-formats`) e reaproveitável |
+| 5 | API real: lista de teste | ✅ Criada (versão 1), renomeada (continuou na versão 1), exigências editadas → **versão 2**, as duas versões na ficha |
+| 6 | API real: tipo de teste | ✅ Criado (30 dias, 1 MB, PDF) e editado: o PATCH levou só `{"neverExpires":true,"acceptedFormatIds":[1,2]}` |
+| 7 | API real: lista na obra | ✅ Lista de teste vinculada a Edifício Comercial Centro; a API respondeu 1 fornecedor (Theta, o de material da obra) e a ficha da obra mostra a lista na versão 2 |
+| 8 | API real: erros na tela | ✅ Tipo com nome "ASO" → 409 no campo Nome; vincular a "Serviço padrão" à obra que já a usa → 409 no campo; lista inexistente → 404 no alerta; ficha de lista inexistente (`/exigencias/999999` e `/exigencias/abc`) → "Lista não encontrada" |
+| 9 | 390 px | ✅ Sem rolagem horizontal nas 4 telas novas, na ficha da obra e nos drawers |
+
+Detalhe do passo 8:
+- Os 409 do vínculo e o 404 foram provocados injetando no select do modal um id que a tela não ofereceria.
+- O back recusa antes de gravar, então esses testes não escreveram nada.
+
+### O que ficou no banco real (não há rota de exclusão)
+
+- **Tipo de documento:** "TESTE Claude (Partes B e C) - tipo de documento".
+  - Id `127c3e92-779c-4087-afd0-296e87dfbfc0`.
+  - Hoje está como "não vence", PDF e PNG, 1 MB.
+- **Lista de exigências:** "TESTE Claude (Partes B e C) - lista renomeada".
+  - `workFlowId` 3, tipo Material.
+  - Versão 1 com 2 documentos (o tipo de teste e NF opcional) e versão 2 com 3 (+ RG).
+- **Uso da lista na obra Edifício Comercial Centro**, na versão 2, com o vínculo da Theta Aço e Ferragens ao workflow (prazo 30 dias).
+  - **Consequência:** essa obra não aceita outra lista de Material enquanto não houver rota de desvínculo.
+- **Intactos:** "Material padrão" e "Serviço padrão" (versão 1, sem alteração) e os tipos ASO, CTPS, NF e RG. Os PATCH de teste nos tipos existentes foram erros ou corpo vazio, sem gravação.
+
+### O que o back oferece nesta área e não foi implementado
+
+- **Ícone e tipo MIME dos formatos (`icon`, `type`):** a tela mostra só o nome. O ícone é um nome de ícone do back (`file-pdf`) que não existe no design system.
+- **Obras que usam uma lista:** não há rota. Daria para descobrir chamando `GET /constructions/{id}/workflows` obra a obra; não fiz por ser N chamadas para um dado que a API não oferece direto.
+- **Ids das empresas vinculadas (`assignedEnterpriseIds`) e da versão (`workFlowVersionId`):** a tela usa só a contagem e o número da versão.
 
 ## Parte A — vínculo fornecedor ↔ obra (16/11/2026)
 
@@ -100,79 +250,63 @@ API_PROXY_ALVO=https://residenciaiv-api-interna-latest.onrender.com
 
 Conferir: **`/_api`** lista as 14 rotas do contrato, com 55 cenários; **`/_estados`** lista os estados de cada tela, com link direto.
 
-## O que vem da API e o que é demonstração (Fase 2)
+## Etapa de limpeza: só dados da API (16/11/2026)
 
-### Como funciona
-
-```
-API (ou MSW) ──TanStack Query──► SincronizarDemonstracao ──sincronizar()──► datasetStore ──► telas
-                 │                                                                   ▲
-                 └── detalhe e mutações de fornecedor ──────────────────────────────┘ (ficha e formulários)
-```
-
-- **Leitura** (`src/features/*/hooks`):
-  - `useFornecedoresApi` busca todas as páginas de `GET /enterprises`, com `pageSize` 50, até o `totalCount`.
-  - `useObrasApi` faz o mesmo em `GET /constructions`.
-  - `useVinculosApi` busca `GET /enterprises?constructionIds=<obra>`, uma vez por obra. A API não tem rota de vínculo; é ela que diz quem está em qual obra.
-  - `useFornecedorDetalhe` lê `GET /enterprises/{id}`.
-  - Tudo fica no cache do Query (`queryKeys` da Fase 1).
-- **Base → telas** (`src/app/SincronizarDemonstracao.tsx`): a cada resposta nova, aplica a base sobre o dataset em memória com `sincronizar` (`src/mocks/gerar.ts`, função pura e idempotente).
-  - Antes da primeira carga, toda tela que usa o dataset fica em "carregando".
-  - Se a carga falha, mostram o estado de erro com "Tentar de novo", que refaz as queries (`useDatasetQuery`).
-- **Demonstração determinística**:
-  - A "sorte" vem de um hash FNV-1a do id. Não usa `Math.random`.
-  - O "hoje" é o do navegador, com hora fixa (08:00). Recarregar a página não muda a tela.
-  - O que já foi gerado ou decidido na sessão não é refeito: só o que falta é gerado (fornecedor novo, tipo trocado).
-- **Busca e filtros**: são feitos no front sobre a lista inteira.
-  - A busca para em 200 itens.
-  - Acima disso, a tela de fornecedores mostra um aviso discreto de lista parcial.
-  - A busca vai para o servidor quando o back tiver o parâmetro (comentário em `src/shared/api/paginas.ts`).
-- **Mutações** (`src/features/fornecedores/hooks/useMutacoesFornecedor.ts`, `useMutation`):
-  - **Cadastro:** `POST /enterprises`.
-  - **Edição:** `PATCH /enterprises/{id}` só com os campos que mudaram, e `PUT /types` se os tipos mudaram.
-  - **Bloqueio:** `PATCH /status` com `{active:false}` para bloquear e `{active:true}` para desbloquear.
-  - Depois de cada uma, `invalidateQueries(['fornecedores'])`: a listagem, o detalhe e os vínculos buscam de novo. Nada é editado no cache à mão e não há atualização otimista.
-  - Os botões mostram "Cadastrando…", "Salvando…" ou "Bloqueando…" e voltam ao normal em qualquer saída, inclusive em erro.
-- **Erros** (`errosDaApi` em `src/features/fornecedores/lib.ts`):
-  - **400 com `errors`:** cada campo recusado ganha a mensagem dele ao lado. O texto do ASP.NET vem em inglês, então a mensagem sai de `errosApi.porCampo`.
-  - **409 `CNPJ_ALREADY_REGISTERED`** e **422 `INVALID_CNPJ`:** erro no campo CNPJ.
-  - **422 `INVALID_PHONE`, `INVALID_EMAIL`, `INVALID_ENTERPRISE_NAME`, `ENTERPRISE_TYPE_REQUIRED` e `INVALID_ENTERPRISE_TYPE`:** erro no campo correspondente.
-  - **404 na ficha** (`ENTERPRISE_NOT_FOUND`, ou 404 sem corpo quando o id não é GUID): tela "Fornecedor não encontrado".
-  - **Rede e 5xx:** estado de erro com "Tentar de novo" e a mensagem do `code`.
-  - Todas as mensagens vêm de `src/shared/strings/erros.ts`.
-- **Cold start do Render**:
-  - O timeout é de 65 s.
-  - Requisição que passa de 4 s mostra, acima do esqueleto, a linha "Acordando o serviço, isso pode levar alguns segundos.", que some quando a resposta chega (`src/shared/api/lentidao.ts` e `SkeletonRegion`).
-  - Lentidão não vira erro.
+Princípio: se o dado não vem de um endpoint que existe e funciona, não aparece. Sem valor inventado nem placeholder.
 
 ### Tela por tela
 
-| Tela | Da API | Demonstração |
+| Tela | Saiu | Ficou / entrou |
 |---|---|---|
-| **Fornecedores** (lista) | Quais fornecedores existem, razão social, CNPJ, tipos e bloqueio | Situação (apto/pendência), contagem de documentos, listas aplicáveis, "Aguardando 1º acesso" |
-| **Ficha do fornecedor** | Cabeçalho (razão social, CNPJ, tipos, situação bloqueado, telefone, e-mail, "fornecedor desde") e a **aba Dados** (nova), toda do `GET /enterprises/{id}` | Abas Documentos, Exigências, Obras, Histórico e Contatos; "Reenviar acesso"; "Cobrar pendências" |
-| **Cadastrar fornecedor** | CNPJ, razão social, telefone, e-mail e tipos (POST) | Nome fantasia, contato, convite e obra. Ficam em memória, presos ao id que a API devolveu, e somem no F5 |
-| **Editar dados / Bloquear / Desbloquear** | Tudo (PATCH, PUT, PATCH status) | — |
-| **Obras** (lista) | Quais obras existem, nome e fornecedores de cada uma | Código, cidade, situação, listas de exigências, pendências |
-| **Ficha da obra** | Nome e fornecedores vinculados | O resto. "Vincular fornecedor" continua só em memória (não há rota) |
-| **Visão geral, Fila, Análise, Envio, Exigências, Relatórios** | Indiretamente: são calculadas sobre os fornecedores e obras da API | Todo o conteúdo |
-| **`/_estados`** | — | O catálogo agora é montado a partir dos dados carregados (procura um exemplo de cada caso em vez de fixar ids). As descrições deixaram de citar empresas fictícias |
-| **`/_api`** | Inalterada. Com o service worker indisponível, avisa que o mock está no plano B | — |
+| **Menu** | Fila de análise (e o contador dela), Exigências, Relatórios | Visão geral, Obras, Fornecedores. Exigências e Tipos de documento voltaram nas Partes B e C |
+| **Visão geral** | Aguardando análise, analisados hoje, aptos, vencendo em 30 dias, fila prioritária, vencimentos próximos, últimas análises, obras em execução, a data do "hoje" | Empresas (com serviço/material), ativas, bloqueadas, obras, empresas por obra |
+| **Fornecedores** | Situação apto/com pendência, listas aplicáveis, "3 de 5" documentos, "Aguardando 1º acesso", reenviar, nota sobre documentos, filtro por situação documental | Razão social, CNPJ, tipos, nº de obras, bloqueado. Filtros: tipo e ativo/bloqueado; contadores total/ativos/bloqueados; busca por nome e CNPJ |
+| **Ficha do fornecedor** | Abas Documentos, Exigências, Histórico, Contatos; "Reenviar acesso", "Cobrar pendências"; serviço contratado, período e data de vínculo; "fornecedor desde", telefone e e-mail no cabeçalho | Cabeçalho: nome, CNPJ, tipos, bloqueado. Abas **Dados** (nome, CNPJ, telefone, e-mail, tipos, criado e atualizado em) e **Obras** (só o nome) |
+| **Cadastrar fornecedor** | Nome fantasia, contato, convite, exemplo pré-preenchido | Razão social, CNPJ, telefone, e-mail, tipos. A obra opcional voltou na Parte A |
+| **Obras** | Código, cidade, UF, situação, listas, pendências | Nome e nº de fornecedores |
+| **Ficha da obra** | Métricas, abas Exigências/Pendências/Histórico, drawers e modais antigos, código, cidade, "recebida em" | Nome e fornecedores vinculados; vínculo (Parte A) e listas (Partes B e C) |
+| **Fila, Análise, Remessa, Relatórios** | Saíram das rotas e do menu; a URL cai em "não encontrado" | Arquivos mantidos, com comentário em `src/app/router.tsx` |
 
-### O que ainda é demonstração (sem rota no contrato)
+### Limpeza de código
 
-- Documentos, envios, arquivos de funcionário, análise (aprovar/reprovar), fila, histórico e relatórios.
-- Listas de exigências e o vínculo lista ↔ obra.
-- Contatos, convite e acesso ao portal; nome fantasia.
-- Código, cidade e situação da obra; serviço contratado e período do vínculo.
-- Vincular fornecedor a uma obra (o drawer da obra e a obra escolhida no cadastro).
-- Fase 3 (fora desta fase): acervo, visualização, download em lote, painel de pendências, postergação.
+**Apagado:**
+- O gerador de demonstração (`gerar.ts`) e o sincronizador (`SincronizarDemonstracao.tsx`).
+- Os dados fictícios de documentos, envios, análises, histórico, listas e exemplos (`src/mocks/*.ts`).
+- Os componentes da visão geral e da ficha da obra que só serviam a eles.
 
-### Mock de rede nesta fase
+**O MSW continua:**
+- Os dados dele estão em `src/mocks/api/fixtures.ts` e `dados.ts`.
+- Só o mock de rede os lê (modo `VITE_API_MOCK=true`).
 
-- O MSW serve os 41 fornecedores e as 10 obras fictícias, com GUIDs. As telas leem esses dados pela rede, como na API real.
-- Cadastro, edição e bloqueio passam pelos handlers e somem no F5.
-- **Navegador sem service worker** (ex.: o navegador embutido do Claude): o boot troca o `fetch` por um que consulta os mesmos handlers (`getResponse` do MSW). Antes da Fase 2 a tela ficava sem resposta; agora funciona igual.
+**Fora das rotas, mas compilando:**
+- O `datasetStore` e o `useDatasetQuery` continuam, vazios, para as telas que estão fora das rotas compilarem.
+
+**Situação do fornecedor:**
+- `SituacaoFornecedor` agora é `'ativo' | 'bloqueado'`.
+- O cálculo apto/com pendência virou `SituacaoDocumental` e só as telas fora de uso o usam.
+
+**Hooks de consulta:**
+- Ficam em `entities/*/consultas.ts`.
+- Assim as features de obra e fornecedor usam umas às outras sem import circular.
+
+**knip:**
+- O `npx knip` sai limpo.
+- `knip.jsonc` declara como entrada as telas fora de uso.
+- Também marca como API pública o design system e a camada da Fase 1. Esses têm exports sem uso de propósito: componentes e tipos do contrato.
+- As fontes e o Tailwind são importados pelo CSS, que o knip não lê.
+
+### Revisão contra a API real
+
+Todas as telas foram abertas com `VITE_API_MOCK=false`, pelo proxy, e conferidas com `curl` na mesma API:
+- 12 empresas: 10 ativas, 2 bloqueadas (Epsilon e Iota), 9 de serviço e 7 de material.
+- 4 obras, com 3/2/3/3 fornecedores.
+- Ficha da Theta: obras Edifício Comercial Centro e Torre Empresarial Atlântico.
+
+Todo número e texto de dado na tela tem origem numa resposta da API.
+
+**Busca por dado inventado no projeto:**
+- Fora de `src/mocks/api/` (fixture do MSW) não sobrou nada.
+- Ficaram os textos de exemplo da página `/_componentes`, que é a vitrine do design system e não lê dados.
 
 ## Camada de API (Fase 1)
 
@@ -231,7 +365,7 @@ Como os dados mudam entre a API e o domínio:
 - A tabela de gatilhos está em `src/mocks/api/README.md`.
 - O MSW, as devtools e o que eles puxam ficam fora do pedaço `vendor`: só carregam com `VITE_API_MOCK=true` ou em desenvolvimento.
 
-## Verificação da Fase 2
+## Histórico: verificação da Fase 2 (antes da limpeza)
 
 | # | Passo | Resultado |
 |---|---|---|
@@ -305,4 +439,7 @@ Como os dados mudam entre a API e o domínio:
 - Out/2026: uma primeira integração (só fornecedores e obras, sem Zod nem Query) foi feita e depois removida, para o painel ir para a Vercel 100% em demonstração.
 - Fase 1 (16/11/2026): camada de API completa, mock na rede, rota `/_api`. Nenhuma tela mudou.
 - Fase 2 (16/11/2026): fornecedores e obras pela API com TanStack Query; cadastro, edição, tipos e bloqueio pela API; demonstração determinística gerada sobre a base; aba Dados; aviso de cold start; `/_estados` dinâmica.
+- Limpeza (16/11/2026): só dados da API; gerador de demonstração removido.
+- Parte A (16/11/2026): vínculo fornecedor ↔ obra.
+- Partes B e C (16/11/2026): tipos de documento, formatos, listas de exigências com versões, lista na obra.
 - Fase 3 (próxima): acervo, visualização, download em lote, painel de pendências e postergação.

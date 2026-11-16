@@ -15,12 +15,15 @@ import { modalDesvincular, modalVincular } from './pages/vinculo';
 import { fornecedorNovoPage } from './pages/fornecedorNovo';
 import { fornecedorPage } from './pages/fornecedor';
 import {
-  drawerDocumento,
-  drawerVincularObras,
+  drawerEditarExigencias,
+  editorExigencias,
   exigenciasPage,
   listaPage,
+  modalRenomearLista,
+  modalVincularLista,
   novaListaPage,
 } from './pages/exigencias';
+import { drawerTipoDocumento, tiposDocumentoPage } from './pages/tiposDocumento';
 import { relatoriosPage } from './pages/relatorios';
 import { filaPage } from './pages/fila';
 import { envioPage } from './pages/envio';
@@ -39,8 +42,9 @@ export const strings = {
   ui,
   errosApi,
   layout,
-  modais: { reenviarAcesso: modalReenviarAcesso, bloquear: modalBloquear, editarFornecedor: modalEditarFornecedor, editarContato: modalEditarContato, vincular: modalVincular, desvincular: modalDesvincular },
-  drawers: { documento: drawerDocumento, vincularObras: drawerVincularObras },
+  modais: { reenviarAcesso: modalReenviarAcesso, bloquear: modalBloquear, editarFornecedor: modalEditarFornecedor, editarContato: modalEditarContato, vincular: modalVincular, desvincular: modalDesvincular, renomearLista: modalRenomearLista, vincularLista: modalVincularLista },
+  drawers: { editarExigencias: drawerEditarExigencias, tipoDocumento: drawerTipoDocumento },
+  editorExigencias,
   dominio,
   eventos,
   pages: {
@@ -60,6 +64,7 @@ export const strings = {
     exigencias: exigenciasPage,
     novaLista: novaListaPage,
     lista: listaPage,
+    tiposDocumento: tiposDocumentoPage,
     relatorios: relatoriosPage,
   },
 } as const;

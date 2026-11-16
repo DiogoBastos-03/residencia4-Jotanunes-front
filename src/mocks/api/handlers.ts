@@ -2,7 +2,7 @@ import { http as rest, HttpResponse, type HttpResponseResolver } from 'msw';
 import { CODIGOS_CONTRATO, PAGE_SIZE_MAX, PREFIXO, type CodigoContrato } from '@/shared/api';
 import { cnpjValido, telefoneValido } from '@/shared/lib';
 import { env } from '@/shared/config/env';
-import { db, exigenciasDaEmpresa, guidDe, HOJE_MOCK, type EmpresaMock, type EnvioMock } from './dados';
+import { db, exigenciasDaEmpresa, guidDe, HOJE_MOCK, type DefinicaoMock, type DocumentoListaMock, type EmpresaMock, type EnvioMock, type VersaoMock } from './dados';
 import { montarZip } from './zip';
 
 /**
@@ -42,6 +42,26 @@ const STATUS_DO_CODIGO: Readonly<Record<CodigoContrato, number>> = {
   ENTERPRISE_INACTIVE: 422,
   ENTERPRISE_NOT_IN_CONSTRUCTION: 404,
   INVALID_LIMIT_EXPIRES_DAYS: 422,
+  WORKFLOW_NOT_FOUND: 404,
+  WORKFLOW_WITHOUT_VERSION: 500,
+  INVALID_WORKFLOW_TYPE: 422,
+  INVALID_WORKFLOW_NAME: 422,
+  REQUIREMENTS_REQUIRED: 422,
+  INVALID_DOCUMENT_REQUIREMENT: 422,
+  DUPLICATED_REQUIREMENT: 422,
+  INVALID_DISPLAY_ORDER: 422,
+  WORKFLOW_ALREADY_IN_CONSTRUCTION: 409,
+  CONSTRUCTION_ALREADY_HAS_WORKFLOW_FOR_TYPE: 409,
+  DOCUMENT_DEFINITION_NOT_FOUND: 404,
+  DOCUMENT_DEFINITION_NAME_ALREADY_EXISTS: 409,
+  INVALID_DOCUMENT_DEFINITION_NAME: 422,
+  INVALID_DOCUMENT_DEFINITION_DESCRIPTION: 422,
+  INVALID_MAX_SIZE: 422,
+  EXPIRATION_POLICY_REQUIRED: 422,
+  FORMATS_REQUIRED: 422,
+  DOCUMENT_FORMAT_NOT_FOUND: 404,
+  INVALID_VALIDITY_DAYS: 422,
+  INVALID_EXPIRATION_INPUT: 422,
   INTERNAL_ERROR: 500,
 };
 
@@ -71,6 +91,26 @@ const TITULO: Readonly<Record<CodigoContrato, string>> = {
   ENTERPRISE_INACTIVE: 'Empresa inativa.',
   ENTERPRISE_NOT_IN_CONSTRUCTION: 'Esta empresa não está nesta obra.',
   INVALID_LIMIT_EXPIRES_DAYS: 'Prazo de entrega deve estar entre 1 e 9999 dias.',
+  WORKFLOW_NOT_FOUND: 'Workflow não encontrado.',
+  WORKFLOW_WITHOUT_VERSION: 'Workflow sem versão cadastrada.',
+  INVALID_WORKFLOW_TYPE: 'Tipo de workflow inválido.',
+  INVALID_WORKFLOW_NAME: 'Nome do workflow inválido.',
+  REQUIREMENTS_REQUIRED: 'A lista deve ter ao menos um documento.',
+  INVALID_DOCUMENT_REQUIREMENT: 'Documento da lista inválido.',
+  DUPLICATED_REQUIREMENT: 'O mesmo documento não pode aparecer duas vezes na lista.',
+  INVALID_DISPLAY_ORDER: 'Dois documentos não podem ter a mesma ordem de exibição.',
+  WORKFLOW_ALREADY_IN_CONSTRUCTION: 'Esta obra já usa este workflow.',
+  CONSTRUCTION_ALREADY_HAS_WORKFLOW_FOR_TYPE: 'Esta obra já usa um workflow deste tipo.',
+  DOCUMENT_DEFINITION_NOT_FOUND: 'Tipo de documento não encontrado.',
+  DOCUMENT_DEFINITION_NAME_ALREADY_EXISTS: 'Já existe um tipo de documento com este nome.',
+  INVALID_DOCUMENT_DEFINITION_NAME: 'Nome do tipo de documento inválido.',
+  INVALID_DOCUMENT_DEFINITION_DESCRIPTION: 'Descrição do tipo de documento inválida.',
+  INVALID_MAX_SIZE: 'Tamanho máximo deve estar entre 1 byte e 20MB.',
+  EXPIRATION_POLICY_REQUIRED: 'Política de validade é obrigatória.',
+  FORMATS_REQUIRED: 'Informe ao menos um formato de documento válido.',
+  DOCUMENT_FORMAT_NOT_FOUND: 'Formato de documento não encontrado.',
+  INVALID_VALIDITY_DAYS: 'Prazo de validade deve estar entre 1 e 9999 dias.',
+  INVALID_EXPIRATION_INPUT: 'Informe um prazo de validade ou que o documento não expira, não os dois.',
   INTERNAL_ERROR: 'Erro interno no servidor.',
 };
 
@@ -208,7 +248,345 @@ const param = (params: Params, nome: string) => {
   return typeof v === 'string' ? v : '';
 };
 
+
+// ——— Módulo workflow (listas de exigências, tipos de documento, formatos) ———
+// Mesmas regras e ordem de verificação do código do back (use cases e entidades de src/modules/workflow).
+
+const WF = `${API}/workflow`;
+const MAX_TAMANHO = 20 * 1024 * 1024;
+const ehInteiro = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v);
+/** [Required] do ASP.NET: string ausente, vazia ou só com espaços é recusada. */
+const textoPreenchido = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
+
+const versaoAtual = (workFlowId: number): VersaoMock | undefined =>
+  db.versoes.filter((v) => v.workFlowId === workFlowId).sort((a, b) => b.version - a.version)[0];
+
+/** Versões em uso na obra: a maior de cada workflow (ListCurrentByConstructionAsync). */
+function usosAtuais(obraId: string): VersaoMock[] {
+  const daObra = db.usos.filter((u) => u.constructionId === obraId).flatMap((u) => db.versoes.filter((v) => v.workFlowVersionId === u.workFlowVersionId));
+  return daObra.filter((v) => !daObra.some((o) => o.workFlowId === v.workFlowId && o.version > v.version));
+}
+
+function definicaoParaApi(d: DefinicaoMock, comDatas: boolean) {
+  const { createdAt, updatedAt, ...resto } = d;
+  return comDatas ? { ...resto, createdAt, updatedAt } : resto;
+}
+
+function versaoParaApi(v: VersaoMock) {
+  return { workFlowVersionId: v.workFlowVersionId, version: v.version, documents: [...v.documents].sort((a, b) => a.displayOrder - b.displayOrder), createdAt: v.createdAt };
+}
+
+/** Itens de documento: 400 de campo obrigatório por item (Documents[i].X), como o model binding faz. */
+function validarDocumentos(v: unknown, erros: Record<string, string[]>): unknown[] {
+  if (!Array.isArray(v) || v.length === 0) {
+    erros.Documents = [v === undefined || v === null ? 'A lista de documentos é obrigatória.' : 'Informe ao menos um documento.'];
+    return [];
+  }
+  v.forEach((item, i) => {
+    const o = objeto(item);
+    if (!o) return; // item nulo segue: o domínio recusa com INVALID_DOCUMENT_REQUIREMENT
+    if (o.documentDefinitionId === undefined || o.documentDefinitionId === null) erros[`Documents[${i}].DocumentDefinitionId`] = ['O tipo de documento é obrigatório.'];
+    else if (!ehGuid(o.documentDefinitionId)) erros[`$.documents[${i}].documentDefinitionId`] = ['The JSON value could not be converted to System.Nullable`1[System.Guid].'];
+    if (o.displayOrder === undefined || o.displayOrder === null) erros[`Documents[${i}].DisplayOrder`] = ['A ordem de exibição é obrigatória.'];
+    else if (!ehInteiro(o.displayOrder)) erros[`$.documents[${i}].displayOrder`] = ['The JSON value could not be converted to System.Nullable`1[System.Int32].'];
+    if (o.required === undefined || o.required === null) erros[`Documents[${i}].Required`] = ['Informe se o documento é obrigatório.'];
+    else if (typeof o.required !== 'boolean') erros[`$.documents[${i}].required`] = ['The JSON value could not be converted to System.Nullable`1[System.Boolean].'];
+  });
+  return v;
+}
+
+/** DocumentRequirement + WorkFlowVersion.ValidateRequirements + EnsureDocumentsExistAsync. */
+function requisitos(lista: unknown[]): { ok: true; docs: DocumentoListaMock[] } | { ok: false; resposta: HttpResponse<string> } {
+  const docs: DocumentoListaMock[] = [];
+  for (const item of lista) {
+    const o = objeto(item);
+    if (!o || o.documentDefinitionId === '00000000-0000-0000-0000-000000000000') return { ok: false, resposta: problema('INVALID_DOCUMENT_REQUIREMENT') };
+    if (ehInteiro(o.displayOrder) && o.displayOrder < 0) return { ok: false, resposta: problema('INVALID_DISPLAY_ORDER') };
+    docs.push({ documentDefinitionId: String(o.documentDefinitionId), displayOrder: Number(o.displayOrder), required: o.required === true });
+  }
+  if (new Set(docs.map((d) => d.documentDefinitionId)).size !== docs.length) return { ok: false, resposta: problema('DUPLICATED_REQUIREMENT') };
+  if (new Set(docs.map((d) => d.displayOrder)).size !== docs.length) return { ok: false, resposta: problema('INVALID_DISPLAY_ORDER') };
+  if (docs.some((d) => !db.definicoes.some((x) => x.documentDefinitionId === d.documentDefinitionId))) return { ok: false, resposta: problema('DOCUMENT_DEFINITION_NOT_FOUND') };
+  return { ok: true, docs: docs.sort((a, b) => a.displayOrder - b.displayOrder) };
+}
+
+/** EnsureConstructionCanUseTypeAsync: obra existe → já usa este workflow → já tem um do tipo. */
+function obraPodeUsar(obraId: string, tipo: 'Material' | 'Servico', workFlowId: number | null): HttpResponse<string> | null {
+  if (!db.obras.some((o) => o.constructionId === obraId)) return problema('CONSTRUCTION_NOT_FOUND');
+  const atuais = usosAtuais(obraId);
+  if (workFlowId !== null && atuais.some((v) => v.workFlowId === workFlowId)) return problema('WORKFLOW_ALREADY_IN_CONSTRUCTION');
+  if (atuais.some((v) => db.workflows.find((w) => w.workFlowId === v.workFlowId)?.type === tipo)) return problema('CONSTRUCTION_ALREADY_HAS_WORKFLOW_FOR_TYPE');
+  return null;
+}
+
+/** Empresas da obra que seguem a lista: ativas e com o tipo dela (ConstructionAssignmentBuilder). */
+function empresasQueSeguem(obraId: string, tipo: 'Material' | 'Servico'): string[] {
+  const daObra = new Set(db.vinculos.filter((v) => v.constructionId === obraId).map((v) => v.enterpriseId));
+  return db.empresas.filter((e) => daObra.has(e.enterpriseId) && e.active && e.types.includes(tipo)).map((e) => e.enterpriseId);
+}
+
+const novaVersaoId = () => guidDe('5', db.proximaVersao++);
+
+/** Enum na query: o model binding aceita o nome (sem diferenciar maiúsculas) ou o número. */
+function tipoDaQuery(v: string): 'Material' | 'Servico' | null {
+  const t = v.trim().toLowerCase();
+  return t === 'material' || t === '1' ? 'Material' : t === 'servico' || t === '2' ? 'Servico' : null;
+}
+
+function validarDefinicao(b: Record<string, unknown>, erros: Record<string, string[]>, criando: boolean) {
+  if (criando && !textoPreenchido(b.name)) erros.Name = ['O nome é obrigatório.'];
+  else if (typeof b.name === 'string' && b.name.length > 100) erros.Name = ['O nome deve ter no máximo 100 caracteres.'];
+  if (criando && typeof b.description !== 'string') erros.Description = ['A descrição é obrigatória.'];
+  else if (typeof b.description === 'string' && b.description.length > 255) erros.Description = ['A descrição deve ter no máximo 255 caracteres.'];
+  if (criando && (b.maxSizeBytes === undefined || b.maxSizeBytes === null)) erros.MaxSizeBytes = ['O tamanho máximo é obrigatório.'];
+  if (criando && (b.canReuse === undefined || b.canReuse === null)) erros.CanReuse = ['Informe se o documento pode ser reaproveitado.'];
+  if (b.acceptedFormatIds !== undefined && b.acceptedFormatIds !== null) {
+    if (!Array.isArray(b.acceptedFormatIds) || b.acceptedFormatIds.length === 0) erros.AcceptedFormatIds = ['Informe ao menos um formato aceito.'];
+  } else if (criando) erros.AcceptedFormatIds = ['Informe ao menos um formato aceito.'];
+}
+
+const formatosDe = (v: unknown): number[] => (Array.isArray(v) ? v.filter(ehInteiro) : []);
+
+const handlersWorkflow = [
+  rest.get(`${WF}/document-formats`, comCenario(() =>
+    HttpResponse.json(db.formatos.filter((f) => f.active).sort((a, b) => porNome(a.name, b.name)).map(({ active: _a, ...f }) => f)),
+  )),
+
+  rest.get(`${WF}/document-definitions`, comCenario(({ request }) => {
+    const url = new URL(request.url);
+    const p = paginacao(url);
+    if (!p.ok) return p.resposta;
+    const nome = url.searchParams.get('name')?.toLowerCase() ?? '';
+    const lista = db.definicoes.filter((d) => d.name.toLowerCase().includes(nome)).sort((a, b) => porNome(a.name, b.name));
+    return HttpResponse.json(paginar(lista.map((d) => definicaoParaApi(d, false)), p.page, p.pageSize));
+  })),
+
+  rest.get(`${WF}/document-definitions/:id`, comCenario(({ params }) => {
+    const id = param(params, 'id');
+    if (!ehGuid(id)) return naoEncontradoSemCorpo();
+    const d = db.definicoes.find((x) => x.documentDefinitionId === id);
+    return d ? HttpResponse.json(definicaoParaApi(d, true)) : problema('DOCUMENT_DEFINITION_NOT_FOUND');
+  })),
+
+  // CreateDocumentDefinitionUseCase: 400 → validade → entidade (nome, descrição, tamanho, formatos) → nome livre (409) → formatos ativos (404).
+  rest.post(`${WF}/document-definitions`, comCenario(async ({ request }) => {
+    const corpo = await lerCorpo(request);
+    if (!corpo.ok) return corpo.resposta;
+    const b = objeto(corpo.valor) ?? {};
+    const erros: Record<string, string[]> = {};
+    validarDefinicao(b, erros, true);
+    if (Object.keys(erros).length) return validacao(erros);
+    const dias = b.expiresInDays;
+    if (dias !== undefined && dias !== null && (!ehInteiro(dias) || dias < 1 || dias > 9999)) return problema('INVALID_VALIDITY_DAYS');
+    const nome = String(b.name).trim();
+    const tamanho = Number(b.maxSizeBytes);
+    if (tamanho <= 0 || tamanho > MAX_TAMANHO) return problema('INVALID_MAX_SIZE');
+    const formatos = [...new Set(formatosDe(b.acceptedFormatIds))];
+    if (formatos.length === 0 || formatos.some((f) => f <= 0)) return problema('FORMATS_REQUIRED');
+    if (db.definicoes.some((d) => d.name === nome)) return problema('DOCUMENT_DEFINITION_NAME_ALREADY_EXISTS');
+    if (formatos.some((f) => !db.formatos.some((x) => x.documentFormatId === f && x.active))) return problema('DOCUMENT_FORMAT_NOT_FOUND');
+    const agora = agoraUtc();
+    const nova: DefinicaoMock = {
+      documentDefinitionId: crypto.randomUUID(),
+      name: nome,
+      description: String(b.description).trim(),
+      maxSizeBytes: tamanho,
+      canReuse: b.canReuse === true,
+      expiresInDays: ehInteiro(dias) ? dias : null,
+      acceptedFormatIds: formatos,
+      createdAt: agora,
+      updatedAt: agora,
+    };
+    db.definicoes.push(nova);
+    return HttpResponse.json({ documentDefinitionId: nova.documentDefinitionId }, { status: 201 });
+  })),
+
+  // UpdateDocumentDefinitionUseCase: 400 → validade + "não vence" juntos (422) → validade → 404 → nada a mudar (204) → entidade → nome → formatos novos ativos.
+  rest.patch(`${WF}/document-definitions/:id`, comCenario(async ({ request, params }) => {
+    const id = param(params, 'id');
+    if (!ehGuid(id)) return naoEncontradoSemCorpo();
+    const corpo = await lerCorpo(request);
+    if (!corpo.ok) return corpo.resposta;
+    const b = objeto(corpo.valor) ?? {};
+    const erros: Record<string, string[]> = {};
+    validarDefinicao(b, erros, false);
+    if (Object.keys(erros).length) return validacao(erros);
+    const dias = b.expiresInDays;
+    if (dias !== undefined && dias !== null && b.neverExpires === true) return problema('INVALID_EXPIRATION_INPUT');
+    if (dias !== undefined && dias !== null && (!ehInteiro(dias) || dias < 1 || dias > 9999)) return problema('INVALID_VALIDITY_DAYS');
+    const d = db.definicoes.find((x) => x.documentDefinitionId === id);
+    if (!d) return problema('DOCUMENT_DEFINITION_NOT_FOUND');
+    const nada = [b.name, b.description, b.maxSizeBytes, b.canReuse, b.acceptedFormatIds].every((v) => v === undefined || v === null) && (dias === undefined || dias === null) && b.neverExpires !== true;
+    if (nada) return new HttpResponse(null, { status: 204 });
+    const nome = typeof b.name === 'string' ? b.name.trim() : d.name;
+    if (typeof b.name === 'string' && (nome === '' || nome.length > 100)) return problema('INVALID_DOCUMENT_DEFINITION_NAME');
+    if (typeof b.maxSizeBytes === 'number' && (b.maxSizeBytes <= 0 || b.maxSizeBytes > MAX_TAMANHO)) return problema('INVALID_MAX_SIZE');
+    const formatos = b.acceptedFormatIds !== undefined && b.acceptedFormatIds !== null ? [...new Set(formatosDe(b.acceptedFormatIds))] : d.acceptedFormatIds;
+    if (formatos.length === 0 || formatos.some((f) => f <= 0)) return problema('FORMATS_REQUIRED');
+    if (typeof b.name === 'string' && db.definicoes.some((x) => x.name === nome && x.documentDefinitionId !== id)) return problema('DOCUMENT_DEFINITION_NAME_ALREADY_EXISTS');
+    const adicionados = formatos.filter((f) => !d.acceptedFormatIds.includes(f));
+    if (adicionados.some((f) => !db.formatos.some((x) => x.documentFormatId === f && x.active))) return problema('DOCUMENT_FORMAT_NOT_FOUND');
+    Object.assign(d, {
+      name: nome,
+      description: typeof b.description === 'string' ? b.description.trim() : d.description,
+      maxSizeBytes: typeof b.maxSizeBytes === 'number' ? b.maxSizeBytes : d.maxSizeBytes,
+      canReuse: typeof b.canReuse === 'boolean' ? b.canReuse : d.canReuse,
+      expiresInDays: ehInteiro(dias) ? dias : b.neverExpires === true ? null : d.expiresInDays,
+      acceptedFormatIds: formatos,
+      updatedAt: agoraUtc(),
+    });
+    return new HttpResponse(null, { status: 204 });
+  })),
+
+  rest.get(`${WF}/workflows`, comCenario(({ request }) => {
+    const url = new URL(request.url);
+    const tipoBruto = url.searchParams.get('type');
+    const tipo = tipoBruto === null || tipoBruto === '' ? null : tipoDaQuery(tipoBruto);
+    if (tipoBruto && !tipo) return validacao({ type: [`The value '${tipoBruto}' is not valid.`] });
+    const p = paginacao(url);
+    if (!p.ok) return p.resposta;
+    const nome = url.searchParams.get('name')?.toLowerCase() ?? '';
+    const lista = db.workflows
+      .filter((w) => (!tipo || w.type === tipo) && w.name.toLowerCase().includes(nome))
+      .sort((a, b) => porNome(a.name, b.name))
+      .map((w) => ({ workFlowId: w.workFlowId, name: w.name, type: w.type }));
+    return HttpResponse.json(paginar(lista, p.page, p.pageSize));
+  })),
+
+  rest.get(`${WF}/workflows/:id`, comCenario(({ params }) => {
+    const id = Number(param(params, 'id'));
+    if (!Number.isInteger(id)) return naoEncontradoSemCorpo();
+    const w = db.workflows.find((x) => x.workFlowId === id);
+    if (!w) return problema('WORKFLOW_NOT_FOUND');
+    const v = versaoAtual(id);
+    if (!v) return problema('WORKFLOW_WITHOUT_VERSION');
+    return HttpResponse.json({ workFlowId: w.workFlowId, name: w.name, type: w.type, createdAt: w.createdAt, updatedAt: w.updatedAt, currentVersion: versaoParaApi(v) });
+  })),
+
+  rest.get(`${WF}/workflows/:id/versions`, comCenario(({ params }) => {
+    const id = Number(param(params, 'id'));
+    if (!Number.isInteger(id)) return naoEncontradoSemCorpo();
+    if (!db.workflows.some((x) => x.workFlowId === id)) return problema('WORKFLOW_NOT_FOUND');
+    return HttpResponse.json(db.versoes.filter((v) => v.workFlowId === id).sort((a, b) => a.version - b.version).map(versaoParaApi));
+  })),
+
+  // CreateWorkflowUseCase: 400 (inclui prazo obrigatório com obra) → nome → requisitos → documentos existem → obra (prazo, existe, tipo) → grava.
+  rest.post(`${WF}/workflows`, comCenario(async ({ request }) => {
+    const corpo = await lerCorpo(request);
+    if (!corpo.ok) return corpo.resposta;
+    const b = objeto(corpo.valor) ?? {};
+    const erros: Record<string, string[]> = {};
+    if (!textoPreenchido(b.name)) erros.Name = ['O nome é obrigatório.'];
+    else if (b.name.length > 150) erros.Name = ['O nome deve ter no máximo 150 caracteres.'];
+    if (b.type === undefined || b.type === null) erros.Type = ['O tipo do workflow é obrigatório.'];
+    else if (b.type !== 'Material' && b.type !== 'Servico') erros['$.type'] = ['The JSON value could not be converted to System.Nullable`1[Api.Modules.Workflow.Domain.Enums.WorkFlowEnterpriseType].'];
+    const lista = validarDocumentos(b.documents, erros);
+    const obraId = b.constructionId === undefined || b.constructionId === null ? null : b.constructionId;
+    if (obraId !== null && !ehGuid(obraId)) erros['$.constructionId'] = ['The JSON value could not be converted to System.Nullable`1[System.Guid].'];
+    if (Object.keys(erros).length) return validacao(erros);
+    // IValidatableObject: só roda depois que os atributos passaram.
+    if (obraId !== null) {
+      if (b.limitExpiresDays === undefined || b.limitExpiresDays === null) return validacao({ LimitExpiresDays: ['O prazo de entrega é obrigatório quando a obra é informada.'] });
+      if (!ehInteiro(b.limitExpiresDays) || b.limitExpiresDays < 1 || b.limitExpiresDays > 9999) return validacao({ LimitExpiresDays: ['O prazo de entrega deve estar entre 1 e 9999 dias.'] });
+    }
+    const tipo = b.type === 'Material' ? 'Material' : 'Servico';
+    const r = requisitos(lista);
+    if (!r.ok) return r.resposta;
+    if (obraId !== null) {
+      const recusa = obraPodeUsar(String(obraId), tipo, null);
+      if (recusa) return recusa;
+    }
+    const agora = agoraUtc();
+    const id = db.proximoWorkflowId++;
+    db.workflows.push({ workFlowId: id, name: String(b.name).trim(), type: tipo, createdAt: agora, updatedAt: agora });
+    const versao: VersaoMock = { workFlowVersionId: novaVersaoId(), workFlowId: id, version: 1, documents: r.docs, createdAt: agora };
+    db.versoes.push(versao);
+    const empresas = obraId !== null ? empresasQueSeguem(String(obraId), tipo) : [];
+    if (obraId !== null) db.usos.push({ constructionId: String(obraId), workFlowVersionId: versao.workFlowVersionId });
+    return HttpResponse.json({ workFlowId: id, workFlowVersionId: versao.workFlowVersionId, assignedEnterpriseIds: empresas }, { status: 201 });
+  })),
+
+  rest.patch(`${WF}/workflows/:id`, comCenario(async ({ request, params }) => {
+    const id = Number(param(params, 'id'));
+    if (!Number.isInteger(id)) return naoEncontradoSemCorpo();
+    const corpo = await lerCorpo(request);
+    if (!corpo.ok) return corpo.resposta;
+    const b = objeto(corpo.valor) ?? {};
+    if (!textoPreenchido(b.name)) return validacao({ Name: ['O nome é obrigatório.'] });
+    if (b.name.length > 150) return validacao({ Name: ['O nome deve ter no máximo 150 caracteres.'] });
+    const w = db.workflows.find((x) => x.workFlowId === id);
+    if (!w) return problema('WORKFLOW_NOT_FOUND');
+    w.name = b.name.trim();
+    w.updatedAt = agoraUtc();
+    return new HttpResponse(null, { status: 204 });
+  })),
+
+  // UpdateWorkflowRequirementsUseCase: igual à vigente → devolve a vigente; senão versão + 1, e as obras que usavam a vigente passam para a nova.
+  rest.put(`${WF}/workflows/:id/requirements`, comCenario(async ({ request, params }) => {
+    const id = Number(param(params, 'id'));
+    if (!Number.isInteger(id)) return naoEncontradoSemCorpo();
+    const corpo = await lerCorpo(request);
+    if (!corpo.ok) return corpo.resposta;
+    const b = objeto(corpo.valor) ?? {};
+    const erros: Record<string, string[]> = {};
+    const lista = validarDocumentos(b.documents, erros);
+    if (Object.keys(erros).length) return validacao(erros);
+    if (!db.workflows.some((x) => x.workFlowId === id)) return problema('WORKFLOW_NOT_FOUND');
+    const atual = versaoAtual(id);
+    if (!atual) return problema('WORKFLOW_WITHOUT_VERSION');
+    const r = requisitos(lista);
+    if (!r.ok) return r.resposta;
+    const igual =
+      atual.documents.length === r.docs.length &&
+      [...atual.documents].sort((a, b) => a.displayOrder - b.displayOrder).every((d, i) => {
+        const n = r.docs[i];
+        return n !== undefined && n.documentDefinitionId === d.documentDefinitionId && n.displayOrder === d.displayOrder && n.required === d.required;
+      });
+    if (igual) return HttpResponse.json({ workFlowId: id, workFlowVersionId: atual.workFlowVersionId, version: atual.version });
+    const nova: VersaoMock = { workFlowVersionId: novaVersaoId(), workFlowId: id, version: atual.version + 1, documents: r.docs, createdAt: agoraUtc() };
+    db.versoes.push(nova);
+    for (const u of db.usos.filter((x) => x.workFlowVersionId === atual.workFlowVersionId)) db.usos.push({ constructionId: u.constructionId, workFlowVersionId: nova.workFlowVersionId });
+    return HttpResponse.json({ workFlowId: id, workFlowVersionId: nova.workFlowVersionId, version: nova.version });
+  })),
+
+  rest.get(`${WF}/constructions/:obraId/workflows`, comCenario(({ params }) => {
+    const obraId = param(params, 'obraId');
+    if (!ehGuid(obraId)) return naoEncontradoSemCorpo();
+    if (!db.obras.some((o) => o.constructionId === obraId)) return problema('CONSTRUCTION_NOT_FOUND');
+    return HttpResponse.json(
+      usosAtuais(obraId).flatMap((v) => {
+        const w = db.workflows.find((x) => x.workFlowId === v.workFlowId);
+        return w ? [{ workFlowId: w.workFlowId, name: w.name, type: w.type, workFlowVersionId: v.workFlowVersionId, version: v.version }] : [];
+      }),
+    );
+  })),
+
+  // AssignWorkflowToConstructionUseCase: 400 → prazo → workflow (404) → versão → obra (404, 409, 409) → grava.
+  rest.post(`${WF}/constructions/:obraId/workflows`, comCenario(async ({ request, params }) => {
+    const obraId = param(params, 'obraId');
+    if (!ehGuid(obraId)) return naoEncontradoSemCorpo();
+    const corpo = await lerCorpo(request);
+    if (!corpo.ok) return corpo.resposta;
+    const b = objeto(corpo.valor) ?? {};
+    const erros: Record<string, string[]> = {};
+    if (b.workFlowId === undefined || b.workFlowId === null) erros.WorkFlowId = ['O workflow é obrigatório.'];
+    else if (!ehInteiro(b.workFlowId)) erros['$.workFlowId'] = ['The JSON value could not be converted to System.Nullable`1[System.Int32].'];
+    if (b.limitExpiresDays === undefined || b.limitExpiresDays === null) erros.LimitExpiresDays = ['O prazo de entrega é obrigatório.'];
+    else if (!ehInteiro(b.limitExpiresDays) || b.limitExpiresDays < 1 || b.limitExpiresDays > 9999) erros.LimitExpiresDays = ['O prazo de entrega deve estar entre 1 e 9999 dias.'];
+    if (Object.keys(erros).length) return validacao(erros);
+    const w = db.workflows.find((x) => x.workFlowId === b.workFlowId);
+    if (!w) return problema('WORKFLOW_NOT_FOUND');
+    const atual = versaoAtual(w.workFlowId);
+    if (!atual) return problema('WORKFLOW_WITHOUT_VERSION');
+    const recusa = obraPodeUsar(obraId, w.type, w.workFlowId);
+    if (recusa) return recusa;
+    db.usos.push({ constructionId: obraId, workFlowVersionId: atual.workFlowVersionId });
+    return HttpResponse.json({ workFlowVersionId: atual.workFlowVersionId, assignedEnterpriseIds: empresasQueSeguem(obraId, w.type) }, { status: 201 });
+  })),
+];
+
 export const handlers = [
+  ...handlersWorkflow,
   rest.get(`${env.apiUrl}/health`, () => new HttpResponse('Healthy', { headers: { 'Content-Type': 'text/plain' } })),
 
   // 4.1 Cadastrar empresa
@@ -408,9 +786,14 @@ export const handlers = [
       if (!empresa.active) return problema('ENTERPRISE_INACTIVE');
 
       db.vinculos.push({ enterpriseId: empresaId, constructionId: obraId });
-      // O mock não tem workflows: nenhum é atribuído e todos os tipos da empresa ficam sem workflow (1 = Material, 2 = Servico).
+      // Workflows atuais da obra com um dos tipos da empresa; os tipos dela sem workflow na obra (1 = Material, 2 = Servico).
+      const daObra = usosAtuais(obraId).flatMap((v) => db.workflows.filter((w) => w.workFlowId === v.workFlowId));
+      const seguidos = daObra.filter((w) => empresa.types.includes(w.type));
       return HttpResponse.json(
-        { assignedWorkFlowIds: [], typesWithoutWorkflow: empresa.types.map((t) => (t === 'Material' ? 1 : 2)) },
+        {
+          assignedWorkFlowIds: seguidos.map((w) => w.workFlowId),
+          typesWithoutWorkflow: empresa.types.filter((t) => !seguidos.some((w) => w.type === t)).map((t) => (t === 'Material' ? 1 : 2)),
+        },
         { status: 201, headers: { Location: `${API}/constructions?enterpriseId=${empresaId}` } },
       );
     }),

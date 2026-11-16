@@ -12,7 +12,7 @@ export type GrupoCatalogo = { chave: ChaveGrupo; entradas: EntradaCatalogo[] };
 /** Id que não existe: o link cai em "não encontrado" quando a base atual não tem exemplo daquele caso. */
 const SEM_EXEMPLO = 'sem-exemplo';
 
-export type BaseCatalogo = { fornecedores: readonly FornecedorResumo[]; obras: readonly ObraResumo[]; vinculos: readonly VinculoApi[] };
+export type BaseCatalogo = { fornecedores: readonly FornecedorResumo[]; obras: readonly ObraResumo[]; vinculos: readonly VinculoApi[]; listaId: number | null };
 
 /** Cada estado revisável, com o endereço que abre direto nele. Os ids saem das respostas da API. */
 export function montarCatalogo(base: BaseCatalogo): readonly GrupoCatalogo[] {
@@ -26,6 +26,7 @@ export function montarCatalogo(base: BaseCatalogo): readonly GrupoCatalogo[] {
 
   const FICHA = paths.fornecedor(fornecedor?.id ?? SEM_EXEMPLO);
   const OBRA = paths.obra(obra?.id ?? SEM_EXEMPLO);
+  const LISTA = paths.lista(base.listaId ?? SEM_EXEMPLO);
 
   return [
     {
@@ -99,6 +100,36 @@ export function montarCatalogo(base: BaseCatalogo): readonly GrupoCatalogo[] {
         { chave: 'ffNaoEncontrado', para: paths.fornecedor('fornecedor-inexistente') },
         { chave: 'ffCarregando', para: `${FICHA}?estado=carregando` },
         { chave: 'ffErro', para: `${FICHA}?estado=erro` },
+      ],
+    },
+    {
+      chave: 'listas',
+      entradas: [
+        { chave: 'liLista', para: paths.exigencias },
+        { chave: 'liTipo', para: `${paths.exigencias}?tipo=material` },
+        { chave: 'liSemResultado', para: `${paths.exigencias}?busca=Lista%20Inexistente` },
+        { chave: 'liVazia', para: `${paths.exigencias}?estado=vazio` },
+        { chave: 'liCarregando', para: `${paths.exigencias}?estado=carregando` },
+        { chave: 'liErro', para: `${paths.exigencias}?estado=erro` },
+      ],
+    },
+    { chave: 'novaLista', entradas: [{ chave: 'nlVazio', para: paths.novaLista }] },
+    {
+      chave: 'lista',
+      entradas: [
+        { chave: 'clFicha', para: LISTA },
+        { chave: 'clNaoEncontrada', para: paths.lista(999999) },
+        { chave: 'clCarregando', para: `${LISTA}?estado=carregando` },
+        { chave: 'clErro', para: `${LISTA}?estado=erro` },
+      ],
+    },
+    {
+      chave: 'tiposDocumento',
+      entradas: [
+        { chave: 'tdLista', para: paths.tiposDocumento },
+        { chave: 'tdVazia', para: `${paths.tiposDocumento}?estado=vazio` },
+        { chave: 'tdCarregando', para: `${paths.tiposDocumento}?estado=carregando` },
+        { chave: 'tdErro', para: `${paths.tiposDocumento}?estado=erro` },
       ],
     },
   ];

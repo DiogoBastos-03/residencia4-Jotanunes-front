@@ -1,38 +1,66 @@
-import type { Dataset, ItemExigido, ListaExigencias } from '@/entities';
-import type { ItemRascunho } from './types';
+import type { ItemExigencia } from '@/entities/exigencias';
+import { ApiError, mensagemDoErro } from '@/shared/api';
+import { strings } from '@/shared/strings';
 
-/** Item da lista → rascunho (com o nome do documento por extenso). */
-export function paraRascunho(ds: Dataset, item: ItemExigido): ItemRascunho {
-  const nome = ds.tiposDocumento.find((t) => t.id === item.tipoDocumentoId)?.nome ?? item.tipoDocumentoId;
-  const { tipoDocumentoId: _id, ...resto } = item;
-  return { ...resto, nome };
+export type CampoLista = 'nome' | 'tipo' | 'documentos' | 'obra' | 'prazo';
+export type ErrosLista = Partial<Record<CampoLista, string>>;
+
+/** Código de negócio → campo do formulário. Os demais vão para a mensagem geral. */
+const CAMPO_DO_CODIGO: Readonly<Record<string, CampoLista>> = {
+  INVALID_WORKFLOW_NAME: 'nome',
+  INVALID_WORKFLOW_TYPE: 'tipo',
+  REQUIREMENTS_REQUIRED: 'documentos',
+  INVALID_DOCUMENT_REQUIREMENT: 'documentos',
+  DUPLICATED_REQUIREMENT: 'documentos',
+  INVALID_DISPLAY_ORDER: 'documentos',
+  DOCUMENT_DEFINITION_NOT_FOUND: 'documentos',
+  CONSTRUCTION_NOT_FOUND: 'obra',
+  CONSTRUCTION_ALREADY_HAS_WORKFLOW_FOR_TYPE: 'obra',
+  WORKFLOW_ALREADY_IN_CONSTRUCTION: 'obra',
+  INVALID_LIMIT_EXPIRES_DAYS: 'prazo',
+};
+
+/** Campo do 400 (já normalizado pelo ApiError) → campo do formulário. */
+const CAMPO_DA_API: Readonly<Record<string, CampoLista>> = {
+  name: 'nome',
+  type: 'tipo',
+  documents: 'documentos',
+  constructionId: 'obra',
+  limitExpiresDays: 'prazo',
+  workFlowId: 'obra',
+};
+
+const MENSAGEM_DO_CAMPO: Readonly<Record<CampoLista, string>> = {
+  nome: strings.errosApi.porCampo.nome,
+  tipo: strings.errosApi.porCampo.tipo,
+  documentos: strings.errosApi.porCampo.documentos,
+  obra: strings.errosApi.porCampo.obra,
+  prazo: strings.errosApi.porCampo.prazo,
+};
+
+/** Erro da API → mensagens por campo (pela tabela de códigos) e mensagem geral. */
+export function errosDaApiLista(e: unknown): { campos: ErrosLista; topo: string | null } {
+  if (!(e instanceof ApiError)) return { campos: {}, topo: mensagemDoErro(e) };
+  const campo = e.code ? CAMPO_DO_CODIGO[e.code] : undefined;
+  if (campo) return { campos: { [campo]: e.mensagem }, topo: null };
+  if (e.code === 'VALIDATION_ERROR') {
+    const campos: ErrosLista = {};
+    let fora = false;
+    for (const c of e.camposComErro) {
+      const nosso = CAMPO_DA_API[c];
+      if (nosso) campos[nosso] = MENSAGEM_DO_CAMPO[nosso];
+      else fora = true;
+    }
+    return { campos, topo: fora || Object.keys(campos).length === 0 ? e.mensagem : null };
+  }
+  return { campos: {}, topo: e.mensagem };
 }
 
-export function itensDaLista(ds: Dataset, lista: ListaExigencias): ItemRascunho[] {
-  return lista.itens.map((item) => paraRascunho(ds, item));
+/** Prazo do formulário (texto) → dias, ou null se fora de 1–9999. */
+export function prazoValido(texto: string): number | null {
+  const n = Number(texto);
+  return texto !== '' && Number.isInteger(n) && n >= 1 && n <= 9999 ? n : null;
 }
 
-function slug(texto: string): string {
-  return texto
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
-
-/** Rascunho → item da lista, registrando o documento no catálogo se for novo. */
-export function deRascunho(ds: Dataset, item: ItemRascunho): { item: ItemExigido; tipos: Dataset['tiposDocumento'] } {
-  const existente = ds.tiposDocumento.find((t) => t.nome.toLowerCase() === item.nome.trim().toLowerCase());
-  const tipoId = existente?.id ?? `doc-${slug(item.nome)}`;
-  const tipos = existente ? ds.tiposDocumento : [...ds.tiposDocumento, { id: tipoId, nome: item.nome.trim() }];
-  const { nome: _nome, ...resto } = item;
-  return { item: { ...resto, tipoDocumentoId: tipoId }, tipos };
-}
-
-let contador = 0;
-/** Id para um item recém-criado na interface. */
-export function novoIdItem(prefixo: string): string {
-  contador += 1;
-  return `${prefixo}-novo-${Date.now().toString(36)}-${contador}`;
-}
+export const mesmasExigencias = (a: readonly ItemExigencia[], b: readonly ItemExigencia[]) =>
+  a.length === b.length && a.every((x, i) => x.definicaoId === b[i]?.definicaoId && x.obrigatoria === b[i]?.obrigatoria);

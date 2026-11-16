@@ -1,15 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
   "entry": [
-    "src/main.tsx",
     // Telas fora das rotas até a API ter os endpoints (ver src/app/router.tsx).
     // Os arquivos ficam; declarados como entrada para o knip não os tratar como lixo.
     "src/pages/fila/FilaPage.tsx",
     "src/pages/analise/AnalisePage.tsx",
     "src/pages/envio/EnvioPage.tsx",
-    "src/pages/exigencias/ExigenciasPage.tsx",
-    "src/pages/nova-lista/NovaListaPage.tsx",
-    "src/pages/lista/ListaPage.tsx",
     "src/pages/relatorios/RelatoriosPage.tsx",
     // Abas da ficha do fornecedor fora da interface (ver src/pages/fornecedor/FornecedorPage.tsx).
     "src/features/fornecedores/components/AbaDocumentos.tsx",
@@ -22,10 +18,19 @@
   ],
   "project": ["src/**/*.{ts,tsx}"],
   "ignore": [
-    // Protótipo estático de referência, fora do app.
-    "Protótipo de fila com 22 telas/**",
-    // Contrato da Fase 1: schemas e mappers exportam todos os tipos do contrato de propósito.
+    // Contrato da Fase 1: os schemas exportam todos os tipos do contrato de propósito.
     "src/entities/*/schema.ts"
   ],
+  // Importadas pelo CSS (src/app/styles/theme.css), que o knip não lê.
+  "ignoreDependencies": ["@fontsource/geist-mono", "@fontsource/geist-sans", "tailwindcss"],
+  "ignoreIssues": {
+    // Design system: API pública dos componentes (não se mexe nesta etapa), em uso ou não.
+    "src/shared/ui/index.ts": ["exports", "types"],
+    "src/shared/ui/*.tsx": ["exports"],
+    // Camada de API da Fase 1: funções e tipos públicos de cada módulo do contrato.
+    "src/shared/api/index.ts": ["exports", "types"],
+    "src/shared/api/schemas.ts": ["types"],
+    "src/entities/{acervo,pendencias,fornecedor,obra}/index.ts": ["exports", "types"]
+  },
   "ignoreExportsUsedInFile": true
 }

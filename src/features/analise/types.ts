@@ -1,5 +1,4 @@
 import type {
-  Analise,
   ArquivoFuncionario,
   DocumentoEmpresa,
   DocumentoExigido,
@@ -69,5 +68,4 @@ export type Sequencia = {
   origemNome: string | undefined;
 };
 
-export type AnaliseComFornecedor = Analise & { fornecedor: Fornecedor };
 

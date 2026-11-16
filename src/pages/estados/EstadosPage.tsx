@@ -2,6 +2,7 @@ import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useMemo } from 'react';
 import { useFornecedoresApi } from '@/entities/fornecedor';
 import { useObrasApi, useVinculosApi } from '@/entities/obra';
+import { useListasApi } from '@/entities/exigencias';
 import { useDocumentTitle } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { Block, BlockRowLink, Icon, InfoNote, Mono, PageHeader, Stack, Text } from '@/shared/ui';
@@ -19,7 +20,8 @@ export function EstadosPage() {
   const f = fornecedores.data?.itens;
   const o = obras.data?.itens;
   const v = vinculos.data;
-  const catalogo = useMemo(() => montarCatalogo({ fornecedores: f ?? [], obras: o ?? [], vinculos: v ?? [] }), [f, o, v]);
+  const listaId = useListasApi().data?.itens[0]?.id ?? null;
+  const catalogo = useMemo(() => montarCatalogo({ fornecedores: f ?? [], obras: o ?? [], vinculos: v ?? [], listaId }), [f, o, v, listaId]);
   const carregando = !f || !o || !v;
   const total = catalogo.reduce((n, g) => n + g.entradas.length, 0);
   return (

@@ -28,6 +28,8 @@
 
 **Ações** — cadastro, edição, tipos e bloqueio de fornecedor vão para a API (`src/features/fornecedores/hooks/useMutacoesFornecedor.ts`, com invalidação das queries). As demais (`useDecisoes`, `useVinculosObra`, `useAcoesFornecedor` para convite e contatos, `useAcoesLista`…) alteram o `datasetStore` em memória; o F5 desfaz.
 
+**Exigências e tipos de documento** — `src/entities/exigencias` e `src/entities/tipoDocumento` (schema, mapper, api, consultas); telas em `src/features/exigencias` e `src/features/tiposDocumento`. Versão da lista: o back numera; a tela só mostra o que a API devolve.
+
 **API** — `.env.local` (modelo em `.env.example`) com `VITE_API_URL` e `VITE_API_MOCK`, validadas em `src/shared/config/env.ts` (na Vercel, cadastre as duas). Cliente e erros em `src/shared/api/`; mensagens de erro por `code` em `src/shared/strings/erros.ts`; contratos por módulo em `src/entities/<módulo>/{schema,api,mapper,model}.ts`; mock de rede em `src/mocks/api/` (gatilhos de erro no README de lá). Para testar cada rota: `/_api`. Estado completo (o que é API e o que é demonstração) em `INTEGRACAO.md`.
 
 **Publicação** — `vercel.json` reescreve todas as rotas para `/index.html`. `/_componentes`, `/_estados` e `/_api` existem também na build de produção.

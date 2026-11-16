@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { acervoApi, type DocumentoAcervo } from '@/entities/acervo';
+import { listaApi } from '@/entities/exigencias';
+import { tipoDocumentoApi } from '@/entities/tipoDocumento';
 import { fornecedorApi } from '@/entities/fornecedor';
 import { obraApi } from '@/entities/obra';
 import { pendenciasApi } from '@/entities/pendencias';
@@ -104,6 +106,42 @@ async function vinculoLivre(): Promise<{ obraId: string; fornecedorId: string }>
 }
 
 const VINCULO = (obraId: string) => `${PREFIXO}/construction/constructions/${obraId}/enterprises`;
+
+// ——— Módulo workflow: dados de apoio buscados na própria API ———
+
+const W = `${PREFIXO}/workflow`;
+const LISTA_INEXISTENTE = 999999;
+
+async function primeiroTipoDoc() {
+  const d = (await tipoDocumentoApi.listar({ porPagina: 50 })).itens[0];
+  if (!d) throw new SemDado(t.semDado('tipo de documento'));
+  return d;
+}
+
+async function doisTiposDoc() {
+  const [a, b] = (await tipoDocumentoApi.listar({ porPagina: 50 })).itens;
+  if (!a || !b) throw new SemDado(t.semDado('dois tipos de documento'));
+  return [a, b] as const;
+}
+
+async function primeiraLista() {
+  const l = (await listaApi.listar({ porPagina: 50 })).itens[0];
+  if (!l) throw new SemDado(t.semDado('lista de exigências'));
+  return l;
+}
+
+/** Uma obra que já usa alguma lista (para os 409 do vínculo). */
+async function obraComLista() {
+  for (const o of (await obraApi.listar({ porPagina: 50 })).itens) {
+    const listas = await listaApi.daObra(o.id);
+    if (listas[0]) return { obraId: o.id, lista: listas[0] };
+  }
+  throw new SemDado(t.semDado('obra com lista de exigências'));
+}
+
+let sequencia = 0;
+/** Nome de teste único: a API real não tem exclusão, então tudo que for criado fica marcado como teste. */
+const marca = () => `TESTE /_api ${new Date().toISOString().slice(0, 19)} #${++sequencia}`;
 
 export const ROTAS: readonly Rota[] = [
   { chave: 'health', metodo: 'GET', caminho: '/health', cenarios: [{ chave: 'ok', executar: () => verificarSaude() }] },
@@ -263,6 +301,229 @@ export const ROTAS: readonly Rota[] = [
         executar: async () => {
           const v = await vinculoLivre();
           return obraApi.desvincularFornecedor(v.obraId, v.fornecedorId);
+        },
+      },
+    ],
+  },
+  {
+    chave: 'formatos',
+    metodo: 'GET',
+    caminho: `${W}/document-formats`,
+    cenarios: [{ chave: 'ok', executar: () => tipoDocumentoApi.listarFormatos() }],
+  },
+  {
+    chave: 'tiposDoc',
+    metodo: 'GET',
+    caminho: `${W}/document-definitions`,
+    cenarios: [
+      { chave: 'ok', executar: () => tipoDocumentoApi.listar() },
+      { chave: 'filtros', executar: async () => tipoDocumentoApi.listar({ nome: (await primeiroTipoDoc()).nome.slice(0, 2) }) },
+      { chave: 'pageSize', executar: () => tipoDocumentoApi.listar({ porPagina: 100 }) },
+    ],
+  },
+  {
+    chave: 'tipoDocDetalhe',
+    metodo: 'GET',
+    caminho: `${W}/document-definitions/{id}`,
+    cenarios: [
+      { chave: 'ok', executar: async () => tipoDocumentoApi.detalhar((await primeiroTipoDoc()).id) },
+      { chave: 'docInexistente', executar: () => tipoDocumentoApi.detalhar(GUID_INEXISTENTE) },
+    ],
+  },
+  {
+    chave: 'tipoDocCriar',
+    metodo: 'POST',
+    caminho: `${W}/document-definitions`,
+    cenarios: [
+      {
+        chave: 'criadoGrava',
+        executar: () => tipoDocumentoApi.criar({ nome: marca(), descricao: 'Criado pela /_api', tamanhoMaxBytes: 1048576, reaproveitavel: false, validadeDias: 30, formatoIds: [1] }),
+      },
+      { chave: 'v400', executar: () => http.json('POST', `${W}/document-definitions`, qualquer, { body: {} }) },
+      {
+        chave: 'nomeRepetido',
+        executar: async () => tipoDocumentoApi.criar({ nome: (await primeiroTipoDoc()).nome, descricao: '', tamanhoMaxBytes: 1000, reaproveitavel: false, validadeDias: null, formatoIds: [1] }),
+      },
+      { chave: 'tamanhoInvalido', executar: () => tipoDocumentoApi.criar({ nome: marca(), descricao: '', tamanhoMaxBytes: 0, reaproveitavel: false, validadeDias: null, formatoIds: [1] }) },
+      { chave: 'validadeInvalida', executar: () => tipoDocumentoApi.criar({ nome: marca(), descricao: '', tamanhoMaxBytes: 1000, reaproveitavel: false, validadeDias: 0, formatoIds: [1] }) },
+      { chave: 'formatosObrigatorios', executar: () => tipoDocumentoApi.criar({ nome: marca(), descricao: '', tamanhoMaxBytes: 1000, reaproveitavel: false, validadeDias: null, formatoIds: [0] }) },
+      { chave: 'formatoInexistente', executar: () => tipoDocumentoApi.criar({ nome: marca(), descricao: '', tamanhoMaxBytes: 1000, reaproveitavel: false, validadeDias: null, formatoIds: [99] }) },
+    ],
+  },
+  {
+    chave: 'tipoDocEditar',
+    metodo: 'PATCH',
+    caminho: `${W}/document-definitions/{id}`,
+    cenarios: [
+      { chave: 'semMudanca204', executar: async () => http.semCorpo('PATCH', `${W}/document-definitions/${(await primeiroTipoDoc()).id}`, { body: {} }) },
+      { chave: 'docInexistente', executar: () => http.semCorpo('PATCH', `${W}/document-definitions/${GUID_INEXISTENTE}`, { body: { name: 'x' } }) },
+      { chave: 'validadeDupla', executar: async () => http.semCorpo('PATCH', `${W}/document-definitions/${(await primeiroTipoDoc()).id}`, { body: { expiresInDays: 10, neverExpires: true } }) },
+      {
+        chave: 'nomeRepetido',
+        executar: async () => {
+          const [a, b] = await doisTiposDoc();
+          return http.semCorpo('PATCH', `${W}/document-definitions/${a.id}`, { body: { name: b.nome } });
+        },
+      },
+    ],
+  },
+  {
+    chave: 'listas',
+    metodo: 'GET',
+    caminho: `${W}/workflows`,
+    cenarios: [
+      { chave: 'ok', executar: () => listaApi.listar() },
+      { chave: 'filtros', executar: () => listaApi.listar({ tipo: 'material', nome: 'padr' }) },
+      { chave: 'v400', executar: () => http.json('GET', `${W}/workflows`, qualquer, { query: { type: 'Outro' } }) },
+    ],
+  },
+  {
+    chave: 'listaDetalhe',
+    metodo: 'GET',
+    caminho: `${W}/workflows/{workFlowId}`,
+    cenarios: [
+      { chave: 'ok', executar: async () => listaApi.detalhar((await primeiraLista()).id) },
+      { chave: 'listaInexistente', executar: () => listaApi.detalhar(LISTA_INEXISTENTE) },
+      { chave: 'semVersao', forcar: 'WORKFLOW_WITHOUT_VERSION', executar: async () => listaApi.detalhar((await primeiraLista()).id) },
+    ],
+  },
+  {
+    chave: 'listaVersoes',
+    metodo: 'GET',
+    caminho: `${W}/workflows/{workFlowId}/versions`,
+    cenarios: [
+      { chave: 'ok', executar: async () => listaApi.versoes((await primeiraLista()).id) },
+      { chave: 'listaInexistente', executar: () => listaApi.versoes(LISTA_INEXISTENTE) },
+    ],
+  },
+  {
+    chave: 'listaCriar',
+    metodo: 'POST',
+    caminho: `${W}/workflows`,
+    cenarios: [
+      { chave: 'criadoGrava', executar: async () => listaApi.criar({ nome: marca(), tipo: 'material', exigencias: [{ definicaoId: (await primeiroTipoDoc()).id, obrigatoria: true }] }) },
+      { chave: 'v400', executar: () => http.json('POST', `${W}/workflows`, qualquer, { body: {} }) },
+      {
+        chave: 'docInexistente',
+        executar: () => listaApi.criar({ nome: marca(), tipo: 'material', exigencias: [{ definicaoId: GUID_INEXISTENTE, obrigatoria: true }] }),
+      },
+      {
+        chave: 'duplicado',
+        executar: async () => {
+          const d = await primeiroTipoDoc();
+          return http.json('POST', `${W}/workflows`, qualquer, {
+            body: { name: marca(), type: 'Material', documents: [{ documentDefinitionId: d.id, displayOrder: 1, required: true }, { documentDefinitionId: d.id, displayOrder: 2, required: true }] },
+          });
+        },
+      },
+      {
+        chave: 'ordemRepetida',
+        executar: async () => {
+          const [a, b] = await doisTiposDoc();
+          return http.json('POST', `${W}/workflows`, qualquer, {
+            body: { name: marca(), type: 'Material', documents: [{ documentDefinitionId: a.id, displayOrder: 1, required: true }, { documentDefinitionId: b.id, displayOrder: 1, required: true }] },
+          });
+        },
+      },
+      {
+        chave: 'obraSemPrazo',
+        executar: async () => {
+          const d = await primeiroTipoDoc();
+          const obraId = await primeiraObra();
+          return http.json('POST', `${W}/workflows`, qualquer, { body: { name: marca(), type: 'Material', constructionId: obraId, documents: [{ documentDefinitionId: d.id, displayOrder: 1, required: true }] } });
+        },
+      },
+      {
+        chave: 'tipoNaObra',
+        executar: async () => {
+          const { obraId, lista } = await obraComLista();
+          return listaApi.criar({ nome: marca(), tipo: lista.tipo, exigencias: [{ definicaoId: (await primeiroTipoDoc()).id, obrigatoria: true }], obra: { id: obraId, prazoDias: 30 } });
+        },
+      },
+      {
+        chave: 'obraInexistente',
+        executar: async () => listaApi.criar({ nome: marca(), tipo: 'material', exigencias: [{ definicaoId: (await primeiroTipoDoc()).id, obrigatoria: true }], obra: { id: GUID_INEXISTENTE, prazoDias: 30 } }),
+      },
+      { chave: 'nomeLista', forcar: 'INVALID_WORKFLOW_NAME', executar: async () => listaApi.criar({ nome: marca(), tipo: 'material', exigencias: [{ definicaoId: (await primeiroTipoDoc()).id, obrigatoria: true }] }) },
+    ],
+  },
+  {
+    chave: 'listaRenomear',
+    metodo: 'PATCH',
+    caminho: `${W}/workflows/{workFlowId}`,
+    cenarios: [
+      {
+        chave: 'renomeiaGrava',
+        executar: async () => {
+          const l = await primeiraLista();
+          return listaApi.renomear(l.id, l.nome);
+        },
+      },
+      { chave: 'v400', executar: async () => http.semCorpo('PATCH', `${W}/workflows/${(await primeiraLista()).id}`, { body: { name: '   ' } }) },
+      { chave: 'listaInexistente', executar: () => listaApi.renomear(LISTA_INEXISTENTE, 'x') },
+    ],
+  },
+  {
+    chave: 'listaExigencias',
+    metodo: 'PUT',
+    caminho: `${W}/workflows/{workFlowId}/requirements`,
+    cenarios: [
+      {
+        chave: 'mesmaVersao',
+        executar: async () => {
+          const l = await listaApi.detalhar((await primeiraLista()).id);
+          return listaApi.editarExigencias(l.id, l.vigente.exigencias.map((e) => ({ definicaoId: e.definicaoId, obrigatoria: e.obrigatoria })));
+        },
+      },
+      { chave: 'v400', executar: async () => http.json('PUT', `${W}/workflows/${(await primeiraLista()).id}/requirements`, qualquer, { body: {} }) },
+      { chave: 'listaInexistente', executar: async () => listaApi.editarExigencias(LISTA_INEXISTENTE, [{ definicaoId: (await primeiroTipoDoc()).id, obrigatoria: true }]) },
+      {
+        chave: 'duplicado',
+        executar: async () => {
+          const d = await primeiroTipoDoc();
+          return http.json('PUT', `${W}/workflows/${(await primeiraLista()).id}/requirements`, qualquer, {
+            body: { documents: [{ documentDefinitionId: d.id, displayOrder: 1, required: true }, { documentDefinitionId: d.id, displayOrder: 2, required: true }] },
+          });
+        },
+      },
+    ],
+  },
+  {
+    chave: 'listasObra',
+    metodo: 'GET',
+    caminho: `${W}/constructions/{constructionId}/workflows`,
+    cenarios: [
+      { chave: 'ok', executar: async () => listaApi.daObra(await primeiraObra()) },
+      { chave: 'obraInexistente', executar: () => listaApi.daObra(GUID_INEXISTENTE) },
+    ],
+  },
+  {
+    chave: 'listaVincularObra',
+    metodo: 'POST',
+    caminho: `${W}/constructions/{constructionId}/workflows`,
+    cenarios: [
+      { chave: 'v400', executar: async () => http.json('POST', `${W}/constructions/${await primeiraObra()}/workflows`, qualquer, { body: {} }) },
+      { chave: 'listaInexistente', executar: async () => listaApi.vincularAObra(await primeiraObra(), LISTA_INEXISTENTE, 30) },
+      { chave: 'obraInexistente', executar: async () => listaApi.vincularAObra(GUID_INEXISTENTE, (await primeiraLista()).id, 30) },
+      {
+        chave: 'listaNaObra',
+        executar: async () => {
+          const { obraId, lista } = await obraComLista();
+          return listaApi.vincularAObra(obraId, lista.id, 30);
+        },
+      },
+      {
+        chave: 'tipoNaObra',
+        executar: async () => {
+          // Uma obra com lista de um tipo e outra lista do mesmo tipo que ela não usa.
+          const todas = (await listaApi.listar({ porPagina: 50 })).itens;
+          for (const o of (await obraApi.listar({ porPagina: 50 })).itens) {
+            for (const usada of await listaApi.daObra(o.id)) {
+              const outra = todas.find((l) => l.tipo === usada.tipo && l.id !== usada.id);
+              if (outra) return listaApi.vincularAObra(o.id, outra.id, 30);
+            }
+          }
+          throw new SemDado(t.semDado('outra lista do mesmo tipo de uma obra'));
         },
       },
     ],

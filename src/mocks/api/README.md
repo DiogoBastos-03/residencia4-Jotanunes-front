@@ -78,6 +78,28 @@ Mesma ordem do back: 400 → `CONSTRUCTION_NOT_FOUND` → `ENTERPRISE_ALREADY_IN
 | POST | `X-Mock-Code: INVALID_LIMIT_EXPIRES_DAYS` | 422 (o 400 vem antes em qualquer entrada JSON) |
 | DELETE `/construction/constructions/{id}/enterprises/{empresa}` | vínculo que não existe (inclusive obra inexistente) | 404 `ENTERPRISE_NOT_IN_CONSTRUCTION` |
 
+### Módulo workflow (listas de exigências, tipos de documento, formatos)
+
+Mesma ordem de verificação dos casos de uso do back (`src/modules/workflow`). Dados: 4 formatos, os tipos de documento (os mesmos ids do acervo), "Material padrão" (id 1) e "Serviço padrão" (id 2) na versão 1, usadas pelas obras 1 e 2.
+
+| Rota | Entrada | Resposta |
+|---|---|---|
+| POST `/workflow/document-definitions` | `{}` | 400 por campo |
+| POST | validade 0; tamanho 0 ou > 20 MB; formato `0` | 422 `INVALID_VALIDITY_DAYS` / `INVALID_MAX_SIZE` / `FORMATS_REQUIRED` |
+| POST / PATCH | nome de outro tipo | 409 `DOCUMENT_DEFINITION_NAME_ALREADY_EXISTS` |
+| POST / PATCH | formato inexistente (`99`) | 404 `DOCUMENT_FORMAT_NOT_FOUND` |
+| PATCH | `expiresInDays` + `neverExpires: true` | 422 `INVALID_EXPIRATION_INPUT` |
+| PATCH | `{}` | 204 sem gravar |
+| POST `/workflow/workflows` | documento repetido / ordem repetida ou negativa / item `null` | 422 `DUPLICATED_REQUIREMENT` / `INVALID_DISPLAY_ORDER` / `INVALID_DOCUMENT_REQUIREMENT` |
+| POST | tipo de documento inexistente | 404 `DOCUMENT_DEFINITION_NOT_FOUND` |
+| POST | obra sem `limitExpiresDays` | 400 `LimitExpiresDays` |
+| POST / vincular | obra que já tem lista do tipo | 409 `CONSTRUCTION_ALREADY_HAS_WORKFLOW_FOR_TYPE` |
+| vincular | lista que a obra já usa | 409 `WORKFLOW_ALREADY_IN_CONSTRUCTION` |
+| PUT `…/requirements` | as mesmas exigências da vigente | 200 com a versão vigente (não cria versão) |
+| PUT | exigências diferentes | 200 com versão + 1; as obras que usavam a vigente passam para a nova |
+| GET `/workflows/{id}`, `/versions`, PATCH, PUT | id inexistente | 404 `WORKFLOW_NOT_FOUND` |
+| qualquer | `X-Mock-Code: INVALID_WORKFLOW_NAME`, `WORKFLOW_WITHOUT_VERSION`… | o code forçado (os que o 400 tapa) |
+
 ### Acervo
 
 | Rota | Entrada | Resposta |

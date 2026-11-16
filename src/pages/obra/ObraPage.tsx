@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BuildingOffice2Icon, PlusIcon } from '@heroicons/react/24/outline';
 import { useParams } from 'react-router';
 import { useFornecedoresApi } from '@/entities/fornecedor';
-import { FornecedoresDaObra, ModalDesvincular, ModalVincular, useObra, type AlvoDesvinculo } from '@/features/obras';
+import { FornecedoresDaObra, ListasDaObra, ModalDesvincular, ModalVincular, useObra, type AlvoDesvinculo } from '@/features/obras';
 import { paths, useDocumentTitle } from '@/shared/lib';
 import { strings } from '@/shared/strings';
 import { AsyncContent, Button, ButtonLink, EmptyState, PageHeader, Stack } from '@/shared/ui';
@@ -50,6 +50,7 @@ export function ObraPage() {
                 </Button>
               }
             />
+            <ListasDaObra obraId={ficha.obra.id} nomeObra={ficha.obra.nome} />
             <FornecedoresDaObra
               fornecedores={ficha.fornecedores}
               onDesvincular={(f) => setDesvinculando({ obraId: ficha.obra.id, nomeObra: ficha.obra.nome, fornecedorId: f.id, razaoSocial: f.razaoSocial })}

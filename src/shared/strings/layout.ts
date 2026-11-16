@@ -6,6 +6,8 @@ export const layout = {
     visaoGeral: 'Visão geral',
     obras: 'Obras',
     fornecedores: 'Fornecedores',
+    exigencias: 'Exigências',
+    tiposDocumento: 'Tipos de documento',
   },
   footerTitle: 'Acesso interno',
   footerText: 'Uso restrito à equipe de Suprimentos',

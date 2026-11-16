@@ -9,11 +9,6 @@ export function listasDaObra(ds: Dataset, obraId: string): ListaExigencias[] {
   return ds.listas.filter((l) => ids.includes(l.id));
 }
 
-export function obrasDaLista(ds: Dataset, listaId: string): Obra[] {
-  const ids = ds.obraListas.filter((ol) => ol.listaId === listaId).map((ol) => ol.obraId);
-  return ds.obras.filter((o) => ids.includes(o.id));
-}
-
 export function obrasDoFornecedor(ds: Dataset, fornecedorId: string): Obra[] {
   const ids = ds.vinculos.filter((v) => v.fornecedorId === fornecedorId).map((v) => v.obraId);
   return ds.obras.filter((o) => ids.includes(o.id));

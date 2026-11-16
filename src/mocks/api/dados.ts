@@ -46,6 +46,26 @@ export type EnvioMock = {
 
 export type PostergacaoMock = { deadlineAt: string; reason: string | undefined };
 
+// ——— Módulo workflow: formatos, tipos de documento, listas (workflows), versões e uso nas obras ———
+
+export type FormatoMock = { documentFormatId: number; name: string; icon: string; type: string; active: boolean };
+export type DefinicaoMock = {
+  documentDefinitionId: string;
+  name: string;
+  description: string;
+  maxSizeBytes: number;
+  canReuse: boolean;
+  expiresInDays: number | null;
+  acceptedFormatIds: number[];
+  createdAt: string;
+  updatedAt: string;
+};
+export type DocumentoListaMock = { documentDefinitionId: string; displayOrder: number; required: boolean };
+export type WorkflowMock = { workFlowId: number; name: string; type: 'Material' | 'Servico'; createdAt: string; updatedAt: string };
+export type VersaoMock = { workFlowVersionId: string; workFlowId: number; version: number; documents: DocumentoListaMock[]; createdAt: string };
+/** Linha de tb_construction_workflow: a obra usa aquela versão. A versão "atual" da obra é a maior por workflow. */
+export type UsoObraMock = { constructionId: string; workFlowVersionId: string };
+
 /** FNV-1a: o mesmo índice dá sempre o mesmo envio. */
 function sorteio(...partes: Array<string | number>): number {
   let h = 0x811c9dc5;
@@ -154,7 +174,46 @@ function montar() {
   return { empresas, obras, vinculos, envios };
 }
 
+const FORMATOS: FormatoMock[] = [
+  { documentFormatId: 1, name: 'PDF', icon: 'file-pdf', type: 'pdf', active: true },
+  { documentFormatId: 2, name: 'PNG', icon: 'file-image', type: 'png', active: true },
+  { documentFormatId: 3, name: 'JPEG', icon: 'file-image', type: 'jpeg', active: true },
+  { documentFormatId: 4, name: 'JPG', icon: 'file-image', type: 'jpg', active: true },
+];
+
+/** Os mesmos ids do acervo (guidDe('d', n)): tipo de documento é um só no back. */
+function montarWorkflow() {
+  const criado = '2026-01-01T00:00:00Z';
+  const definicoes: DefinicaoMock[] = DEFINICOES.map((d, i) => ({
+    documentDefinitionId: guidDe('d', i + 1),
+    name: d.nome,
+    description: '',
+    maxSizeBytes: 5 * 1024 * 1024,
+    canReuse: d.escopo === 'Enterprise',
+    expiresInDays: i % 3 === 0 ? null : i % 3 === 1 ? 180 : 365,
+    acceptedFormatIds: d.escopo === 'Employee' ? [1, 2, 3, 4] : [1],
+    createdAt: criado,
+    updatedAt: criado,
+  }));
+  const doc = (n: number, ordem: number, required = true): DocumentoListaMock => ({ documentDefinitionId: guidDe('d', n), displayOrder: ordem, required });
+  const workflows: WorkflowMock[] = [
+    { workFlowId: 1, name: 'Material padrão', type: 'Material', createdAt: criado, updatedAt: criado },
+    { workFlowId: 2, name: 'Serviço padrão', type: 'Servico', createdAt: criado, updatedAt: criado },
+  ];
+  const versoes: VersaoMock[] = [
+    { workFlowVersionId: guidDe('5', 9001), workFlowId: 1, version: 1, documents: [doc(1, 1), doc(2, 2), doc(3, 3)], createdAt: criado },
+    { workFlowVersionId: guidDe('5', 9002), workFlowId: 2, version: 1, documents: [doc(1, 1), doc(3, 2), doc(4, 3), doc(6, 4), doc(8, 5), doc(9, 6, false)], createdAt: criado },
+  ];
+  const usos: UsoObraMock[] = [
+    { constructionId: guidDe('c', 1), workFlowVersionId: guidDe('5', 9002) },
+    { constructionId: guidDe('c', 1), workFlowVersionId: guidDe('5', 9001) },
+    { constructionId: guidDe('c', 2), workFlowVersionId: guidDe('5', 9002) },
+  ];
+  return { formatos: FORMATOS, definicoes, workflows, versoes, usos };
+}
+
 const inicial = montar();
+const workflow = montarWorkflow();
 
 /** Estado mutável do mock (some no F5). */
 export const db = {
@@ -164,6 +223,13 @@ export const db = {
   envios: inicial.envios,
   postergacoes: new Map<string, PostergacaoMock>(),
   proximoId: inicial.empresas.length + 1,
+  formatos: workflow.formatos,
+  definicoes: workflow.definicoes,
+  workflows: workflow.workflows,
+  versoes: workflow.versoes,
+  usos: workflow.usos,
+  proximoWorkflowId: 3,
+  proximaVersao: 9003,
 };
 
 /**

@@ -16,6 +16,20 @@ export const queryKeys = {
     todos: ['obras'] as const,
     lista: <F extends object>(filtros: F) => ['obras', 'lista', filtros] as const,
   },
+  /** Listas de exigências (workflows). Tudo sob ['listas']: uma versão nova invalida lista, ficha, versões e obras. */
+  listas: {
+    todos: ['listas'] as const,
+    lista: <F extends object>(filtros: F) => ['listas', 'lista', filtros] as const,
+    detalhe: (id: number) => ['listas', 'detalhe', id] as const,
+    versoes: (id: number) => ['listas', 'versoes', id] as const,
+    daObra: (obraId: string) => ['listas', 'daObra', obraId] as const,
+  },
+  tiposDocumento: {
+    todos: ['tiposDocumento'] as const,
+    lista: () => ['tiposDocumento', 'lista'] as const,
+    detalhe: (id: string) => ['tiposDocumento', 'detalhe', id] as const,
+  },
+  formatos: () => ['formatos'] as const,
   acervo: {
     todos: ['acervo'] as const,
     doFornecedor: <F extends object>(fornecedorId: string, filtros: F) => ['acervo', fornecedorId, filtros] as const,

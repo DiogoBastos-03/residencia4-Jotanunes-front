@@ -30,3 +30,6 @@ export function paginaSchema<T extends z.ZodType>(item: T) {
 
 /** Query de paginação (page ≥ 1; pageSize 1..50). */
 export type PaginacaoQuery = { page?: number; pageSize?: number };
+
+/** Paginação do lado do front (pagina/porPagina), para as funções de api. */
+export type ListagemPaginada = { pagina?: number; porPagina?: number };
